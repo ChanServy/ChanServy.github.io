@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ribbon on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Ribbon/</link>
+    <description>Recent content in Ribbon on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 15:20:31 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Ribbon/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Ribbon(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-ribbonH.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:20:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-ribbonH.html</guid>
+      <description>前言：Spring Cloud之Ribbon(H版)。 Spring Cloud之Ribbon(H版) 一、ribbon简介 Ribbon is a client side load balancer which gives you a lot of control over the behaviour of HTTP and TCP clients. Feign already uses Ribbon, so if you are using @FeignClient then this section also applies. —–摘自官网 ribbon是一个负载均衡客户端，可以很好的控制 http 和 tcp 的一些行为。Feign默认集成了r</description>
+    </item>
+    
+  </channel>
+</rss>

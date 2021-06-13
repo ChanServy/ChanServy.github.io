@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Freemarker研究 | 迩东陈的博客</title>
+    <meta property="og:title" content="Freemarker研究 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-16T15:19:25&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-16T15:19:25&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Freemarker研究">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/16/freemarker.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-freemarker介绍">1. Freemarker介绍</a></li>
+    <li><a href="#2-快速使用">2. 快速使用</a></li>
+    <li><a href="#3-freemarker基础">3. Freemarker基础</a>
+      <ul>
+        <li><a href="#31-核心指令">3.1 核心指令</a></li>
+        <li><a href="#32-其它指令">3.2 其它指令</a></li>
+        <li><a href="#33-静态化测试">3.3 静态化测试</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Freemarker研究</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月16日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h2 id="1-freemarker介绍">1. Freemarker介绍</h2>
+<p>Freemarker 是一个用 Java 开发的模板引擎，模板引擎即为一种基于模板和要改变的数据，并用来生成输出文本的通用工具。Freemarker 不是面向最终用户的，而是一个 Java 类库，是一款程序员可以嵌入他们所开发的产品的组件。常用的 Java 模板引擎还有：Jsp、Thymeleaf 等。</p>
+<blockquote>
+<p>Freemarker核心：模板 + 数据模型 = 输出</p>
+</blockquote>
+<p>Freemarker 并不关心数据的来源，只是根据模板的内容，将数据模型在模板中显示并输出文件（通常为 html，也可以生成其它格式的文本文件）。</p>
+<p>数据模型：数据模型在 Java 中可以是基本类型，也可以是 List、Map、Pojo 等复杂类型或对象。</p>
+<h2 id="2-快速使用">2. 快速使用</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring‐boot‐starter‐freemarker<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.projectlombok<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>lombok<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.squareup.okhttp3<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>okhttp<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.apache.commons<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>commons‐io<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring‐boot‐starter‐test<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">	</span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8088</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#服务端口</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">	</span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">		</span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>test‐freemarker<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#指定服务名</span><span style="color:#bbb">
+</span><span style="color:#bbb">	</span><span style="color:#000080">freemarker</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">		</span><span style="color:#000080">cache</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">false</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#关闭模板缓存,方便测试</span><span style="color:#bbb">
+</span><span style="color:#bbb">		</span><span style="color:#000080">settings</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">			</span><span style="color:#000080">template_update_delay</span>:<span style="color:#bbb"> </span><span style="color:#099">0</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#检查模板更新延迟时间,设置为0表示立即检查,如果时间大于0会有缓存不方便进行模板测试</span><span style="color:#bbb">
+</span></code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@ToString</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Student</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//姓名
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> age<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//年龄
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date birthday<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//生日
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Float money<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//钱包
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>Student<span style="color:#000;font-weight:bold">&gt;</span> friends<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//朋友列表
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Student bestFriend<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//最好的朋友
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>在 src/main/resources 下创建 templates，此目录为 freemarker 的默认模板存放目录。在 templates 下创建模板文件 test1.ftl，模板中的 ${name} 最终会被 freemarker 替换成具体的数据。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf‐8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Hello World!&lt;/<span style="color:#000080">title</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+Hello ${name}!
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><p>创建 Controller类，向 Map 中添加 name，最后返回模板文件。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/freemarker&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">FreemarkerController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    RestTemplate restTemplate<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/test1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">freemarker</span><span style="color:#000;font-weight:bold">(</span>Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> map<span style="color:#000;font-weight:bold">){</span>
+        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;程序员&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">//返回模板文件名称
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;test1&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">FreemarkerTestApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    	SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>FreemarkerTestApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span>args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>请求：http://localhost:8088/freemarker/test1，屏幕显示：Hello 程序员!</p>
+<h2 id="3-freemarker基础">3. Freemarker基础</h2>
+<h3 id="31-核心指令">3.1 核心指令</h3>
+<h4 id="311-数据模型">3.1.1 数据模型</h4>
+<p>Freemarker 静态化依赖<code>数据模型</code>和<code>模板</code>，下边定义数据模型：</p>
+<p>下边方法的形参 map 即为 freemarker 静态化所需要的数据模型，在 map 中填充数据：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/test1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">freemarker</span><span style="color:#000;font-weight:bold">(</span>Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> map<span style="color:#000;font-weight:bold">){</span>
+    <span style="color:#998;font-style:italic">//向数据模型放数据
+</span><span style="color:#998;font-style:italic"></span>    map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;程序员&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    Student stu1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Student<span style="color:#000;font-weight:bold">();</span>
+    stu1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;小明&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    stu1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAge</span><span style="color:#000;font-weight:bold">(</span>18<span style="color:#000;font-weight:bold">);</span>
+    stu1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setMondy</span><span style="color:#000;font-weight:bold">(</span>1000<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">86f</span><span style="color:#000;font-weight:bold">);</span>
+    stu1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setBirthday</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> Date<span style="color:#000;font-weight:bold">());</span>
+    Student stu2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Student<span style="color:#000;font-weight:bold">();</span>
+    stu2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;小红&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    stu2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setMondy</span><span style="color:#000;font-weight:bold">(</span>200<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">1f</span><span style="color:#000;font-weight:bold">);</span>
+    stu2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAge</span><span style="color:#000;font-weight:bold">(</span>19<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// stu2.setBirthday(new Date());
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>Student<span style="color:#000;font-weight:bold">&gt;</span> friends <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    friends<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>stu1<span style="color:#000;font-weight:bold">);</span>
+    stu2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setFriends</span><span style="color:#000;font-weight:bold">(</span>friends<span style="color:#000;font-weight:bold">);</span>
+    stu2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setBestFriend</span><span style="color:#000;font-weight:bold">(</span>stu1<span style="color:#000;font-weight:bold">);</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Student<span style="color:#000;font-weight:bold">&gt;</span> stus <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    stus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>stu1<span style="color:#000;font-weight:bold">);</span>
+    stus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>stu2<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//向数据模型放数据
+</span><span style="color:#998;font-style:italic"></span>    map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;stus&#34;</span><span style="color:#000;font-weight:bold">,</span>stus<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//准备map数据
+</span><span style="color:#998;font-style:italic"></span>    HashMap<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span>Student<span style="color:#000;font-weight:bold">&gt;</span> stuMap <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    stuMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;stu1&#34;</span><span style="color:#000;font-weight:bold">,</span>stu1<span style="color:#000;font-weight:bold">);</span>
+    stuMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;stu2&#34;</span><span style="color:#000;font-weight:bold">,</span>stu2<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//向数据模型放数据
+</span><span style="color:#998;font-style:italic"></span>    map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;stu1&#34;</span><span style="color:#000;font-weight:bold">,</span>stu1<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//向数据模型放数据
+</span><span style="color:#998;font-style:italic"></span>	map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;stuMap&#34;</span><span style="color:#000;font-weight:bold">,</span>stuMap<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#998;font-style:italic">//返回模板文件名称
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;test1&#34;</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h4 id="312-list-指令">3.1.2 List 指令</h4>
+<p>本节定义 freemarker 模板，模板中使用 freemarker 的指令，关于 freemarker 的指令需要知道：</p>
+<blockquote>
+<p>1、注释，即&lt;#‐‐和‐‐&gt;，介于其之间的内容会被 freemarker 忽略</p>
+<p>2、插值(Interpolation)：即 ${..} 部分，freemarker 会用真实的值代替 ${..}</p>
+<p>3、FTL 指令：和 HTML 标记类似，名字前加 # 予以区分，Freemarker 会解析标签中的表达式或逻辑。</p>
+<p>4、文本，仅文本信息，这些不是 freemarker 的注释、插值、FTL 指令的内容会被 freemarker 忽略解析，直接输出内容。</p>
+</blockquote>
+<p>在 test1.ftl 模板中使用 list 指令遍历数据模型中的数据：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;序号&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stus as stu&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu_index + 1}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu.name}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu.age}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu.mondy}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+</code></pre></div><blockquote>
+<p>说明：_index：得到循环的下标，使用方法就是在 stu 后面加 _index，它的值是从0开始。</p>
+</blockquote>
+<h4 id="313-遍历-map-数据">3.1.3 遍历 Map 数据</h4>
+<ol>
+<li>
+<p>数据模型</p>
+<p>显示数据模型中的 stuMap</p>
+</li>
+<li>
+<p>模板</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">输出stu1的学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+姓名:${stuMap[&#39;stu1&#39;].name}&lt;<span style="color:#000080">br</span>/&gt;
+年龄:${stuMap[&#39;stu1&#39;].age}&lt;<span style="color:#000080">br</span>/&gt;
+   
+输出stu1的学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+姓名:${stuMap.stu1.name}&lt;<span style="color:#000080">br</span>/&gt;
+年龄:${stuMap.stu1.age}&lt;<span style="color:#000080">br</span>/&gt;
+   
+遍历输出两个学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;序号&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stuMap?keys as k&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${k_index + 1}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stuMap[k].name}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stuMap[k].age}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span> &gt;${stuMap[k].mondy}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+</code></pre></div></li>
+</ol>
+<h4 id="314-if-指令">3.1.4 if 指令</h4>
+<p>if 指令即判断指令，是常用的 FTL 指令，freemarker 在解析时遇到 if 会进行判断，条件为真则输出 if 中间的内容，否则跳过内容不再输出。</p>
+<ol>
+<li>
+<p>数据模型：</p>
+<p>使用 list 指令中测试数据模型。</p>
+</li>
+<li>
+<p>模板：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stus as stu&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span> <span style="color:#a61717;background-color:#e3d2d2">&lt;#</span><span style="color:#008080">if</span> <span style="color:#008080">stu</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">name </span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">=&#39;小明&#39;</span>&gt;style=&#34;background:red;&#34;<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#if&gt;&gt;${stu.name}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu.age}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span> &gt;${stu.mondy}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+</code></pre></div><p>上边的代码，实现的功能是：如果姓名为 “小明”，则背景色显示为红色。</p>
+</li>
+</ol>
+<h3 id="32-其它指令">3.2 其它指令</h3>
+<h4 id="321-运算符">3.2.1 运算符</h4>
+<blockquote>
+<p>1、算数运算符</p>
+</blockquote>
+<p>FreeMarker表达式中完全支持算术运算,FreeMarker支持的算术运算符包括:+, - , * , / , %</p>
+<blockquote>
+<p>2、逻辑运算符</p>
+</blockquote>
+<p>逻辑运算符有如下几个: 逻辑与:&amp;&amp; 逻辑或:|| 逻辑非:! 逻辑运算符只能作用于布尔值,否则将产生错误</p>
+<blockquote>
+<p>3、比较运算符</p>
+</blockquote>
+<p>表达式中支持的比较运算符有如下几个:</p>
+<p>1 =或者==:判断两个值是否相等.</p>
+<p>2 !=:判断两个值是否不等.</p>
+<p>3 &gt;或者gt:判断左边值是否大于右边值</p>
+<p>4 &gt;=或者gte:判断左边值是否大于等于右边值</p>
+<p>5 &lt;或者lt:判断左边值是否小于右边值</p>
+<p>6 &lt;=或者lte:判断左边值是否小于等于右边值</p>
+<blockquote>
+<p>注意: =和!=可以用于字符串,数值和日期来比较是否相等,但=和!=两边必须是相同类型的值,否则会产生错误,而且FreeMarker是精确比较,&ldquo;x&rdquo;,&ldquo;x &ldquo;,&ldquo;X&quot;是不等的.其它的运行符可以作用于数字和日期,但不能作用于字符串,大部分的时候,使用gt等字母运算符代替&gt;会有更好的效果,因为 FreeMarker会把&gt;解释成FTL标签的结束字符,当然,也可以使用括号来避免这种情况,如:&lt;#if (x&gt;y)&gt;</p>
+</blockquote>
+<h4 id="322-空值处理">3.2.2 空值处理</h4>
+<p>1、判断某变量是否存在使用 “??” 用法为 variable??, 如果该变量存在, 返回true, 否则返回false</p>
+<p>例: 为防止stus为空报错可以加上判断如下:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#if stus??&gt;
+<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stus as stu&gt;
+......
+<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#if&gt;
+</code></pre></div><p>2、缺失变量默认值使用 “!” 使用!要以指定一个默认值,当变量为空时显示默认值。</p>
+<p>例: ${name!' &lsquo;}表示如果name为空显示空字符串。</p>
+<p>如果是嵌套对象则建议使用()括起来。</p>
+<p>例: ${(stu.bestFriend.name)!&rsquo; &lsquo;}表示,如果stu或bestFriend或name为空默认显示空字符串。</p>
+<h4 id="323-内建函数">3.2.3 内建函数</h4>
+<blockquote>
+<p>内建函数语法格式: 变量+?+函数名称</p>
+</blockquote>
+<p>1、某个集合的大小: ${集合名?size}</p>
+<p>2、日期格式化</p>
+<pre><code>显示年月日: ${today?date}
+显示时分秒:${today?time}
+显示日期+时间:${today?datetime} 
+自定义格式化:${today?string(&quot;yyyy年MM月&quot;)}
+</code></pre><p>3、内建函数c</p>
+<p>map.put(&ldquo;point&rdquo;, 102920122);</p>
+<p>point是数字型,使用<code>${point}</code>会显示这个数字的值,每三位使用逗号分隔。如果不想显示为每三位分隔的数字,可以使用c函数将数字型转成字符串输出<code>${point?c}</code></p>
+<p>4、将json字符串转成对象</p>
+<p>一个例子: 其中用到了 assign标签, assign的作用是定义一个变量。</p>
+<pre><code>&lt;#assign text=&quot;{'bank':'工商银行','account':'10101920201920212'}&quot; /&gt;
+&lt;#assign data=text?eval /&gt;
+开户行:${data.bank}  账号:${data.account}
+</code></pre><h4 id="324-完整的模板">3.2.4 完整的模板</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf‐8&#34;</span>&gt;
+&lt;<span style="color:#000080">title</span>&gt;Hello World!&lt;/<span style="color:#000080">title</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+Hello ${name}!
+&lt;<span style="color:#000080">br</span>/&gt;
+&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;序号&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stus as stu&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu_index + 1}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span> <span style="color:#a61717;background-color:#e3d2d2">&lt;#</span><span style="color:#008080">if</span> <span style="color:#008080">stu</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">name </span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">=&#39;小明&#39;</span>&gt;style=&#34;background:red;&#34;<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#if&gt;&gt;${stu.name}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stu.age}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span> &gt;${stu.mondy}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+&lt;<span style="color:#000080">br</span>/&gt;&lt;<span style="color:#000080">br</span>/&gt;
+输出stu1的学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+姓名:${stuMap[&#39;stu1&#39;].name}&lt;<span style="color:#000080">br</span>/&gt;
+年龄:${stuMap[&#39;stu1&#39;].age}&lt;<span style="color:#000080">br</span>/&gt;
+输出stu1的学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+姓名:${stu1.name}&lt;<span style="color:#000080">br</span>/&gt;
+年龄:${stu1.age}&lt;<span style="color:#000080">br</span>/&gt;
+遍历输出两个学生信息:&lt;<span style="color:#000080">br</span>/&gt;
+&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;序号&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stuMap?keys as k&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${k_index + 1}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stuMap[k].name}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;${stuMap[k].age}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span> &gt;${stuMap[k].mondy}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+&lt;/<span style="color:#000080">br</span>&gt;
+&lt;<span style="color:#000080">table</span>&gt;
+    &lt;<span style="color:#000080">tr</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;姓名&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;年龄&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;出生日期&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;钱包&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;最好的朋友&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;朋友个数&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;<span style="color:#000080">td</span>&gt;朋友列表&lt;/<span style="color:#000080">td</span>&gt;
+    &lt;/<span style="color:#000080">tr</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#if stus??&gt;
+        <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stus as stu&gt;
+            &lt;<span style="color:#000080">tr</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${stu.name!&#39;&#39;}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${stu.age}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${(stu.birthday?date)!&#39;&#39;}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${stu.mondy}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${(stu.bestFriend.name)!&#39;&#39;}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;${(stu.friends?size)!0}&lt;/<span style="color:#000080">td</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;
+                    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#if stu.friends??&gt;
+                        <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#list stu.friends as firend&gt;
+                            ${firend.name!&#39;&#39;}&lt;<span style="color:#000080">br</span>/&gt;
+                        <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+                    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#if&gt;
+                &lt;/<span style="color:#000080">td</span>&gt;
+            &lt;/<span style="color:#000080">tr</span>&gt;
+        <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#list&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>/#if&gt;
+&lt;/<span style="color:#000080">table</span>&gt;
+&lt;<span style="color:#000080">br</span>/&gt;
+<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#assign text=&#34;{&#39;bank&#39;:&#39;工商银行&#39;,&#39;account&#39;:&#39;10101920201920212&#39;}&#34; /&gt;
+<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>#assign data=text?eval /&gt;
+开户行:${data.bank}
+账号:${data.account}
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h3 id="33-静态化测试">3.3 静态化测试</h3>
+<p>1、使用模板文件静态化</p>
+<p>定义模板文件,使用freemarker静态化程序生成html文件。</p>
+<p>2、使用模板字符串静态化</p>
+<p>定义模板字符串,使用freemarker静态化程序生成html文件。</p>
+<h4 id="331-使用模板文件静态化">3.3.1 使用模板文件静态化</h4>
+<p>在test下创建测试类,并且将main下的resource/templates拷贝到test下,本次测试使用之前我们在main下创建
+的模板文件。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//基于模板生成静态化文件
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@Test</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testGenerateHtml</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> TemplateException <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">//创建配置类
+</span><span style="color:#998;font-style:italic"></span>    Configuration configuration<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">new</span> Configuration<span style="color:#000;font-weight:bold">(</span>Configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getVersion</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#998;font-style:italic">//设置模板路径
+</span><span style="color:#998;font-style:italic"></span>    String classpath <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getClass</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getResource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">getPath</span><span style="color:#000;font-weight:bold">();</span>
+    configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setDirectoryForTemplateLoading</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> File<span style="color:#000;font-weight:bold">(</span>classpath <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;/templates/&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#998;font-style:italic">//设置字符集
+</span><span style="color:#998;font-style:italic"></span>    configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setDefaultEncoding</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;utf‐8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//加载模板
+</span><span style="color:#998;font-style:italic"></span>    Template template <span style="color:#000;font-weight:bold">=</span> configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTemplate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;test1.ftl&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//数据模型
+</span><span style="color:#998;font-style:italic"></span>    Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span>Object<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;黑马程序员&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//静态化
+</span><span style="color:#998;font-style:italic"></span>    String content <span style="color:#000;font-weight:bold">=</span> FreeMarkerTemplateUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">processTemplateIntoString</span><span style="color:#000;font-weight:bold">(</span>template<span style="color:#000;font-weight:bold">,</span> map<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//静态化内容
+</span><span style="color:#998;font-style:italic"></span>    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>content<span style="color:#000;font-weight:bold">);</span>
+    InputStream inputStream <span style="color:#000;font-weight:bold">=</span> IOUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toInputStream</span><span style="color:#000;font-weight:bold">(</span>content<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//输出文件
+</span><span style="color:#998;font-style:italic"></span>    FileOutputStream fileOutputStream <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> FileOutputStream<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> File<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;d:/test1.html&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#458;font-weight:bold">int</span> copy <span style="color:#000;font-weight:bold">=</span> IOUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">copy</span><span style="color:#000;font-weight:bold">(</span>inputStream<span style="color:#000;font-weight:bold">,</span> fileOutputStream<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h4 id="332-使用模板字符串静态化">3.3.2 使用模板字符串静态化</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//基于模板字符串生成静态化文件
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@Test</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testGenerateHtmlByString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> TemplateException <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">//创建配置类
+</span><span style="color:#998;font-style:italic"></span>    Configuration configuration<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">new</span> Configuration<span style="color:#000;font-weight:bold">(</span>Configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getVersion</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#998;font-style:italic">//模板内容,这里测试时使用简单的字符串作为模板
+</span><span style="color:#998;font-style:italic"></span>    String templateString<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34;&lt;html&gt;\n&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34; &lt;head&gt;&lt;/head&gt;\n&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34; &lt;body&gt;\n&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34; 名称:${name}\n&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34; &lt;/body&gt;\n&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#34;&lt;/html&gt;&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">//模板加载器
+</span><span style="color:#998;font-style:italic"></span>    StringTemplateLoader stringTemplateLoader <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> StringTemplateLoader<span style="color:#000;font-weight:bold">();</span>
+    stringTemplateLoader<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">putTemplate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;template&#34;</span><span style="color:#000;font-weight:bold">,</span>templateString<span style="color:#000;font-weight:bold">);</span>
+    configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setTemplateLoader</span><span style="color:#000;font-weight:bold">(</span>stringTemplateLoader<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//得到模板
+</span><span style="color:#998;font-style:italic"></span>    Template template <span style="color:#000;font-weight:bold">=</span> configuration<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTemplate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;template&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;utf‐8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//数据模型
+</span><span style="color:#998;font-style:italic"></span>    Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span>Object<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;黑马程序员&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//静态化
+</span><span style="color:#998;font-style:italic"></span>    String content <span style="color:#000;font-weight:bold">=</span> FreeMarkerTemplateUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">processTemplateIntoString</span><span style="color:#000;font-weight:bold">(</span>template<span style="color:#000;font-weight:bold">,</span> map<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//静态化内容
+</span><span style="color:#998;font-style:italic"></span>    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>content<span style="color:#000;font-weight:bold">);</span>
+    InputStream inputStream <span style="color:#000;font-weight:bold">=</span> IOUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toInputStream</span><span style="color:#000;font-weight:bold">(</span>content<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//输出文件
+</span><span style="color:#998;font-style:italic"></span>    FileOutputStream fileOutputStream <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> FileOutputStream<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> File<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;d:/test1.html&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    IOUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">copy</span><span style="color:#000;font-weight:bold">(</span>inputStream<span style="color:#000;font-weight:bold">,</span> fileOutputStream<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/16/freemarker.html">https://chanservy.github.io/2021/04/16/freemarker.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/thymeleaf-study.html">Thymeleaf语法入门</a></li>
+        
+        <li><a href="/2021/04/09/boot-with-tkMapper.html">Spring Boot之集成通用Mapper</a></li>
+        
+        <li><a href="/2021/04/09/boot-with-data-jpa.html">Spring Boot整合Spring Data JPA</a></li>
+        
+        <li><a href="/2021/04/09/redis-load-operating.html">Redis的安装及操作</a></li>
+        
+        <li><a href="/2021/01/29/some-idea-about-divide.html">前后端分离开发中权限管理的一点思路</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Boot'>Spring Boot</a></li>
+                
+                <li><a href='/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E'>模板引擎</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

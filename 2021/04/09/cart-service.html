@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>购物车业务 | 迩东陈的博客</title>
+    <meta property="og:title" content="购物车业务 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T17:54:34&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T17:54:34&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="购物车业务">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/cart-service.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1购物车功能分析">1.购物车功能分析</a>
+      <ul>
+        <li><a href="#11需求">1.1.需求</a></li>
+        <li><a href="#12流程图">1.2.流程图</a></li>
+      </ul>
+    </li>
+    <li><a href="#2未登录状态下的购物车">2.未登录状态下的购物车</a>
+      <ul>
+        <li><a href="#21购物车的数据结构">2.1购物车的数据结构</a></li>
+        <li><a href="#22web本地存储">2.2.web本地存储</a></li>
+      </ul>
+    </li>
+    <li><a href="#3已登录状态下的购物车">3.已登录状态下的购物车</a>
+      <ul>
+        <li><a href="#31添加登录校验">3.1.添加登录校验</a></li>
+        <li><a href="#32后台购物车设计">3.2.后台购物车设计</a></li>
+        <li><a href="#33添加商品到购物车">3.3.添加商品到购物车</a></li>
+        <li><a href="#44查询购物车">4.4.查询购物车</a></li>
+        <li><a href="#45修改商品数量">4.5.修改商品数量</a></li>
+        <li><a href="#46删除购物车商品">4.6.删除购物车商品</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">购物车业务</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：记一次项目中实现购物车业务的流程。</p>
+<h2 id="1购物车功能分析">1.购物车功能分析</h2>
+<h3 id="11需求">1.1.需求</h3>
+<p>需求描述：</p>
+<ul>
+<li>用户可以在登录状态下将商品添加到购物车
+<ul>
+<li>放入数据库</li>
+<li>放入redis（采用）</li>
+</ul>
+</li>
+<li>用户可以在未登录状态下将商品添加到购物车
+<ul>
+<li>放入localstorage</li>
+</ul>
+</li>
+<li>用户可以使用购物车一起结算下单</li>
+<li>用户可以查询自己的购物车</li>
+<li>用户可以在购物车中修改购买商品的数量。</li>
+<li>用户可以在购物车中删除商品。</li>
+<li>在购物车中展示商品优惠信息</li>
+<li>提示购物车商品价格变化</li>
+</ul>
+<h3 id="12流程图">1.2.流程图</h3>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527585343248.png">
+            <img class="mx-auto" alt="1527585343248" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527585343248.png" />
+        </a>
+    </p>
+<p>1527585343248</p>
+<p>这幅图主要描述了两个功能：新增商品到购物车、查询购物车。</p>
+<p>新增商品：</p>
+<ul>
+<li>判断是否登录
+<ul>
+<li>是：则添加商品到后台Redis中</li>
+<li>否：则添加商品到本地的Localstorage</li>
+</ul>
+</li>
+</ul>
+<p>无论哪种新增，完成后都需要查询购物车列表：</p>
+<ul>
+<li>判断是否登录
+<ul>
+<li>否：直接查询localstorage中数据并展示</li>
+<li>是：已登录，则需要先看本地是否有数据，
+<ul>
+<li>有：需要提交到后台添加到redis，合并数据，而后查询</li>
+<li>否：直接去后台查询redis，而后返回</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="2未登录状态下的购物车">2.未登录状态下的购物车</h2>
+<h3 id="21购物车的数据结构">2.1购物车的数据结构</h3>
+<p>首先，分析未登录购物车的数据结构。</p>
+<p>我们看下页面展示需要什么数据：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527737419294.png">
+            <img class="mx-auto" alt="1527737419294" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527737419294.png" />
+        </a>
+    </p>
+<p>1527737419294</p>
+<p>因此每一个购物车信息，都是一个对象，包含：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">{
+    skuId<span style="color:#000;font-weight:bold">:</span><span style="color:#099">2131241</span>,
+    title<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;小米6&#34;</span>,
+    image<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;&#34;</span>,
+    price<span style="color:#000;font-weight:bold">:</span><span style="color:#099">190000</span>,
+    num<span style="color:#000;font-weight:bold">:</span><span style="color:#099">1</span>,
+    ownSpec<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;{&#34;</span>机身颜色<span style="color:#d14">&#34;:&#34;</span>陶瓷黑尊享版<span style="color:#d14">&#34;,&#34;</span>内存<span style="color:#d14">&#34;:&#34;</span><span style="color:#099">6</span>GB<span style="color:#d14">&#34;,&#34;</span>机身存储<span style="color:#d14">&#34;:&#34;</span><span style="color:#099">128</span>GB<span style="color:#d14">&#34;}&#34;</span>
+}
+</code></pre></div><p>JS</p>
+<p>另外，购物车中不止一条数据，因此最终会是对象的数组。即：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">[
+    {...},{...},{...}
+]
+</code></pre></div><p>JS</p>
+<h3 id="22web本地存储">2.2.web本地存储</h3>
+<p>知道了数据结构，下一个问题，就是如何保存购物车数据。前面我们分析过，可以使用Localstorage来实现。Localstorage是web本地存储的一种，那么，什么是web本地存储呢？</p>
+<h4 id="什么是web本地存储">什么是web本地存储？</h4>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527587496457.png">
+            <img class="mx-auto" alt="1527587496457" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1527587496457.png" />
+        </a>
+    </p>
+<p>1527587496457</p>
+<p>web本地存储主要有两种方式：</p>
+<ul>
+<li>LocalStorage：localStorage 方法存储的数据没有时间限制。第二天、第二周或下一年之后，数据依然可用。</li>
+<li>SessionStorage：sessionStorage 方法针对一个 session 进行数据存储。当用户关闭浏览器窗口后，数据会被删除。</li>
+</ul>
+<h4 id="localstorage的用法">LocalStorage的用法</h4>
+<p>语法非常简单：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1533739711101.png">
+            <img class="mx-auto" alt="1533739711101" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1533739711101.png" />
+        </a>
+    </p>
+<p>1533739711101</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">localStorage.setItem(<span style="color:#d14">&#34;key&#34;</span>,<span style="color:#d14">&#34;value&#34;</span>); <span style="color:#998;font-style:italic">// 存储数据
+</span><span style="color:#998;font-style:italic"></span>localStorage.getItem(<span style="color:#d14">&#34;key&#34;</span>); <span style="color:#998;font-style:italic">// 获取数据
+</span><span style="color:#998;font-style:italic"></span>localStorage.removeItem(<span style="color:#d14">&#34;key&#34;</span>); <span style="color:#998;font-style:italic">// 删除数据
+</span></code></pre></div><p>JS</p>
+<p>注意：<strong>localStorage和SessionStorage都只能保存字符串</strong>。</p>
+<p>未登录的话，保存在web本地，逻辑前端人员实现。但是值得一提的是，比如前端现在完成了购物车的逻辑，将购物车存在了localstorage，但是还不够，前端这里需要后端提供一个接口查询sku。 有人会问，购物车所需要的信息在localstorage中都有的呀，为什么还要查询sku的信息呢？答案是我们之前所说的<strong>购物车中需要显示价格变化</strong>，我们加入购物车中的商品价格不是一成不变的，因此需要发送这条请求来查询此时的价格与加入购物车时的价格是否发生了变化，提供友好的提示。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/3.png">
+            <img class="mx-auto" alt="3" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/3.png" />
+        </a>
+    </p>
+<p>3</p>
+<p>下面我们直接看后端，登录之后的购物车逻辑。</p>
+<h2 id="3已登录状态下的购物车">3.已登录状态下的购物车</h2>
+<h3 id="31添加登录校验">3.1.添加登录校验</h3>
+<p>购物车系统只负责登录状态的购物车处理，因此需要添加登录校验，我们通过JWT鉴权即可实现。</p>
+<h4 id="311引入jwt相关依赖">3.1.1.引入JWT相关依赖</h4>
+<p>我们引入之前写的鉴权工具：<code>ly-auth-common</code></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.auth<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-auth-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<h4 id="312配置公钥">3.1.2.配置公钥</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">ly</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">jwt</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">pubKeyPath</span>:<span style="color:#bbb"> </span>E:\\tmp\\rsa\\rsa.pub<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 公钥地址</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">cookieName</span>:<span style="color:#bbb"> </span>LY_TOKEN<span style="color:#bbb">
+</span></code></pre></div><p>YAML</p>
+<h4 id="313加载公钥">3.1.3.加载公钥</h4>
+<p>代码：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#3c5d5d;font-weight:bold">@ConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>prefix <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;ly.jwt&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">JwtProperties</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> String pubKeyPath<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 公钥路径
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> PublicKey publicKey<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 公钥
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String cookieName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>JwtProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@PostConstruct</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 获取公钥
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">publicKey</span> <span style="color:#000;font-weight:bold">=</span> CreateSecretKey<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPublicKey</span><span style="color:#000;font-weight:bold">(</span>pubKeyPath<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;初始化公钥失败！&#34;</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> RuntimeException<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getPubKeyPath</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> pubKeyPath<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setPubKeyPath</span><span style="color:#000;font-weight:bold">(</span>String pubKeyPath<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">pubKeyPath</span> <span style="color:#000;font-weight:bold">=</span> pubKeyPath<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> PublicKey <span style="color:#900;font-weight:bold">getPublicKey</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> publicKey<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setPublicKey</span><span style="color:#000;font-weight:bold">(</span>PublicKey publicKey<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">publicKey</span> <span style="color:#000;font-weight:bold">=</span> publicKey<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCookieName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> cookieName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCookieName</span><span style="color:#000;font-weight:bold">(</span>String cookieName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">cookieName</span> <span style="color:#000;font-weight:bold">=</span> cookieName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="314编写拦截器">3.1.4.编写拦截器</h4>
+<p>因为很多接口都需要进行登录，我们直接编写SpringMVC拦截器，进行统一登录校验，为何网关校验一遍了，在这里还要进行校验？其实我们这里的主要目的并不是进行校验，而是因为我们需要获得用户信息，但是网关拿到的信息不可以跨服务传给购物车服务。同时，我们还要把解析得到的用户信息保存起来，以便后续的接口可以使用。</p>
+<p>代码：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserInterceptor</span> <span style="color:#000;font-weight:bold">extends</span> HandlerInterceptorAdapter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> JwtProperties jwtProperties<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger LOGGER <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// 线程域, 存放登录用户
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> ThreadLocal<span style="color:#000;font-weight:bold">&lt;</span>UserInfo<span style="color:#000;font-weight:bold">&gt;</span> tl <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ThreadLocal<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">UserInterceptor</span><span style="color:#000;font-weight:bold">(</span>JwtProperties jwtProperties<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">jwtProperties</span> <span style="color:#000;font-weight:bold">=</span> jwtProperties<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 前置拦截, 在controller的方法执行之前执行
+</span><span style="color:#998;font-style:italic">     * @Param [request, response, handler]
+</span><span style="color:#998;font-style:italic">     * @return boolean
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/12 11:43
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">preHandle</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">,</span> Object handler<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 查询token
+</span><span style="color:#998;font-style:italic"></span>        String token <span style="color:#000;font-weight:bold">=</span> CookieUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCookieValue</span><span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">,</span> jwtProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCookieName</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isBlank</span><span style="color:#000;font-weight:bold">(</span>token<span style="color:#000;font-weight:bold">)){</span>
+            <span style="color:#998;font-style:italic">// 未登录
+</span><span style="color:#998;font-style:italic"></span>            response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStatus</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">UNAUTHORIZED</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">value</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 拦截
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#998;font-style:italic">// 有token, 查询用户信息
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            UserInfo userInfo <span style="color:#000;font-weight:bold">=</span> JwtUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getInfoFromToken</span><span style="color:#000;font-weight:bold">(</span>token<span style="color:#000;font-weight:bold">,</span> jwtProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPublicKey</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#998;font-style:italic">// 放入线程域
+</span><span style="color:#998;font-style:italic"></span>            tl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">set</span><span style="color:#000;font-weight:bold">(</span>userInfo<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 放行
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 抛出异常证明未登录
+</span><span style="color:#998;font-style:italic"></span>            response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStatus</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">UNAUTHORIZED</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">value</span><span style="color:#000;font-weight:bold">());</span>
+            LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[购物车服务] 解析用户信息失败!&#34;</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 拦截
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 最终, 视图渲染之后执行
+</span><span style="color:#998;font-style:italic">     * @Param [request, response, handler, ex]
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/12 11:44
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">afterCompletion</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">,</span> Object handler<span style="color:#000;font-weight:bold">,</span> Exception ex<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        tl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">remove</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> UserInfo <span style="color:#900;font-weight:bold">getLoginUserInfo</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> tl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>注意：</p>
+<ul>
+<li>这里我们使用了<code>ThreadLocal</code>来存储查询到的用户信息，线程内共享，因此请求到达<code>Controller</code>后可以共享User</li>
+<li>并且对外提供了静态的方法：<code>getLoginUser()</code>来获取User信息</li>
+</ul>
+<blockquote>
+<p>分析：</p>
+</blockquote>
+<p>解析完token后需要把user信息传递过去，那通过什么传递呢？ 既然要传递，就要思考从拦截器到controller再到service有什么东西是共享的？——request、spring容器、thread</p>
+<ul>
+<li>
+<p>request ：可行，但是SpringMVC是不推荐这种方案的</p>
+</li>
+<li>
+<p>spring容器：会有线程安全问题，因为spring容器都单例的</p>
+</li>
+<li>
+<p>thread：可行，有一个容器threadlocal（线程域），是一个map结构，key是thread，value是存储的值，原理图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1.png">
+            <img class="mx-auto" alt="1" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/1.png" />
+        </a>
+    </p>
+<p>1</p>
+</li>
+</ul>
+<h4 id="315配置过滤器">3.1.5.配置过滤器</h4>
+<p>配置SpringMVC，使过滤器生效：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>JwtProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MvcConfig</span> <span style="color:#000;font-weight:bold">implements</span> WebMvcConfigurer <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> JwtProperties jwtProperties<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#000;font-weight:bold">public</span> UserInterceptor <span style="color:#900;font-weight:bold">userInterceptor</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> UserInterceptor<span style="color:#000;font-weight:bold">(</span>jwtProperties<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">addInterceptors</span><span style="color:#000;font-weight:bold">(</span>InterceptorRegistry registry<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        registry<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addInterceptor</span><span style="color:#000;font-weight:bold">(</span>userInterceptor<span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">addPathPatterns</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/**&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="32后台购物车设计">3.2.后台购物车设计</h3>
+<p>当用户登录时，我们需要把购物车数据保存到后台，可以选择保存在数据库。但是购物车是一个读写频率很高的数据。因此我们这里选择读写效率比较高的Redis作为购物车存储。</p>
+<p>Redis有5种不同数据结构，这里选择哪一种比较合适呢？</p>
+<ul>
+<li>首先不同用户应该有独立的购物车，因此购物车应该以用户的作为key来存储，Value是用户的所有购物车信息。这样看来基本的<code>k-v</code>结构就可以了。</li>
+<li>但是，我们对购物车中的商品进行增、删、改操作，基本都需要根据商品id进行判断，为了方便后期处理，我们的购物车也应该是<code>k-v</code>结构，key是商品id，value才是这个商品的购物车信息。</li>
+</ul>
+<p>综上所述，我们的购物车结构是一个双层Map：Map&lt;String,Map&lt;String,String&raquo;，redis中的hash类型比较适合。</p>
+<ul>
+<li>第一层Map，Key是用户id</li>
+<li>第二层Map，Key是购物车中商品id，值是购物车数据</li>
+</ul>
+<p>实体类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Cart</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> Long userId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 用户id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long skuId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String title<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 标题
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String image<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 图片
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long price<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 加入购物车时的价格
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer num<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 购买数量
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String ownSpec<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品规格参数
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getUserId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> userId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserId</span><span style="color:#000;font-weight:bold">(</span>Long userId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userId</span> <span style="color:#000;font-weight:bold">=</span> userId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getSkuId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> skuId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setSkuId</span><span style="color:#000;font-weight:bold">(</span>Long skuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">skuId</span> <span style="color:#000;font-weight:bold">=</span> skuId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getTitle</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> title<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setTitle</span><span style="color:#000;font-weight:bold">(</span>String title<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">title</span> <span style="color:#000;font-weight:bold">=</span> title<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getImage</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> image<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setImage</span><span style="color:#000;font-weight:bold">(</span>String image<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">image</span> <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getPrice</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> price<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setPrice</span><span style="color:#000;font-weight:bold">(</span>Long price<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">price</span> <span style="color:#000;font-weight:bold">=</span> price<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getNum</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> num<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setNum</span><span style="color:#000;font-weight:bold">(</span>Integer num<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">num</span> <span style="color:#000;font-weight:bold">=</span> num<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getOwnSpec</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> ownSpec<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setOwnSpec</span><span style="color:#000;font-weight:bold">(</span>String ownSpec<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ownSpec</span> <span style="color:#000;font-weight:bold">=</span> ownSpec<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="33添加商品到购物车">3.3.添加商品到购物车</h3>
+<h4 id="331页面发起请求">3.3.1.页面发起请求</h4>
+<p>已登录情况下，向后台添加购物车：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/2.png">
+            <img class="mx-auto" alt="2" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/cart/2.png" />
+        </a>
+    </p>
+<p>2</p>
+<h4 id="332编写controller">3.3.2.编写controller</h4>
+<p>先分析一下：</p>
+<ul>
+<li>请求方式：新增，肯定是Post</li>
+<li>请求路径：/cart</li>
+<li>请求参数：Json对象，包含skuId和num属性</li>
+<li>返回结果：无</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CartController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    CartService cartService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;java.lang.Void&gt;
+</span><span style="color:#998;font-style:italic">     * @Description 添加购物车
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/11 22:27
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">addCart</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestBody</span> Cart cart<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        cartService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addCart</span><span style="color:#000;font-weight:bold">(</span>cart<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>别忘了在ly-gateway中添加购物车服务的路由配置。</p>
+<h4 id="333cartservice">3.3.3.CartService</h4>
+<p>这里我们不访问数据库，而是直接操作Redis。基本思路：</p>
+<ul>
+<li>先查询之前的购物车数据</li>
+<li>判断要添加的商品是否存在
+<ul>
+<li>存在：则直接修改数量后写回Redis</li>
+<li>不存在：新建一条数据，然后写入Redis</li>
+</ul>
+</li>
+</ul>
+<p>代码：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CartServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> CartService <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    StringRedisTemplate redisTemplate<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    GoodsClient goodsClient<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String KEY_PREFIX <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;ly:cart:uid:&#34;</span><span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>CartServiceImpl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">addCart</span><span style="color:#000;font-weight:bold">(</span>Cart cart<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 获取登录用户
+</span><span style="color:#998;font-style:italic"></span>            UserInfo userInfo <span style="color:#000;font-weight:bold">=</span> UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLoginUserInfo</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#998;font-style:italic">// redis的key
+</span><span style="color:#998;font-style:italic"></span>            String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> userInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#998;font-style:italic">// 获取绑定key的hash操作对象
+</span><span style="color:#998;font-style:italic"></span>            BoundHashOperations<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> hashOps <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">boundHashOps</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询购物车中是否已有
+</span><span style="color:#998;font-style:italic"></span>            Long skuId <span style="color:#000;font-weight:bold">=</span> cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSkuId</span><span style="color:#000;font-weight:bold">();</span>
+            Integer num <span style="color:#000;font-weight:bold">=</span> cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getNum</span><span style="color:#000;font-weight:bold">();</span>
+            Boolean bool <span style="color:#000;font-weight:bold">=</span> hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">hasKey</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>bool<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">// 存在, 获取购物车数据
+</span><span style="color:#998;font-style:italic"></span>                String cartJson <span style="color:#000;font-weight:bold">=</span> hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">();</span>
+                Cart cartCache <span style="color:#000;font-weight:bold">=</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">parse</span><span style="color:#000;font-weight:bold">(</span>cartJson<span style="color:#000;font-weight:bold">,</span> Cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#998;font-style:italic">// 修改购物车中购买数量
+</span><span style="color:#998;font-style:italic"></span>                cartCache<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setNum</span><span style="color:#000;font-weight:bold">(</span>cartCache<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getNum</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">+</span> num<span style="color:#000;font-weight:bold">);</span>
+                hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">(),</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">serialize</span><span style="color:#000;font-weight:bold">(</span>cartCache<span style="color:#000;font-weight:bold">));</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">// 不存在, 新增购物车数据
+</span><span style="color:#998;font-style:italic"></span>                hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">(),</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">serialize</span><span style="color:#000;font-weight:bold">(</span>cart<span style="color:#000;font-weight:bold">));</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[购物车服务] 添加购物车失败&#34;</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CART_ADD_ERROR</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="44查询购物车">4.4.查询购物车</h3>
+<h4 id="441后台实现">4.4.1.后台实现</h4>
+<blockquote>
+<p>Controller</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;java.util.List &lt; com.leyou.cart.pojo.Cart&gt;&gt;
+</span><span style="color:#998;font-style:italic">     * @Description 查询购物车列表
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/12 16:08
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/list&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>List<span style="color:#000;font-weight:bold">&lt;</span>Cart<span style="color:#000;font-weight:bold">&gt;&gt;</span> <span style="color:#900;font-weight:bold">cartList</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>cartService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">queryCarts</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>Service</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Cart<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">queryCarts</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 获取登录用户
+</span><span style="color:#998;font-style:italic"></span>        UserInfo loginUserInfo <span style="color:#000;font-weight:bold">=</span> UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLoginUserInfo</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#998;font-style:italic">// key
+</span><span style="color:#998;font-style:italic"></span>        String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> loginUserInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">hasKey</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// key不存在, 返回404
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CART_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#998;font-style:italic">// 获取登录用户的所有购物车项
+</span><span style="color:#998;font-style:italic"></span>        BoundHashOperations<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> operations <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">boundHashOps</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> cartsObj <span style="color:#000;font-weight:bold">=</span> operations<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">values</span><span style="color:#000;font-weight:bold">();</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Cart<span style="color:#000;font-weight:bold">&gt;</span> carts <span style="color:#000;font-weight:bold">=</span> cartsObj<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">stream</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">map</span><span style="color:#000;font-weight:bold">(</span>o <span style="color:#000;font-weight:bold">-&gt;</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">parse</span><span style="color:#000;font-weight:bold">(</span>o<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">(),</span> Cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)).</span><span style="color:#008080">collect</span><span style="color:#000;font-weight:bold">(</span>Collectors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toList</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">return</span> carts<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>LyException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[购物车服务] 查询购物车项失败!&#34;</span><span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CART_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="45修改商品数量">4.5.修改商品数量</h3>
+<h4 id="451后台实现">4.5.1.后台实现</h4>
+<blockquote>
+<p>Controller</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 更新某个购物车项的数量
+</span><span style="color:#998;font-style:italic">     * @Param [skuId, num]
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;java.lang.Void&gt;
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/12 16:23
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PutMapping</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">updateNum</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;skuId&#34;</span><span style="color:#000;font-weight:bold">)</span> Long skuId<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;num&#34;</span><span style="color:#000;font-weight:bold">)</span> Integer num<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        cartService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">updateNum</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">,</span> num<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>Service</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateNum</span><span style="color:#000;font-weight:bold">(</span>Long skuId<span style="color:#000;font-weight:bold">,</span> Integer num<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 获取登录用户
+</span><span style="color:#998;font-style:italic"></span>    UserInfo userInfo <span style="color:#000;font-weight:bold">=</span> UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLoginUserInfo</span><span style="color:#000;font-weight:bold">();</span>
+    String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> userInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">();</span>
+    BoundHashOperations<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> hashOps <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">boundHashOps</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+    String json <span style="color:#000;font-weight:bold">=</span> hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">();</span>
+    Cart cart <span style="color:#000;font-weight:bold">=</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">parse</span><span style="color:#000;font-weight:bold">(</span>json<span style="color:#000;font-weight:bold">,</span> Cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">assert</span> cart <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setNum</span><span style="color:#000;font-weight:bold">(</span>num<span style="color:#000;font-weight:bold">);</span>
+    hashOps<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">(),</span> JsonUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">serialize</span><span style="color:#000;font-weight:bold">(</span>cart<span style="color:#000;font-weight:bold">));</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="46删除购物车商品">4.6.删除购物车商品</h3>
+<h4 id="461后台实现">4.6.1.后台实现</h4>
+<blockquote>
+<p>Controller</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@DeleteMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/{skuId}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">deleteCart</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;skuId&#34;</span><span style="color:#000;font-weight:bold">)</span>Long skuId<span style="color:#000;font-weight:bold">){</span>
+    cartService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">deleteCart</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>Service</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">deleteCart</span><span style="color:#000;font-weight:bold">(</span>Long skuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    UserInfo user <span style="color:#000;font-weight:bold">=</span> UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLoginUserInfo</span><span style="color:#000;font-weight:bold">();</span>
+    String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">();</span>
+    BoundHashOperations<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> ops <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">boundHashOps</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+    ops<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>skuId<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/cart-service.html">https://chanservy.github.io/2021/04/09/cart-service.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/auth-center.html">授权中心</a></li>
+        
+        <li><a href="/2021/04/09/register-step.html">项目中的注册流程</a></li>
+        
+        <li><a href="/2021/04/09/mq-data-together.html">RabbitMQ及数据同步</a></li>
+        
+        <li><a href="/2021/04/09/goods-details-page-static.html">商品详情及静态化</a></li>
+        
+        <li><a href="/2021/04/09/search-service.html">项目中的搜索服务</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

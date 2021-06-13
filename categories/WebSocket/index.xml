@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>WebSocket on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/WebSocket/</link>
+    <description>Recent content in WebSocket on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 17:30:28 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/WebSocket/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WebSocket在线聊天</title>
+      <link>https://chanservy.github.io/2020/12/22/websocket-zaixianliaotian.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:30:28 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/websocket-zaixianliaotian.html</guid>
+      <description>前言：在 http 的协议中，所有的请求都是由客户端发起的，服务端进行响应，但是服务端的话是没办法直接给客户端推送消息的。但是在一些需要即时通信的应用中，我们会有这样的需求，而且这种需求很常见，比如在线游戏、在线股票、支付和最典型的在线聊天等。 WebSocket在线聊天 开头先说说长轮循：请</description>
+    </item>
+    
+  </channel>
+</rss>

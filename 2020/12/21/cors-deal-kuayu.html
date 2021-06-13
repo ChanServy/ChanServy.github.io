@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>CORS解决跨域问题 | 迩东陈的博客</title>
+    <meta property="og:title" content="CORS解决跨域问题 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-21T11:51:05&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-21T11:51:05&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="CORS解决跨域问题.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1同源策略">1、同源策略</a></li>
+    <li><a href="#2实践">2、实践</a></li>
+    <li><a href="#3存在的问题">3、存在的问题</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">CORS解决跨域问题</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月21日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言： 通过CORS解决跨域问题。  很多人对跨域有一种误解，以为这是前端的事，和后端没关系，其实不是这样的，说到跨域，就不得不说说浏览器的同源策略。</p>
+<h1 id="cors解决跨域问题">CORS解决跨域问题</h1>
+<h2 id="1同源策略">1、同源策略</h2>
+<p>同源策略是由 Netscape 提出的一个著名的安全策略，它是浏览器最核心也最基本的安全功能，现在所有支持 JavaScript 的浏览器都会使用这个策略。所谓同源是指协议、域名以及端口要相同。同源策略是基于安全方面的考虑提出来的，这个策略本身没问题，但是我们在实际开发中，由于各种原因又经常有跨域的需求，传统的跨域方案是 JSONP，JSONP 虽然能解决跨域但是有一个很大的局限性，那就是只支持 GET 请求，不支持其他类型的请求，而今天我们说的 CORS（跨域源资源共享）（CORS，Cross-origin resource sharing）是一个 W3C 标准，它是一份浏览器技术的规范，提供了 Web 服务从不同网域传来沙盒脚本的方法，以避开浏览器的同源策略，这是 JSONP 模式的现代版。</p>
+<h2 id="2实践">2、实践</h2>
+<p>接下来我们就来看看 Spring Boot 中如何实现这个东西。</p>
+<p>首先创建两个普通的 Spring Boot 项目，这个就不用我多说，第一个命名为 provider 提供服务，配置端口为 8080；第二个命名为 consumer 消费服务，配置端口为 8081。然后在 provider 上提供两个 hello 接口，一个 get，一个 post，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HelloController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello2</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;post hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>在 consumer 的 resources/static 目录下创建一个 html 文件，发送一个简单的 ajax 请求，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;button&#34;</span> <span style="color:#008080">onclick</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;btnClick()&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;get_button&#34;</span>&gt;
+&lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;button&#34;</span> <span style="color:#008080">onclick</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;btnClick2()&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;post_button&#34;</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">function</span> btnClick() {
+        $.get(<span style="color:#d14">&#39;http://localhost:8080/hello&#39;</span>, <span style="color:#000;font-weight:bold">function</span> (msg) {
+            $(<span style="color:#d14">&#34;#app&#34;</span>).html(msg);
+        });
+    }
+
+    <span style="color:#000;font-weight:bold">function</span> btnClick2() {
+        $.post(<span style="color:#d14">&#39;http://localhost:8080/hello&#39;</span>, <span style="color:#000;font-weight:bold">function</span> (msg) {
+            $(<span style="color:#d14">&#34;#app&#34;</span>).html(msg);
+        });
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+</code></pre></div><p>然后分别启动两个项目，发送请求按钮，观察浏览器控制台如下：</p>
+<pre><code>Access to XMLHttpRequest at 'http://localhost:8080/hello' from origin 'http://localhost:8081' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+</code></pre><p>可以看到，由于同源策略的限制，请求无法发送成功。</p>
+<p>使用 CORS 可以在前端代码不做任何修改的情况下，实现跨域，那么接下来看看在 provider 中如何配置。首先可以通过 <code>@CrossOrigin</code> 注解配置某一个方法接受某一个域的请求，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HelloController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@CrossOrigin</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;http://localhost:8081&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@CrossOrigin</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;http://localhost:8081&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello2</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;post hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>这个注解表示这两个接口接受来自 <code>http://localhost:8081</code> 地址（consumer）的请求，配置完成后，重启 provider ，再次发送请求，浏览器控制台就不会报错了，consumer 也能拿到数据了。</p>
+<p>此时观察浏览器请求网络控制台，可以看到响应头中多了如下信息：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/f13f3c53/14-1.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/f13f3c53/14-1.png" />
+        </a>
+    </p>
+<p>这个表示服务端愿意接收来自 <code>http://localhost:8081</code> 的请求，拿到这个信息后，浏览器就不会再去限制本次请求的跨域了。</p>
+<p>provider 上，每一个方法上都去加注解未免太麻烦了，有的朋友想到可以将注解直接加在 Controller 的类上，不过每个 Controller 都要加还是麻烦，在 Spring Boot 中，还可以通过全局配置一次性解决这个问题，全局配置只需要在 SpringMVC 的配置类中重写 <code>addCorsMappings</code> 方法即可，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">WebMvcConfig</span> <span style="color:#000;font-weight:bold">implements</span> WebMvcConfigurer <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">addCorsMappings</span><span style="color:#000;font-weight:bold">(</span>CorsRegistry registry<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        registry<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/**&#34;</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowedOrigins</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;http://localhost:8081&#34;</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowedMethods</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowedHeaders</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p><code>/**</code> 表示本应用的所有方法都会去处理跨域请求，<code>allowedMethods</code> 表示允许通过的请求数，<code>allowedHeaders</code> 则表示允许的请求头。经过这样的配置之后，就不必在每个方法上单独配置跨域了。</p>
+<h2 id="3存在的问题">3、存在的问题</h2>
+<p>了解了整个 CORS 的工作过程之后，我们通过 Ajax 发送跨域请求，虽然用户体验提高了，但是也有潜在的威胁存在，常见的就是 <code>CSRF</code>（Cross-site request forgery）跨站请求伪造。跨站请求伪造也被称为 one-click attack 或者 session riding，通常缩写为 CSRF 或者 XSRF，是一种挟制用户在当前已登录的 Web 应用程序上执行非本意的操作的攻击方法，举个例子：</p>
+<blockquote>
+<p>假如一家银行用以运行转账操作的URL地址如下：<code>http://icbc.com/aa?bb=cc</code>，那么，一个恶意攻击者可以在另一个网站上放置如下代码：<code>&lt;img src=&quot;http://icbc.com/aa?bb=cc&quot;&gt;</code>，如果用户访问了恶意的站点，然而她之前刚访问过银行不久，登录信息尚未过期，那么她可能会遭受损失。</p>
+</blockquote>
+<p>基于此，浏览器在实际操作中，会对请求进行分类，分为简单请求，预先请求，带凭证的请求等，预先请求会首先发送一个 options 探测请求，和浏览器进行协商是否接受请求。默认情况下跨域请求是不需要凭证的，但是服务端可以配置要求客户端提供凭证，这样就可以有效避免 CSRF 攻击。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html">https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/21/controller-advice.html">说说不常见的@ControllerAdvice</a></li>
+        
+        <li><a href="/2020/12/22/boot-wenjianshangchuan.html">Spring Boot的文件上传</a></li>
+        
+        <li><a href="/2020/12/22/boot-jingtaiziyuanpeizhi.html">Spring Boot中的静态资源配置</a></li>
+        
+        <li><a href="/2020/12/22/boot-json.html">Spring Boot中的JSON</a></li>
+        
+        <li><a href="/2020/12/22/boot-shitucengjishu.html">Spring Boot整合视图层技术</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Boot'>Spring Boot</a></li>
+                
+                <li><a href='/tags/%E8%B7%A8%E5%9F%9F'>跨域</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

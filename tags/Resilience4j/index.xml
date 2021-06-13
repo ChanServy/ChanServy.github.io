@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Resilience4j on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Resilience4j/</link>
+    <description>Recent content in Resilience4j on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 17:35:33 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Resilience4j/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Resilience4j</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-resilience4j.html</link>
+      <pubDate>Tue, 22 Dec 2020 17:35:33 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-resilience4j.html</guid>
+      <description>前言：Spring Cloud之Resilience4j。 Resilience4j Resilience4j 是 Spring Cloud GreenWich 版推荐的容错解决方案，相比 Hystrix ， Resilience4j 专为 Java8 以及函数式编程而设计。由于奈飞的断更， Hystrix 将来有可能被 Resilience4j 取而代之。 Resilience4j 主要提供了如下功能： 断路器 限流 基于信号量的隔离 缓存 限时 请求重试 1、结合微服务 Retry、CircuitBre</description>
+    </item>
+    
+  </channel>
+</rss>

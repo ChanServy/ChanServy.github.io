@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Eureka on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Eureka/</link>
+    <description>Recent content in Eureka on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 15:08:12 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Eureka/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Eureka集群搭建</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-eurekajiqun.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:08:12 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-eurekajiqun.html</guid>
+      <description>&lt;p&gt;前言：Spring Cloud之Eureka集群搭建。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之服务注册中心</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-eureka.html</link>
+      <pubDate>Tue, 22 Dec 2020 12:28:36 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-eureka.html</guid>
+      <description>前言：首先，如果是一个传统的单体应用的话，所有的业务都集中在一个项目中，当用户在浏览器发出请求时，直接由前端发起请求给后端，后端调用业务逻辑，给前端请求作出响应，完成一次调用。整个调用过程是一条直线，不需要服务之间的中转，所有没有必要引入注册中心。 注册中心Eureka 随着公司项目</description>
+    </item>
+    
+  </channel>
+</rss>

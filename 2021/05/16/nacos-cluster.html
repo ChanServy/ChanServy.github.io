@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Nacos集群部署以及RPC框架选型 | 迩东陈的博客</title>
+    <meta property="og:title" content="Nacos集群部署以及RPC框架选型 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-05-15T22:35:42&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-05-15T22:35:42&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Nacos集群部署以及RPC框架选型">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/05/16/nacos-cluster.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1我们为什么要使用复杂的微服务架构">1、我们为什么要使用复杂的微服务架构</a></li>
+    <li><a href="#2zookeepereurekaconsulnacos的选型对比">2、ZooKeeper、Eureka、Consul、Nacos的选型对比</a></li>
+    <li><a href="#3springcloudalibaba之nacos注册中心架构原理">3、SpringCloudAlibaba之Nacos注册中心架构原理</a></li>
+    <li><a href="#4深入nacos服务注册中心的内核原理">4、深入Nacos服务注册中心的内核原理</a></li>
+    <li><a href="#5基于nacos实现高可用服务注册中心部署">5、基于Nacos实现高可用服务注册中心部署</a></li>
+    <li><a href="#6nacos多环境部署隔离">6、Nacos多环境部署隔离</a></li>
+    <li><a href="#7为什么微服务化的系统必须通过rpc框架进行通信">7、为什么微服务化的系统必须通过RPC框架进行通信</a></li>
+    <li><a href="#8feignribbondubbo的选型对比">8、Feign+Ribbon、Dubbo的选型对比</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Nacos集群部署以及RPC框架选型</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年5月15日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Cloud-Alibaba'>Spring Cloud Alibaba</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：在进入正题”Nacos集群部署之前“，先从最先的单体架构开始说起，这也是我在中华石杉老师的架构课学习到的知识，想总结到自己的博客中，方便日后复习观看。</p>
+<h2 id="1我们为什么要使用复杂的微服务架构">1、我们为什么要使用复杂的微服务架构</h2>
+<p>单块应用的问题，10个人以上维护一个系统，频繁的代码分支进行合并，冲突很多，因为人多，导致很混乱，谁也不能保证10个人以上还能每个人就一定只会更新自己负责的一部分代码。 每次光是解决大量的代码冲突，就会耗费好几天的时间，解决完了冲突，还得进行一下测试，保证代码正常运行。</p>
+<p>这样一来，完全可能会你拉一个分支修改了代码之后，别人已经在你上线之前就更新了别的分支的代码，合并到master分支还发布上线了，所以你上线之前一般需要把master分支最新代码合并到一个测试分支上，把你的功能分支再合并上去，然后进行测试。</p>
+<p>每次测试，可能都会因为别人频繁改动代码，导致必须把系统所有相关功能都测试一遍，而且很可能因为别人胡乱改过你负责的部分的代码，导致合并之后，测试的时候运行就有问题，这是完全可能的。所以这是一种严重耦合的情况，会导致每次测试和上线，都需要大量的成本解决代码冲突，因为别人可能胡乱修改你的代码，导致测试需要全量回归所有功能，导致上线很慢很麻烦，而且更麻烦的是不同版本之间的上线协同。可能你拉的一个代码分支，修改的仅仅是针对5个功能，但是另外一个人之前修改了20个功能，你们的代码一旦合并了，可能导致大量的地方都有变动，可能会导致另外几十个依赖你们的代码的功能也会有一定的潜在的风险。</p>
+<p>在这种单块系统的情况下，代码一旦合并，上线之前，必须在测试环境对上百个完整的功能都做一下回归测试，这个耗费的时间就很长了。可能有的人要在某一天上线，你就必须等待他后一天再上线，每个人都必须做上线前做代码合并，然后全量回归，最后再上线，下一个人继续合并最新代码，全量回归，再上线，这个过程很麻烦，一旦出了差错，可能导致你直接把代码合并到master部署，上线可能会失败的。</p>
+<ol>
+<li>很多人维护一个单块应用，频繁的进行代码合并，频繁的解决代码冲突，解决冲突的时间和成本很高的，导致开发效率低下</li>
+<li>每次上线都要跟最新代码进行合并，重新进行全量功能的回归测试，很多代码都可能给有变动，必须全量回归测试，耗费时间很多，开发效率低下</li>
+<li>多人频繁上线，你等我，我等你，互相协调困难，而且可能会出现别人多次先上线，你多次重复的合并代码，解决冲突，全量回归测试，做很多次重复的事情，导致效率低下</li>
+<li>测试服务器都很少，就一台测试服务器，你开发好了代码，你连测试都不能测，必须等待别人的分支先测试完毕上线，你才能去合并代码，解决冲突，等到一个测试环境可以用，回归测试</li>
+<li>10个人以内维护一个单块应用，基本这些成本还不算太大，但是一旦10人以上维护一个单块应用，上述的成本会极大，导致系统每个需求的测试和上线，都非常缓慢，要耗费大量时间做全量回归测试，上线日期还得互相配合互相等待互相协调，一个疏忽，就可能导致没侧测试完全的代码上线出线上事故</li>
+<li>如果你想要升级技术架构，不能随意升级，因为可能影响别人，你得让所有人都学习这个新技术架构才行；如果你想要升级已有技术的版本，不能随意升级，因为可能新版本对你的代码没影响，但是对别人的代码有影响</li>
+</ol>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/4.png">
+            <img class="mx-auto" alt="单块系统开发的一些痛点" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/4.png" />
+        </a>
+    </p>
+<p>相反，我们可以看一下微服务架构图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/10.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/10.png" />
+        </a>
+    </p>
+<p>将系统的功能拆分成不同的微服务，最多每两到三个人负责一个微服务，每个微服务就是一个系统，对比前面的可能发生的代码冲突问题，在微服务中得到了更好的解决，当然整个项目的复杂度也大大提高。</p>
+<h2 id="2zookeepereurekaconsulnacos的选型对比">2、ZooKeeper、Eureka、Consul、Nacos的选型对比</h2>
+<p>zookeeper和eureka还好，consul用的没那么多，然鹅，nacos现在用的越来越多。</p>
+<p>zookeeper的原理，leader+follower，leader可写可读，同步到follower，follower只可以读，保证顺序一致性，就是基本尽量保证到数据一致的，主动推送，典型的CP，leader崩溃的时候，为了保证数据一致性，尽量不要读到不一致的数据，此时要重新选举leader以及做数据同步，此时集群会短暂的不可用。符合CP原则。</p>
+<p>P简单来说就是任何分布式系统一般都会满足，他就是分区容错性；CP，C，一致性，尽可能的去保证你读取到的数据是一致的，牺牲掉一个A，可用性，一旦leader崩溃，zk可能会有一个短时间内，几十s有可能，集群不可用，此时需要重新选举一个leader，然后再做数据同步，保证数据一致性之后再开放让你来读取。</p>
+<p>eureka的原理，peer-to-peer，大家都能写也都能读，每个节点都要同步给其他节点，但是是异步复制的，所以随时读任何一个节点，可能读到的数据都不一样，任何一个节点宕机，其他节点正常工作，可用性超高，但是数据一致性不行，符合AP原则。</p>
+<p>如下图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/2.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/2.png" />
+        </a>
+    </p>
+<p>Consul也是基于raft算法的CP模型。</p>
+<p>Nacos也是基于raft算法的CP模型，同时也支持配置成类似eureka的AP。</p>
+<p>其实CP或者AP也都行，CP就是偶尔可能短时间不可用，AP就是可能数据不一致，两个都有问题，但是在生产环境下，无论CP还是AP其实都用的很多。</p>
+<p>其实说白了，zk作为注册中心是早期dubbo时代的标配；后续spring cloud进入国内市场，大家就都用eureka了，但是spring cloud也推荐了consul，所以consul也有不少人在用，zk、eureka、consul，其实都有人用。</p>
+<p>但是还是建议用nacos，因为nacos的功能最为完善，包括了雪崩保护、自动注销实例、监听支持、多数据中心、跨注册中心同步、spring cloud集成、dubbo集成、k8s集成，这些都支持，其他的几个技术基本都支持部分罢了。</p>
+<p>注册中心：nacos -&gt; eureka</p>
+<p>RPC框架：dubbo -&gt; feign+ribbon</p>
+<p>分布式事务：seata -&gt; 无</p>
+<p>限流/熔断/降级：sentinel -&gt; hystrix</p>
+<p>API网关：无(Spring Cloud Gateway) -&gt; zuul</p>
+<h2 id="3springcloudalibaba之nacos注册中心架构原理">3、SpringCloudAlibaba之Nacos注册中心架构原理</h2>
+<p>服务通过nacos server内部的open api进行服务注册，nacos server内部有一个sevice服务的概念，里面有多个instance实例的概念，同时对不同的service服务可以划归到不同的namespace命名空间下去。</p>
+<p>namespace可以是一个技术团队，比如说一个技术团队，业务A的技术团队所有的服务都放在一个namespace命名空间下面，业务B的技术团队所有的服务都放在另外一个namespace命名空间。</p>
+<p>其实说白了，注册的时候就是在注册表里维护好每个服务的每个实例的服务器地址，包括ip地址和端口号，这是最为关键的。</p>
+<p>而且一旦注册成功之后，服务就会跟nacos server进行定时的心跳，保持心跳是很关键的，nacos server会定时检查服务各个实例的心跳，如果一定时间没心跳，就认为这个服务实例宕机了，就从注册表里摘除了。</p>
+<p>其他服务会从nacos server通过open api查询要调用的服务实例列表，而且nacos客户端会启动一个定时任务，每隔10s就重新拉取一次服务实例列表，这样如果调用的服务有上线或者下线，就能很快感知到了。</p>
+<p>此外还可以对要调用的服务进行监听，如果有异常变动会由nacos server反向通知他。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/1.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/1.png" />
+        </a>
+    </p>
+<h2 id="4深入nacos服务注册中心的内核原理">4、深入Nacos服务注册中心的内核原理</h2>
+<p>nacos本身的话，其实是完全可以脱离spring cloud自己独立运作的，但是他目前是集成到spring cloud alibaba里去的，也就是在spring cloud的标准之下实现了一些东西，spring cloud自己是有一个接口，叫做ServiceRegistry，也就是服务注册中心的概念。</p>
+<p>他是一个接口，nacos是实现了一个实现类的，也就是NacosServiceRegistry，实现了register、deregister、close、setStatus、getStatus之类的方法。</p>
+<p>自动装配是一个spring boot的一个概念，用最最简单的话来说，自动装配的意思，其实就是说系统启动的时候，自动装配机制会运行，实现一些系统的初始化、自动做一些事儿。</p>
+<p>比如说spring cloud alibaba，假设用dubbo开发服务，本质上是有一个自动装配类的，这个自动装配类会监听spring的ApplicationStartedEvent这个事件，其实简单理解就是服务启动的时候通过spring的一些动作，监听到某个事件就自动运行了。</p>
+<p>自动运行，就是去调用NacosServiceRegistry的register方法去进行服务注册。</p>
+<p>而且除了注册之外，还会通过schedule线程池去提交一个定时调度任务，源码如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exeutorService</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">schedule</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> BeatReactor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">BeatTask</span><span style="color:#000;font-weight:bold">(</span>beatInfo<span style="color:#000;font-weight:bold">),</span> beatInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPeriod</span><span style="color:#000;font-weight:bold">(),</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MILLISECONDS</span><span style="color:#000;font-weight:bold">)</span>
+</code></pre></div><p>这就是一个心跳机制，定时发送心跳给nacos server。</p>
+<p>接着会进行注册，注册的话是访问nacos server的open api，其实就是http接口，他有一个接口：http://192.168.1.102:8848/nacos/v1/ns/instance?serviceName=xx&amp;ip=xx&amp;port=xx ，这么一个东西，也没什么特别的，这里就是访问注册接口罢了。</p>
+<p>nacos server那里是基于一个ConcurrentHashMap作为注册表来放服务信息的，直接会构造一个Service放到map里，然后对Service去addInstance添加一个实例，本质里面就是在维护信息，同时还会建立定时检查实例心跳的机制，最后还会基于一致性协议，比如说raft协议，去把注册同步给其他节点。</p>
+<p>服务发现的本质其实也是一个http接口，就是：http://192.168.1.102:8848/nacos/v1/ns/instance/list?serviceName=xx ，就这么一个接口，其实也没特别的东西，然后就会启动定时任务，每隔10s拉取一次最新的实例列表，然后服务端还会监听他监听服务的状态，有异常就会基于UDP协议反向通知客户端这次服务异常变动。</p>
+<h2 id="5基于nacos实现高可用服务注册中心部署">5、基于Nacos实现高可用服务注册中心部署</h2>
+<p>做一个nacos高可用集群的部署，因为生产环境肯定是高可用的集群部署的，需要3台虚拟机，centos 7.x去部署，我用的虚拟机软件是Vmware。设置虚拟机网卡：选择创建好的虚拟机，点击“设置”按钮，在网络一栏中，连接方式中，选择“Bridged Adapter”。虚拟机必须有一块网卡，这块网卡是通过什么方式去宿主机里的网卡进行通讯，桥接网卡，就可以让你的虚拟机里的网卡跟你宿主机的一块网卡进行通讯。完成安装虚拟机。</p>
+<ul>
+<li>
+<p>配置网络</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">vi /etc/sysconfig/network-scripts/ifcfg-ens160 <span style="color:#998;font-style:italic">#文件名不一定是ens160，具体进入到系统自己看。</span>
+<span style="color:#008080">ONBOOT</span><span style="color:#000;font-weight:bold">=</span>yes <span style="color:#998;font-style:italic">#先让它动态分配一个ip地址</span>
+service network restart
+ip addr
+vi /etc/sysconfig/network-scripts/ifcfg-ens160
+<span style="color:#008080">BOOTPROTO</span><span style="color:#000;font-weight:bold">=</span>static <span style="color:#998;font-style:italic">#再设置静态ip地址</span>
+<span style="color:#008080">IPADDR</span><span style="color:#000;font-weight:bold">=</span>192.168.1.102 <span style="color:#998;font-style:italic">#指定linux的固定ip地址，必须保证该ip地址在同一局域网下没有被使用且该ip地址网段需要与主机一致</span>
+<span style="color:#008080">NETMASK</span><span style="color:#000;font-weight:bold">=</span>255.255.255.0 <span style="color:#998;font-style:italic">#子网掩码，通过子网掩码判断虚拟机和主机ip是否在同一个网段的</span>
+<span style="color:#008080">GATEWAY</span><span style="color:#000;font-weight:bold">=</span>192.168.1.255 <span style="color:#998;font-style:italic">#网关地址，需要与主机的网关ip保持一致</span>
+service network restart
+ip addr
+<span style="color:#998;font-style:italic">#配置DNS</span>
+systemctl status NetworkManager.service <span style="color:#998;font-style:italic">#检查NetManager的状态</span>
+nmcli dev status <span style="color:#998;font-style:italic">#检查NetManager管理的网络接口</span>
+nmcli connection show <span style="color:#998;font-style:italic">#检查NetManager管理的网络连接</span>
+nmcli con mod ens160 ipv4.dns <span style="color:#d14">&#39;114.114.114.114 8.8.8.8&#39;</span> <span style="color:#998;font-style:italic">#设置dns</span>
+nmcli con up ens160 <span style="color:#998;font-style:italic">#让dns配置生效</span>
+</code></pre></div></li>
+<li>
+<p>配置hosts</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">vi /etc/hosts <span style="color:#998;font-style:italic">#配置本机的hostname到ip地址的映射</span>
+<span style="color:#998;font-style:italic">#安装好三台虚拟机之后，在每台机器的hosts文件里面，配置好所有的机器的ip地址到hostname的映射关系</span>
+192.168.1.102 c2c-01
+192.168.1.106 c2c-02
+192.168.1.107 c2c-03
+</code></pre></div></li>
+<li>
+<p>关闭防火墙</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">systemctl stop firewalld.service
+systemctl disable firewalld.service
+</code></pre></div></li>
+<li>
+<p>配置yum</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">yum clean all
+yum makecache
+yum install wget
+</code></pre></div></li>
+<li>
+<p>安装JDK</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">scp /path/local_filename username@servername:/path <span style="color:#998;font-style:italic">#上传本地文件到服务器</span>
+scp jdk-8u131-linux-x64.rpm root@192.168.1.102:/usr/local/java
+<span style="color:#0086b3">cd</span> /usr/local/java
+rpm -ivh jdk-8u131-linux-x64.rpm <span style="color:#998;font-style:italic">#安装JDK</span>
+<span style="color:#998;font-style:italic">#配置jdk相关的环境变量</span>
+vi ~/.bashrc
+<span style="color:#0086b3">export</span> <span style="color:#008080">JAVA_HOME</span><span style="color:#000;font-weight:bold">=</span>/usr/java/latest
+<span style="color:#0086b3">export</span> <span style="color:#008080">PATH</span><span style="color:#000;font-weight:bold">=</span><span style="color:#008080">$PATH</span>:<span style="color:#008080">$JAVA_HOME</span>/bin
+<span style="color:#0086b3">source</span> ~/.bashrc
+java -version
+</code></pre></div></li>
+<li>
+<p>配置3台CentOS为ssh免密码互相通信</p>
+<p>首先在三台机器上分别各自执行下面的命令生成自己的文件：ssh-keygen -t rsa</p>
+<p>生成本机的公钥，过程中不断敲回车即可，ssh-keygen命令默认会将公钥放在/root/.ssh目录下</p>
+<p>在三台机器上分别各自进入目录，拷贝自己的公钥文件为authroized_keys文件，让三台机器先各自对自己免密码ssh可以登录</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#0086b3">cd</span> /root/.ssh
+cp id_rsa.pub authorized_keys <span style="color:#998;font-style:italic">#将公钥复制为authorized_keys文件,此时使用ssh连接本机就不需要输入密码了</span>
+</code></pre></div><p>接着配置三台机器互相之间的ssh免密码登录，在每台机器上执行下面的命令：</p>
+<p>使用<code>ssh-copy-id -i hostname</code>命令将本机的公钥拷贝到<code>指定机器</code>的authorized_keys文件中。</p>
+</li>
+<li>
+<p>编译nacos，下载nacos-server的源码，接着进行编译</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">git clone https://github.com/alibaba/nacos.git
+<span style="color:#0086b3">cd</span> nacos/
+mvn -Prelease-nacos -Dmaven.test.skip<span style="color:#000;font-weight:bold">=</span><span style="color:#0086b3">true</span> clean install -U <span style="color:#998;font-style:italic">#等待一会</span>
+ls -al distribution/target/
+scp nacos-server-2.0.2-SNAPSHOT.tar.gz root@192.168.1.102:/usr/local <span style="color:#998;font-style:italic">#上传</span>
+<span style="color:#0086b3">cd</span> /usr/local
+tar -zxvf nacos-server-2.0.2-SNAPSHOT.tar.gz 
+rm -rf nacos-server-2.0.2-SNAPSHOT.tar.gz
+<span style="color:#0086b3">cd</span> nacos/conf
+mv cluster.conf.example cluster.conf <span style="color:#998;font-style:italic">#重命名</span>
+vi cluster.conf
+192.168.1.102:8848
+192.168.1.106:8848
+192.168.1.107:8848
+  
+<span style="color:#998;font-style:italic">#在宿主机上面的Mysql数据库中执行nacos-mysql.sql,初始化数据库的表之类的东西</span>
+<span style="color:#998;font-style:italic">#先建立数据库nacos_config,然后执行nacos-mysql.sql</span>
+<span style="color:#998;font-style:italic">#然后别忘了,此时,宿主机本地的数据库只允许localhost或127.0.0.1访问，不允许远程访问,而我的nacos在虚拟机上</span>
+<span style="color:#998;font-style:italic">#由于本地项目无法设置SSH通道，所以需要修改数据库的访问权限,打开宿主机的终端</span>
+service mysql restart
+mysql -uroot -p
+<span style="color:#998;font-style:italic">#输入mysql密码,然后进入到数据库</span>
+show databases;
+use mysql;
+<span style="color:#000;font-weight:bold">select</span> user,host from user;
+<span style="color:#998;font-style:italic">#发现user字段为root的对应的host字段是localhost,我们要更改一下这</span>
+update user <span style="color:#0086b3">set</span> <span style="color:#008080">host</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;%&#39;</span> where <span style="color:#008080">user</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#39;root&#39;</span>;
+flush privileges;
+<span style="color:#0086b3">exit</span>
+  
+<span style="color:#998;font-style:italic">#然后回到虚拟机中</span>
+vi application.properties
+<span style="color:#998;font-style:italic">#将mysql的部分取消注释并更改为自己的配置</span>
+<span style="color:#998;font-style:italic">### If use MySQL as datasource:</span>
+spring.datasource.platform<span style="color:#000;font-weight:bold">=</span>mysql
+  
+<span style="color:#998;font-style:italic">### Count of DB:</span>
+db.num<span style="color:#000;font-weight:bold">=</span><span style="color:#099">1</span>
+  
+<span style="color:#998;font-style:italic">### Connect URL of DB:</span>
+db.url.0<span style="color:#000;font-weight:bold">=</span>jdbc:mysql://192.168.1.104:3306/nacos_config?characterEncoding<span style="color:#000;font-weight:bold">=</span>utf8&amp;<span style="color:#008080">connectTimeout</span><span style="color:#000;font-weight:bold">=</span>10000&amp;<span style="color:#008080">socketTimeout</span><span style="color:#000;font-weight:bold">=</span>30000&amp;<span style="color:#008080">autoReconnect</span><span style="color:#000;font-weight:bold">=</span>true&amp;<span style="color:#008080">useUnicode</span><span style="color:#000;font-weight:bold">=</span>true&amp;<span style="color:#008080">useSSL</span><span style="color:#000;font-weight:bold">=</span>false&amp;<span style="color:#008080">serverTimezone</span><span style="color:#000;font-weight:bold">=</span>UTC
+db.user.0<span style="color:#000;font-weight:bold">=</span>root
+db.password.0<span style="color:#000;font-weight:bold">=</span>password
+  
+<span style="color:#998;font-style:italic"># 然后分别进入三台机器的bin目录，执行startup.sh启动nacos, shutdown.sh关闭</span>
+<span style="color:#0086b3">cd</span> ..
+<span style="color:#0086b3">cd</span> bin/
+./startup.sh
+  
+<span style="color:#998;font-style:italic"># 然后检查logs目录下的start.out启动日志</span>
+<span style="color:#0086b3">cd</span> ..
+<span style="color:#0086b3">cd</span> logs/
+tail start.out
+  
+<span style="color:#998;font-style:italic">#如果启动成功就可以了，访问任何一个节点的8848端口的/nacos地址，进入nacos控制台，可以看到nacos集群的具体情况,如果启动失败,查看nacos.log,看日志报什么错,更改对应的bug</span>
+cat nacos.log
+  
+<span style="color:#998;font-style:italic">#注意,如果报错了的话,更改完之后,再次启动前,别忘了执行./shutdown.sh关闭一下,不然在尝试会显示端口占用</span>
+</code></pre></div></li>
+</ul>
+<p><strong>三台虚拟机都是上面的操作~</strong></p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/9.png">
+            <img class="mx-auto" alt="nacos-mysql.sql" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/9.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/5.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/5.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/6.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/6.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/7.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/7.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/8.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/8.png" />
+        </a>
+    </p>
+<p>Nacos集群部署，OK！</p>
+<h2 id="6nacos多环境部署隔离">6、Nacos多环境部署隔离</h2>
+<p>针对多环境部署隔离的情况，公司大部分都会有。如图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/12.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/12.png" />
+        </a>
+    </p>
+<p>前面说过，Nacos有一个namespace的概念，那么其实这个机制，其实是可以用来实现多环境部署隔离的，在项目发布上线之前，实现多环境隔离测试。</p>
+<p>用法：</p>
+<pre><code class="language-properties" data-lang="properties">spring.cloud.nacos.discovery.namespace=dev
+</code></pre><p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/11.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/11.png" />
+        </a>
+    </p>
+<p>通过微服务的配置文件中的配置，实现将微服务注册到不同的namespace中，微服务运行时只会找相同的namespace下的其它有关联的微服务，实现微服务之间的多环境部署隔离。</p>
+<h2 id="7为什么微服务化的系统必须通过rpc框架进行通信">7、为什么微服务化的系统必须通过RPC框架进行通信</h2>
+<p>假设如果你没有RPC的框架，此时假如说你的每个服务对外暴露的接口，都是一些HTTP接口，http://21.38.254.306:8080/xx/xx?xx=xx ，其他服务如果说要调用你的这个服务，就必须使用apache的http的组件，或者是JDK自带的http组件，构建出来一个HTTP请求，包括请求路径，请求头，请求体（JSON串过去）。</p>
+<p>好不容易构建出来一个完整的HTTP请求，通过http组件发送这个HTTP请求过去，在底层也是得跟那个服务的指定机器的指定端口号，也都是建立TCP连接，在TCP连接之上，发送HTTP协议组装出来的请求过去。</p>
+<p>接收人家给你的HTTP响应，解析HTTP响应，响应头，状态码（404，500），响应体（JSON串），极为麻烦。</p>
+<p>或者使用Spring提供的RestTemplate去请求和通信，但是也需要记住所有的微服务的地址，包括ip和端口号，也是极为麻烦的。</p>
+<h2 id="8feignribbondubbo的选型对比">8、Feign+Ribbon、Dubbo的选型对比</h2>
+<p>feign+ribbon，spring cloud netflix技术栈，RPC调用，用的就是feign框架+ribbon做负载均衡，暴露出来的服务接口，就是最最稀松平常的基于spring mvc写的controller暴露出来的一些http接口，定义一个http的url地址。</p>
+<p>通过feign框架进行RPC调用，会按照http协议来组装你的请求数据，数据格式都是按照http协议里的请求来做的，http请求还还必须做一个序列化，序列化成二进制的字节流，通过底层的tcp连接发送过去，然后那边收到了之后进行反序列化解析请求，再返回请求方需要的数据。</p>
+<p>本质上服务的部署是基于tomcat去进行部署的，tomcat会监听你指定的端口号，当别人要发送http请求给你的时候，首先必须跟tomcat建立tcp网络连接，发送http请求给tomcat，tomcat收到之后，解析出来这个http请求，交给你的spring mvc写的controller来进行处理。</p>
+<p>dubbo自己使用的一套协议，自定义协议，也可以是别的协议，肯定不是http协议，去组装请求数据，然后做一个序列化，二进制字节数组或者是字节流，都可以，通过底层的网络连接把请求数据发送过去就可以了。同样，那边收到了之后进行反序列化解析请求，然后通过网络连接把响应数据按照自己的协议封装，再序列化，通过网络连接发送返回给请求方。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/13.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/nacos/13.png" />
+        </a>
+    </p>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html">https://chanservy.github.io/2021/05/16/nacos-cluster.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/05/06/java-foundation.html">Java基础</a></li>
+        
+        <li><a href="/2021/04/16/freemarker.html">Freemarker研究</a></li>
+        
+        <li><a href="/2021/04/09/boot-with-tkMapper.html">Spring Boot之集成通用Mapper</a></li>
+        
+        <li><a href="/2021/04/09/boot-with-data-jpa.html">Spring Boot整合Spring Data JPA</a></li>
+        
+        <li><a href="/2021/04/09/order-service.html">订单业务</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Cloud-Alibaba'>Spring Cloud Alibaba</a></li>
+                
+                <li><a href='/tags/nacos'>nacos</a></li>
+                
+                <li><a href='/tags/Dubbo'>Dubbo</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

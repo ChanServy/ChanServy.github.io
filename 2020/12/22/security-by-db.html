@@ -1,0 +1,1548 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Security基于数据库动态配置权限 | 迩东陈的博客</title>
+    <meta property="og:title" content="Security基于数据库动态配置权限 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-21T17:46:44&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-21T17:46:44&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Security基于数据库动态配置权限.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/security-by-db.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一底层流程">一、底层流程</a>
+      <ul>
+        <li><a href="#1spring-security验证帐号密码">1、Spring Security验证帐号密码</a></li>
+        <li><a href="#2spring-security的简单原理">2、Spring Security的简单原理</a></li>
+      </ul>
+    </li>
+    <li><a href="#二项目搭建">二、项目搭建</a>
+      <ul>
+        <li><a href="#1搭建项目">1、搭建项目</a></li>
+        <li><a href="#2数据库文件">2、数据库文件</a></li>
+        <li><a href="#3进入编码阶段">3、进入编码阶段</a></li>
+      </ul>
+    </li>
+    <li><a href="#三运行结果">三、运行结果</a>
+      <ul>
+        <li><a href="#1用户chan登录时">1.用户chan登录时</a></li>
+        <li><a href="#2用户admin登录时">2.用户admin登录时</a></li>
+        <li><a href="#3用户root登录时">3.用户root登录时</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Security基于数据库动态配置权限</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月21日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Security'>Spring Security</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：对于Spring Security，由于也是近期才开始接触，所以还是处在慢慢摸索的阶段，前面与Spring Security相关的文章中的例子都是事先将用户，角色，资源的信息都写在了程序中，但是大家只有在生产环境中，没有一成不变的信息，因此本篇博客会将用户，角色，资源都写“活”，实现基于数据库的动态权限配置。</p>
+<h1 id="security基于数据库动态配置权限">Security基于数据库动态配置权限</h1>
+<h2 id="一底层流程">一、底层流程</h2>
+<p>本文将用户、角色、资源均采用数据库存储，并且自定义滤器，代替原有的<code>FilterSecurityInterceptor</code>过滤器，
+并分别实现<code>AccessDecisionManager</code>、<code>FilterInvocationSecurityMetadataSource</code>和<code>UserDetailsService</code>。本文中的用户、角色、资源分别都为多对多的关系。</p>
+<h3 id="1spring-security验证帐号密码">1、Spring Security验证帐号密码</h3>
+<p>首先在<code>usernamePasswordAuthenticationFilter</code>中来拦截登录请求，并调用<code>AuthenticationManager</code>。</p>
+<p><code>AuthenticationManager</code>调用Provider，provider调用<code>userDetaisService</code>来根据<code>username</code>获取真实的数据库信息。</p>
+<p>最终验证帐号密码的类是<code>org.springframework.security.authentication.dao.DaoAuthenticationProvider</code>。</p>
+<h3 id="2spring-security的简单原理">2、Spring Security的简单原理</h3>
+<p>使用众多的拦截器对<code>url</code>拦截，以此来管理权限。本文讲里面核心流程的两个。</p>
+<p>首先，权限管理离不开登录验证的，所以登录验证拦截器<code>AbstractAuthenticationProcessingFilter</code>是核心；
+还有就是对访问的资源管理吧，所以资源管理拦截器<code>AbstractSecurityInterceptor</code>是核心；</p>
+<p>另外拦截器里面的实现需要一些组件来实现，所以就有了<code>AuthenticationManager</code>、<code>AccessDecisionManager</code>等组件来支撑。</p>
+<p>现在先大概过一遍整个流程，用户登录，会被<code>AuthenticationProcessingFilter</code>拦截，调用<code>AuthenticationManager</code>的实现，而且<code>AuthenticationManager</code>会调用<code>ProviderManager</code>来获取用户验证信息（不同的Provider调用的服务不同，因为这些信息可以是在数据库上，可以是在LDAP服务器上，可以是xml配置文件上等），如果验证通过后会将用户的权限信息封装一个User放到Spring的全局缓存<code>SecurityContextHolder</code>中，以备后面访问资源时使用。</p>
+<p>访问资源（即授权管理，也就是角色和资源交互），访问<code>url</code>时，会通过<code>AbstractSecurityInterceptor</code>拦截器拦截，其中会调用<code>FilterInvocationSecurityMetadataSource</code>的方法来获取被拦截<code>url</code>所需的全部权限，再调用授权管理器<code>AccessDecisionManager</code>，这个授权管理器会通过Spring的全局缓存<code>SecurityContextHolder</code>来获取用户的权限信息，还会获取被拦截的<code>url</code>和被拦截<code>url</code>所需的全部权限，然后根据所配的策略（有：一票决定，一票否定，少数服从多数等），如果权限足够，则返回，权限不够则报错并调用权限不足页面（403 Forbidden）。</p>
+<h2 id="二项目搭建">二、项目搭建</h2>
+<h3 id="1搭建项目">1、搭建项目</h3>
+<ul>
+<li>
+<p>pom.xml</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;parent&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-parent<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>2.1.8.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/parent&gt;</span>
+  
+<span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-security<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.mybatis.spring.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>mybatis-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>2.1.0<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.alibaba<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>druid-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.1.10<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>mysql<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>runtime<span style="color:#000080">&lt;/scope&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>5.1.27<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+  
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.security<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-security-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+  
+<span style="color:#000080">&lt;build&gt;</span>
+    <span style="color:#000080">&lt;resources&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 这个配置可以将mapper的xml文件 放在和接口一起的包里
+</span><span style="color:#998;font-style:italic">            但是我是将mapper直接放在resources包的mapper中的 并在yml声明
+</span><span style="color:#998;font-style:italic">            两种方式都可 --&gt;</span>
+        <span style="color:#000080">&lt;resource&gt;</span>
+            <span style="color:#000080">&lt;directory&gt;</span>src/main/java<span style="color:#000080">&lt;/directory&gt;</span>
+            <span style="color:#000080">&lt;includes&gt;</span>
+                <span style="color:#000080">&lt;include&gt;</span>**/*.xml<span style="color:#000080">&lt;/include&gt;</span>
+            <span style="color:#000080">&lt;/includes&gt;</span>
+        <span style="color:#000080">&lt;/resource&gt;</span>
+        <span style="color:#000080">&lt;resource&gt;</span>
+            <span style="color:#000080">&lt;directory&gt;</span>src/main/resources<span style="color:#000080">&lt;/directory&gt;</span>
+        <span style="color:#000080">&lt;/resource&gt;</span>
+    <span style="color:#000080">&lt;/resources&gt;</span>
+    <span style="color:#000080">&lt;plugins&gt;</span>
+        <span style="color:#000080">&lt;plugin&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/plugin&gt;</span>
+    <span style="color:#000080">&lt;/plugins&gt;</span>
+<span style="color:#000080">&lt;/build&gt;</span>
+</code></pre></div></li>
+<li>
+<p>application.yml</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">datasource</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">type</span>:<span style="color:#bbb"> </span>com.alibaba.druid.pool.DruidDataSource<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>root<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#998;font-style:italic">#    password: chan123456</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123456</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#998;font-style:italic">#    url: jdbc:mysql://121.36.15.48/chan01?useUnicode=true&amp;characterEncoding=UTF8&amp;useSSL=false</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span>jdbc:mysql://127.0.0.1/security?useUnicode=true&amp;characterEncoding=UTF8&amp;useSSL=false<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">driver-class-name</span>:<span style="color:#bbb"> </span>com.mysql.jdbc.Driver<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">mybatis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">mapper-locations</span>:<span style="color:#bbb"> </span>classpath:mapper/*.xml<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">type-aliases-package</span>:<span style="color:#bbb"> </span>com.chan.securityDy.pojo<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic">#驼峰命名规范 如：数据库字段是  order_id 那么 实体字段就要写成 orderId</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">configuration</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">map-underscore-to-camel-case</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">log-impl</span>:<span style="color:#bbb"> </span>org.apache.ibatis.logging.stdout.StdOutImpl<span style="color:#bbb">
+</span></code></pre></div></li>
+<li>
+<p>启动类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityDyApplication
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:43
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@MapperScan</span><span style="color:#000;font-weight:bold">(</span>basePackages <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#34;com.chan.securityDy.mapper&#34;</span><span style="color:#000;font-weight:bold">})</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityDyApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>SecurityDyApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div></li>
+</ul>
+<h3 id="2数据库文件">2、数据库文件</h3>
+<p>由于结合数据库操作，那么必不可少的就是Sql的脚本文件了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#998;font-style:italic">/*
+</span><span style="color:#998;font-style:italic">SQLyog Ultimate v12.4.3 (64 bit)
+</span><span style="color:#998;font-style:italic">MySQL - 5.7.17-log : Database - security
+</span><span style="color:#998;font-style:italic">*********************************************************************
+</span><span style="color:#998;font-style:italic">*/</span>
+
+<span style="color:#998;font-style:italic">/*!40101 SET NAMES utf8 */</span>;
+
+<span style="color:#998;font-style:italic">/*!40101 SET SQL_MODE=&#39;&#39;*/</span>;
+
+<span style="color:#998;font-style:italic">/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */</span>;
+<span style="color:#998;font-style:italic">/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */</span>;
+<span style="color:#998;font-style:italic">/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=&#39;NO_AUTO_VALUE_ON_ZERO&#39; */</span>;
+<span style="color:#998;font-style:italic">/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */</span>;
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">DATABASE</span> <span style="color:#998;font-style:italic">/*!32312 IF NOT EXISTS*/</span><span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">security</span><span style="color:#000;font-weight:bold">`</span> <span style="color:#998;font-style:italic">/*!40100 DEFAULT CHARACTER SET utf8 */</span>;
+
+USE <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">security</span><span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#998;font-style:italic">/*Table structure for table `menu` */</span>
+
+<span style="color:#000;font-weight:bold">DROP</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">IF</span> <span style="color:#000;font-weight:bold">EXISTS</span> <span style="color:#000;font-weight:bold">`</span>menu<span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>menu<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#000;font-weight:bold">NULL</span> AUTO_INCREMENT,
+  <span style="color:#000;font-weight:bold">`</span>pattern<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">varchar</span>(<span style="color:#099">128</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>)
+) ENGINE<span style="color:#000;font-weight:bold">=</span>InnoDB AUTO_INCREMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#099">4</span> <span style="color:#000;font-weight:bold">DEFAULT</span> CHARSET<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#998;font-style:italic">/*Data for the table `menu` */</span>
+
+<span style="color:#000;font-weight:bold">insert</span>  <span style="color:#000;font-weight:bold">into</span> <span style="color:#000;font-weight:bold">`</span>menu<span style="color:#000;font-weight:bold">`</span>(<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>pattern<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">values</span> 
+(<span style="color:#099">1</span>,<span style="color:#d14">&#39;/db/**&#39;</span>),
+(<span style="color:#099">2</span>,<span style="color:#d14">&#39;/admin/**&#39;</span>),
+(<span style="color:#099">3</span>,<span style="color:#d14">&#39;/user/**&#39;</span>);
+
+<span style="color:#998;font-style:italic">/*Table structure for table `menu_role` */</span>
+
+<span style="color:#000;font-weight:bold">DROP</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">IF</span> <span style="color:#000;font-weight:bold">EXISTS</span> <span style="color:#000;font-weight:bold">`</span>menu_role<span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>menu_role<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#000;font-weight:bold">NULL</span> AUTO_INCREMENT,
+  <span style="color:#000;font-weight:bold">`</span>mid<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>rid<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>)
+) ENGINE<span style="color:#000;font-weight:bold">=</span>InnoDB AUTO_INCREMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#099">4</span> <span style="color:#000;font-weight:bold">DEFAULT</span> CHARSET<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#998;font-style:italic">/*Data for the table `menu_role` */</span>
+
+<span style="color:#000;font-weight:bold">insert</span>  <span style="color:#000;font-weight:bold">into</span> <span style="color:#000;font-weight:bold">`</span>menu_role<span style="color:#000;font-weight:bold">`</span>(<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>mid<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>rid<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">values</span> 
+(<span style="color:#099">1</span>,<span style="color:#099">1</span>,<span style="color:#099">1</span>),
+(<span style="color:#099">2</span>,<span style="color:#099">2</span>,<span style="color:#099">2</span>),
+(<span style="color:#099">3</span>,<span style="color:#099">3</span>,<span style="color:#099">3</span>);
+
+<span style="color:#998;font-style:italic">/*Table structure for table `role` */</span>
+
+<span style="color:#000;font-weight:bold">DROP</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">IF</span> <span style="color:#000;font-weight:bold">EXISTS</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">role</span><span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">role</span><span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#000;font-weight:bold">NULL</span> AUTO_INCREMENT,
+  <span style="color:#000;font-weight:bold">`</span>name<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">varchar</span>(<span style="color:#099">32</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>nameZh<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">varchar</span>(<span style="color:#099">32</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>)
+) ENGINE<span style="color:#000;font-weight:bold">=</span>InnoDB AUTO_INCREMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#099">4</span> <span style="color:#000;font-weight:bold">DEFAULT</span> CHARSET<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#998;font-style:italic">/*Data for the table `role` */</span>
+
+<span style="color:#000;font-weight:bold">insert</span>  <span style="color:#000;font-weight:bold">into</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">role</span><span style="color:#000;font-weight:bold">`</span>(<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>name<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>nameZh<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">values</span> 
+(<span style="color:#099">1</span>,<span style="color:#d14">&#39;ROLE_dba&#39;</span>,<span style="color:#d14">&#39;数据库管理员&#39;</span>),
+(<span style="color:#099">2</span>,<span style="color:#d14">&#39;ROLE_admin&#39;</span>,<span style="color:#d14">&#39;系统管理员&#39;</span>),
+(<span style="color:#099">3</span>,<span style="color:#d14">&#39;ROLE_user&#39;</span>,<span style="color:#d14">&#39;用户&#39;</span>);
+
+<span style="color:#998;font-style:italic">/*Table structure for table `user` */</span>
+
+<span style="color:#000;font-weight:bold">DROP</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">IF</span> <span style="color:#000;font-weight:bold">EXISTS</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">user</span><span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">user</span><span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#000;font-weight:bold">NULL</span> AUTO_INCREMENT,
+  <span style="color:#000;font-weight:bold">`</span>username<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">varchar</span>(<span style="color:#099">32</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>password<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">varchar</span>(<span style="color:#099">255</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>enabled<span style="color:#000;font-weight:bold">`</span> tinyint(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>locked<span style="color:#000;font-weight:bold">`</span> tinyint(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>)
+) ENGINE<span style="color:#000;font-weight:bold">=</span>InnoDB AUTO_INCREMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#099">4</span> <span style="color:#000;font-weight:bold">DEFAULT</span> CHARSET<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#998;font-style:italic">/*Data for the table `user` */</span>
+
+<span style="color:#000;font-weight:bold">insert</span>  <span style="color:#000;font-weight:bold">into</span> <span style="color:#000;font-weight:bold">`</span><span style="color:#000;font-weight:bold">user</span><span style="color:#000;font-weight:bold">`</span>(<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>username<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>password<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>enabled<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>locked<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">values</span> 
+(<span style="color:#099">1</span>,<span style="color:#d14">&#39;root&#39;</span>,<span style="color:#d14">&#39;$2a$10$RMuFXGQ5AtH4wOvkUqyvuecpqUSeoxZYqilXzbz50dceRsga.WYiq&#39;</span>,<span style="color:#099">1</span>,<span style="color:#099">0</span>),
+(<span style="color:#099">2</span>,<span style="color:#d14">&#39;admin&#39;</span>,<span style="color:#d14">&#39;$2a$10$RMuFXGQ5AtH4wOvkUqyvuecpqUSeoxZYqilXzbz50dceRsga.WYiq&#39;</span>,<span style="color:#099">1</span>,<span style="color:#099">0</span>),
+(<span style="color:#099">3</span>,<span style="color:#d14">&#39;chan&#39;</span>,<span style="color:#d14">&#39;$2a$10$RMuFXGQ5AtH4wOvkUqyvuecpqUSeoxZYqilXzbz50dceRsga.WYiq&#39;</span>,<span style="color:#099">1</span>,<span style="color:#099">0</span>);
+
+<span style="color:#998;font-style:italic">/*Table structure for table `user_role` */</span>
+
+<span style="color:#000;font-weight:bold">DROP</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">IF</span> <span style="color:#000;font-weight:bold">EXISTS</span> <span style="color:#000;font-weight:bold">`</span>user_role<span style="color:#000;font-weight:bold">`</span>;
+
+<span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>user_role<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#000;font-weight:bold">NULL</span> AUTO_INCREMENT,
+  <span style="color:#000;font-weight:bold">`</span>uid<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">`</span>rid<span style="color:#000;font-weight:bold">`</span> <span style="color:#0086b3">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">NULL</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>)
+) ENGINE<span style="color:#000;font-weight:bold">=</span>InnoDB AUTO_INCREMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#099">5</span> <span style="color:#000;font-weight:bold">DEFAULT</span> CHARSET<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#998;font-style:italic">/*Data for the table `user_role` */</span>
+
+<span style="color:#000;font-weight:bold">insert</span>  <span style="color:#000;font-weight:bold">into</span> <span style="color:#000;font-weight:bold">`</span>user_role<span style="color:#000;font-weight:bold">`</span>(<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>uid<span style="color:#000;font-weight:bold">`</span>,<span style="color:#000;font-weight:bold">`</span>rid<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">values</span> 
+(<span style="color:#099">1</span>,<span style="color:#099">1</span>,<span style="color:#099">1</span>),
+(<span style="color:#099">2</span>,<span style="color:#099">1</span>,<span style="color:#099">2</span>),
+(<span style="color:#099">3</span>,<span style="color:#099">2</span>,<span style="color:#099">2</span>),
+(<span style="color:#099">4</span>,<span style="color:#099">3</span>,<span style="color:#099">3</span>);
+
+<span style="color:#998;font-style:italic">/*!40101 SET SQL_MODE=@OLD_SQL_MODE */</span>;
+<span style="color:#998;font-style:italic">/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */</span>;
+<span style="color:#998;font-style:italic">/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */</span>;
+<span style="color:#998;font-style:italic">/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */</span>;
+
+</code></pre></div><p>至于数据库文件中的用户表的密码字段的一大串我之前说过的，不懂的可以参考我前面的文章 <a href="https://erdochan.gitee.io/posts/9aaba07c.html">Spring Boot整合Spring Security</a> ，这里为了方便，密码设成一样的了。</p>
+<h3 id="3进入编码阶段">3、进入编码阶段</h3>
+<h4 id="bean对象">Bean对象</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname User
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:52
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">User</span> <span style="color:#000;font-weight:bold">implements</span> UserDetails <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> Integer id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String username<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String password<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Boolean enabled<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Boolean locked<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> roles<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getRoles</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> roles<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoles</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> roles<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span> <span style="color:#000;font-weight:bold">=</span> roles<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Integer id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getUsername</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> username<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">username</span> <span style="color:#000;font-weight:bold">=</span> username<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getPassword</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> password<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setPassword</span><span style="color:#000;font-weight:bold">(</span>String password<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">password</span> <span style="color:#000;font-weight:bold">=</span> password<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#998;font-style:italic">//    public Boolean getEnabled() {
+</span><span style="color:#998;font-style:italic">//        return enabled;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setEnabled</span><span style="color:#000;font-weight:bold">(</span>Boolean enabled<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">enabled</span> <span style="color:#000;font-weight:bold">=</span> enabled<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#998;font-style:italic">//    public Boolean getLocked() {
+</span><span style="color:#998;font-style:italic">//        return locked;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLocked</span><span style="color:#000;font-weight:bold">(</span>Boolean locked<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">locked</span> <span style="color:#000;font-weight:bold">=</span> locked<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.util.Collection&lt;? extends org.springframework.security.core.GrantedAuthority&gt;
+</span><span style="color:#998;font-style:italic">     * @Description TODO 返回用户的所有角色
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/29 15:27
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Collection<span style="color:#000;font-weight:bold">&lt;?</span> <span style="color:#000;font-weight:bold">extends</span> GrantedAuthority<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAuthorities</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>SimpleGrantedAuthority<span style="color:#000;font-weight:bold">&gt;</span> authorities <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Role role <span style="color:#000;font-weight:bold">:</span> roles<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#998;font-style:italic">//            authorities.add(new SimpleGrantedAuthority(&#34;ROLE_&#34; + role.getName()));
+</span><span style="color:#998;font-style:italic"></span>            authorities<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> SimpleGrantedAuthority<span style="color:#000;font-weight:bold">(</span>role<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">()));</span><span style="color:#998;font-style:italic">//这次在数据库中加上ROLE_前缀,程序里就不写了
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> authorities<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return boolean
+</span><span style="color:#998;font-style:italic">     * @Description TODO 账户是否未过期 反着说的
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/29 15:22
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">isAccountNonExpired</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//是未过期的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return boolean
+</span><span style="color:#998;font-style:italic">     * @Description TODO 账户是否未锁定
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/29 15:23
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">isAccountNonLocked</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">!</span>locked<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">//相当于locked字段的get方法 数据库中的locked 0代表false 1代表true 数据库中是locked==0 证明未锁定
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return boolean
+</span><span style="color:#998;font-style:italic">     * @Description TODO 凭证(密码)是否未过期
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/29 15:25
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">isCredentialsNonExpired</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return boolean
+</span><span style="color:#998;font-style:italic">     * @Description TODO 是否可用
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/29 15:26
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">isEnabled</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> enabled<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">//相当于enabled字段的get方法
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Role
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:54
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Role</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> Integer id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String nameZh<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Role{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;id=&#34;</span> <span style="color:#000;font-weight:bold">+</span> id <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, name=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> name <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, nameZh=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> nameZh <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Integer id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">name</span> <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getNameZh</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> nameZh<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setNameZh</span><span style="color:#000;font-weight:bold">(</span>String nameZh<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">nameZh</span> <span style="color:#000;font-weight:bold">=</span> nameZh<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Menu
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:56
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Menu</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> Integer id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String pattern<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> roles<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Menu{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;id=&#34;</span> <span style="color:#000;font-weight:bold">+</span> id <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, pattern=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> pattern <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, roles=&#34;</span> <span style="color:#000;font-weight:bold">+</span> roles <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getRoles</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> roles<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setRoles</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> roles<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span> <span style="color:#000;font-weight:bold">=</span> roles<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Integer <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Integer id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getPattern</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> pattern<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setPattern</span><span style="color:#000;font-weight:bold">(</span>String pattern<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">pattern</span> <span style="color:#000;font-weight:bold">=</span> pattern<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><h4 id="mapper层">Mapper层</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname UserMapper
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:57
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#3c5d5d;font-weight:bold">@Mapper</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">UserMapper</span> <span style="color:#000;font-weight:bold">{</span>
+
+    User <span style="color:#900;font-weight:bold">loadUserByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+
+    List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getRolesById</span><span style="color:#000;font-weight:bold">(</span>Integer id<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE mapper PUBLIC &#34;-//mybatis.org//DTD Mapper 3.0//EN&#34; &#34;http://mybatis.org/dtd/mybatis-3-mapper.dtd&#34;&gt;</span>
+<span style="color:#000080">&lt;mapper</span> <span style="color:#008080">namespace=</span><span style="color:#d14">&#34;com.chan.securityDy.mapper.UserMapper&#34;</span><span style="color:#000080">&gt;</span>
+
+    <span style="color:#000080">&lt;select</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;loadUserByUsername&#34;</span> <span style="color:#008080">resultType=</span><span style="color:#d14">&#34;com.chan.securityDy.pojo.User&#34;</span> <span style="color:#008080">parameterType=</span><span style="color:#d14">&#34;string&#34;</span><span style="color:#000080">&gt;</span>
+        select * from user where username = #{username}
+    <span style="color:#000080">&lt;/select&gt;</span>
+    <span style="color:#000080">&lt;select</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;getRolesById&#34;</span> <span style="color:#008080">resultType=</span><span style="color:#d14">&#34;com.chan.securityDy.pojo.Role&#34;</span> <span style="color:#008080">parameterType=</span><span style="color:#d14">&#34;integer&#34;</span><span style="color:#000080">&gt;</span>
+        select * from role where id in (select rid from user_role where uid = #{id})
+    <span style="color:#000080">&lt;/select&gt;</span>
+<span style="color:#000080">&lt;/mapper&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MenuMapper
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 21:16
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#3c5d5d;font-weight:bold">@Mapper</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">MenuMapper</span> <span style="color:#000;font-weight:bold">{</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Menu<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAllMenus</span><span style="color:#000;font-weight:bold">();</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE mapper PUBLIC &#34;-//mybatis.org//DTD Mapper 3.0//EN&#34; &#34;http://mybatis.org/dtd/mybatis-3-mapper.dtd&#34;&gt;</span>
+<span style="color:#000080">&lt;mapper</span> <span style="color:#008080">namespace=</span><span style="color:#d14">&#34;com.chan.securityDy.mapper.MenuMapper&#34;</span><span style="color:#000080">&gt;</span>
+
+    <span style="color:#000080">&lt;resultMap</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;BaseResultMap&#34;</span> <span style="color:#008080">type=</span><span style="color:#d14">&#34;com.chan.securityDy.pojo.Menu&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#000080">&lt;id</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;id&#34;</span> <span style="color:#008080">column=</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#000080">&lt;result</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;pattern&#34;</span> <span style="color:#008080">column=</span><span style="color:#d14">&#34;pattern&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#000080">&lt;collection</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;roles&#34;</span> <span style="color:#008080">ofType=</span><span style="color:#d14">&#34;com.chan.securityDy.pojo.Role&#34;</span><span style="color:#000080">&gt;</span>
+            <span style="color:#000080">&lt;id</span> <span style="color:#008080">column=</span><span style="color:#d14">&#34;rid&#34;</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000080">/&gt;</span>
+            <span style="color:#000080">&lt;result</span> <span style="color:#008080">column=</span><span style="color:#d14">&#34;rname&#34;</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000080">/&gt;</span>
+            <span style="color:#000080">&lt;result</span> <span style="color:#008080">column=</span><span style="color:#d14">&#34;rnameZh&#34;</span> <span style="color:#008080">property=</span><span style="color:#d14">&#34;nameZh&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#000080">&lt;/collection&gt;</span>
+    <span style="color:#000080">&lt;/resultMap&gt;</span>
+    <span style="color:#000080">&lt;select</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;getAllMenus&#34;</span> <span style="color:#008080">resultMap=</span><span style="color:#d14">&#34;BaseResultMap&#34;</span><span style="color:#000080">&gt;</span>
+        select m.*,r.`id` as rid,r.`name` as rname,r.`nameZh` as rnameZh from menu m left join menu_role mr on m.`id`=mr.`mid` left join role r on mr.`rid`=r.`id`
+    <span style="color:#000080">&lt;/select&gt;</span>
+
+<span style="color:#000080">&lt;/mapper&gt;</span>
+</code></pre></div><h4 id="service层">Service层</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname UserService
+</span><span style="color:#998;font-style:italic"> * @Description TODO UserDetailsService重点
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:58
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">UserService</span> <span style="color:#000;font-weight:bold">extends</span> UserDetailsService <span style="color:#000;font-weight:bold">{</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname UserServiceImpl
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/1 11:59
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> UserService <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    UserMapper userMapper<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> UserDetails <span style="color:#900;font-weight:bold">loadUserByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> UsernameNotFoundException <span style="color:#000;font-weight:bold">{</span>
+        User user <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loadUserByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>user <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> UsernameNotFoundException<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;用户不存在!&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setRoles</span><span style="color:#000;font-weight:bold">(</span>userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRolesById</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">()));</span>
+        <span style="color:#000;font-weight:bold">return</span> user<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MenuService
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 21:08
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">MenuService</span> <span style="color:#000;font-weight:bold">{</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Menu<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAllMenus</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MenuServiceImpl
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 21:09
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MenuServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> MenuService <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    MenuMapper menuMapper<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Menu<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAllMenus</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> menuMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAllMenus</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h4 id="核心配置">核心配置</h4>
+<h5 id="1过滤器类">1.过滤器类</h5>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.securityDy.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.securityDy.pojo.Menu</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.securityDy.pojo.Role</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.securityDy.service.MenuService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.access.ConfigAttribute</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.access.SecurityConfig</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.FilterInvocation</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Component</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.util.AntPathMatcher</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Collection</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyFilter
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 23:55
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyFilter</span> <span style="color:#000;font-weight:bold">implements</span> FilterInvocationSecurityMetadataSource <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">//路径匹配符
+</span><span style="color:#998;font-style:italic"></span>    AntPathMatcher pathMatcher <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> AntPathMatcher<span style="color:#000;font-weight:bold">();</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    MenuService menuService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 根据请求的地址(资源)分析出来这个地址需要哪些角色
+</span><span style="color:#998;font-style:italic">     * @Param [object] 
+</span><span style="color:#998;font-style:italic">     * @return java.util.Collection&lt;org.springframework.security.access.ConfigAttribute&gt;
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/15 23:56
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Collection<span style="color:#000;font-weight:bold">&lt;</span>ConfigAttribute<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAttributes</span><span style="color:#000;font-weight:bold">(</span>Object o<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IllegalArgumentException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//得到请求的地址 例如/db/hello;/admin/hello...
+</span><span style="color:#998;font-style:italic"></span>        String requestUrl <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">((</span>FilterInvocation<span style="color:#000;font-weight:bold">)</span> o<span style="color:#000;font-weight:bold">).</span><span style="color:#008080">getRequestUrl</span><span style="color:#000;font-weight:bold">();</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Menu<span style="color:#000;font-weight:bold">&gt;</span> allMenus <span style="color:#000;font-weight:bold">=</span> menuService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAllMenus</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//每次查数据库很耗性能,这里的放入缓存
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Menu menu <span style="color:#000;font-weight:bold">:</span> allMenus<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>pathMatcher<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">match</span><span style="color:#000;font-weight:bold">(</span>menu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPattern</span><span style="color:#000;font-weight:bold">(),</span> requestUrl<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">//通过menu的一对多得到role的集合
+</span><span style="color:#998;font-style:italic"></span>                List<span style="color:#000;font-weight:bold">&lt;</span>Role<span style="color:#000;font-weight:bold">&gt;</span> roles <span style="color:#000;font-weight:bold">=</span> menu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRoles</span><span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#998;font-style:italic">//创建一个和集合长度一边大的数组
+</span><span style="color:#998;font-style:italic"></span>                String<span style="color:#000;font-weight:bold">[]</span> rolesStr <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> String<span style="color:#000;font-weight:bold">[</span>roles<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">size</span><span style="color:#000;font-weight:bold">()];</span>
+                <span style="color:#998;font-style:italic">//遍历集合并依次放到数组中
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> i <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span> i <span style="color:#000;font-weight:bold">&lt;</span> roles<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">size</span><span style="color:#000;font-weight:bold">();</span> i<span style="color:#000;font-weight:bold">++)</span> <span style="color:#000;font-weight:bold">{</span>
+                    rolesStr<span style="color:#000;font-weight:bold">[</span>i<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> roles<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>i<span style="color:#000;font-weight:bold">).</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#998;font-style:italic">//传参  org.springframework.security.access.SecurityConfig
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">return</span> SecurityConfig<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createList</span><span style="color:#000;font-weight:bold">(</span>rolesStr<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//参数是个数组
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#998;font-style:italic">//有一些无关的路径(没有角色的路径) 统一到ROLE_login 代表登录即可访问
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> SecurityConfig<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createList</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ROLE_login&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Collection<span style="color:#000;font-weight:bold">&lt;</span>ConfigAttribute<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getAllConfigAttributes</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">supports</span><span style="color:#000;font-weight:bold">(</span>Class<span style="color:#000;font-weight:bold">&lt;?&gt;</span> clazz<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h5 id="2决策管理器">2.决策管理器</h5>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.securityDy.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.access.AccessDecisionManager</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.access.AccessDeniedException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.access.ConfigAttribute</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.AnonymousAuthenticationToken</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.InsufficientAuthenticationException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.Authentication</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.GrantedAuthority</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Component</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Collection</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyAccessDecisionManager
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/16 0:00
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyAccessDecisionManager</span> <span style="color:#000;font-weight:bold">implements</span> AccessDecisionManager <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * authentication保存了当前登录用户的信息
+</span><span style="color:#998;font-style:italic">     * o 获取当前的请求对象 和Filter中的一样
+</span><span style="color:#998;font-style:italic">     * Collection&lt;ConfigAttribute&gt; collection 就是Filter中的返回值
+</span><span style="color:#998;font-style:italic">     * 进行比较 需要的角色有的话 就往下走 如果没有就是非法请求 ctrlH看继承关系
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @Param [authentication, o, configAttributes] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/16 0:06
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">decide</span><span style="color:#000;font-weight:bold">(</span>Authentication authentication<span style="color:#000;font-weight:bold">,</span> Object o<span style="color:#000;font-weight:bold">,</span> Collection<span style="color:#000;font-weight:bold">&lt;</span>ConfigAttribute<span style="color:#000;font-weight:bold">&gt;</span> collection<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AccessDeniedException<span style="color:#000;font-weight:bold">,</span> InsufficientAuthenticationException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>ConfigAttribute attribute <span style="color:#000;font-weight:bold">:</span> collection<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//如果是ROLE_login这个角色的话,那么说明和刚才的那些地址都没匹配上,说明就是登录之后就可以访问的
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ROLE_login&#34;</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>attribute<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAttribute</span><span style="color:#000;font-weight:bold">()))</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">//如果是匿名用户(未登录)
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>authentication <span style="color:#000;font-weight:bold">instanceof</span> AnonymousAuthenticationToken<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> AccessDeniedException<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;非法请求!&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+                <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#998;font-style:italic">//我现在具备的所有角色
+</span><span style="color:#998;font-style:italic"></span>            Collection<span style="color:#000;font-weight:bold">&lt;?</span> <span style="color:#000;font-weight:bold">extends</span> GrantedAuthority<span style="color:#000;font-weight:bold">&gt;</span> authorities <span style="color:#000;font-weight:bold">=</span> authentication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAuthorities</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>GrantedAuthority authority <span style="color:#000;font-weight:bold">:</span> authorities<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>authority<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAuthority</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>attribute<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAttribute</span><span style="color:#000;font-weight:bold">()))</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+                <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> AccessDeniedException<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;非法请求!&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">supports</span><span style="color:#000;font-weight:bold">(</span>ConfigAttribute attribute<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">supports</span><span style="color:#000;font-weight:bold">(</span>Class<span style="color:#000;font-weight:bold">&lt;?&gt;</span> clazz<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h5 id="3核心配置类">3.核心配置类</h5>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.securityDy.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.securityDy.service.UserService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Bean</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.ObjectPostProcessor</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.builders.HttpSecurity</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.crypto.password.PasswordEncoder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.access.intercept.FilterSecurityInterceptor</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 23:54
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityConfig</span> <span style="color:#000;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    UserService userService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    MyFilter myFilter<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    MyAccessDecisionManager myAccessDecisionManager<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    PasswordEncoder <span style="color:#900;font-weight:bold">passwordEncoder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> BCryptPasswordEncoder<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>AuthenticationManagerBuilder auth<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        auth<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userDetailsService</span><span style="color:#000;font-weight:bold">(</span>userService<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>HttpSecurity http<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizeRequests</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">withObjectPostProcessor</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectPostProcessor<span style="color:#000;font-weight:bold">&lt;</span>FilterSecurityInterceptor<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+                    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">&lt;</span>O <span style="color:#000;font-weight:bold">extends</span> FilterSecurityInterceptor<span style="color:#000;font-weight:bold">&gt;</span> O <span style="color:#900;font-weight:bold">postProcess</span><span style="color:#000;font-weight:bold">(</span>O o<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                        o<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAccessDecisionManager</span><span style="color:#000;font-weight:bold">(</span>myAccessDecisionManager<span style="color:#000;font-weight:bold">);</span>
+                        o<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSecurityMetadataSource</span><span style="color:#000;font-weight:bold">(</span>myFilter<span style="color:#000;font-weight:bold">);</span>
+                        <span style="color:#000;font-weight:bold">return</span> o<span style="color:#000;font-weight:bold">;</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">})</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">formLogin</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">permitAll</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">csrf</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">disable</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h4 id="测试的controller层">测试的Controller层</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname HelloController
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/15 21:26
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HelloController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/db/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">db</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello db&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/admin/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">admin</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello admin&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/user/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">user</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello user&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><blockquote>
+<p>项目源地址： <a href="https://gitee.com/erdochan/securitydy">https://gitee.com/erdochan/securitydy</a></p>
+</blockquote>
+<h2 id="三运行结果">三、运行结果</h2>
+<h3 id="1用户chan登录时">1.用户chan登录时</h3>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/01.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/01.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/02.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/02.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/03.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/03.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/04.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/04.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/05.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/05.png" />
+        </a>
+    </p>
+<h3 id="2用户admin登录时">2.用户admin登录时</h3>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/06.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/06.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/07.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/07.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/08.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/08.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/09.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/09.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/10.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/10.png" />
+        </a>
+    </p>
+<h3 id="3用户root登录时">3.用户root登录时</h3>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/11.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/11.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/12.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/12.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/13.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/13.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/14.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/14.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/2dd8e927/15.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/2dd8e927/15.png" />
+        </a>
+    </p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/security-by-db.html">https://chanservy.github.io/2020/12/22/security-by-db.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/security-tianjiayanzhengma.html">Spring Security添加验证码</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-security.html">Spring Boot整合Spring Security</a></li>
+        
+        <li><a href="/2020/12/22/websocket-zaixianliaotian.html">WebSocket在线聊天</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-rabbitmq.html">Spring Boot整合RabbitMQ</a></li>
+        
+        <li><a href="/2020/12/21/two-method-of-dingshirenwu.html">定时任务的两种实现方式</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Security'>Spring Security</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

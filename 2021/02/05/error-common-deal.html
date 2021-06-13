@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>异常统一处理方案 | 迩东陈的博客</title>
+    <meta property="og:title" content="异常统一处理方案 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-02-05T19:24:49&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-02-05T19:24:49&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="异常统一处理方案.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2021/02/05/error-common-deal.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一为什么要统一异常处理">一、为什么要统一异常处理</a></li>
+    <li><a href="#二定义通用异常处理器">二、定义通用异常处理器</a></li>
+    <li><a href="#三定义异常类型枚举">三、定义异常类型枚举</a></li>
+    <li><a href="#四自定义异常类">四、自定义异常类</a></li>
+    <li><a href="#五封装异常结果类">五、封装异常结果类</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">异常统一处理方案</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年2月5日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：最近在自己写项目，也是边写边学习边总结了。回想一下，之前在写项目的时候，当项目中出现异常的时候，总是潦草解决，脑海中没有一个统一的轮廓或者标准，所以想来总结一下。</p>
+<h2 id="一为什么要统一异常处理">一、为什么要统一异常处理</h2>
+<p>我们在项目中，往往需要查询什么数据返回给前端，或者将前端传来的数据插入到数据库等等，比如下面的例子中的代码，保存商品对象到数据库中时，我需要校验价格，价格如果为空，就抛出异常不进行插入。注：下面的代码只是我为了测试随便写的一个简易的例子。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ItemController
+</span><span style="color:#998;font-style:italic"> * @Description
+</span><span style="color:#998;font-style:italic"> * ---@ResponseBody就是将返回的对象序列化成(一般是json)放到响应体中,也就是能够处理方法结果值作为http响应体
+</span><span style="color:#998;font-style:italic"> * ---@ResponseStatus：加在方法上、返回自定义http状态码
+</span><span style="color:#998;font-style:italic"> * ---ResponseEntity标识整个http相应：状态码、头部信息以及相应体内容。因此我们可以使用其对http响应实现完整配置。
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/2 13:24
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/item&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ItemController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> ItemService itemService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/saveItem&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Item<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">saveItem</span><span style="color:#000;font-weight:bold">(</span>Item item<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//校验价格
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>item<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrice</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 新增失败返回400
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">// return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">// throw new RuntimeException(&#34;价格不能为空!&#34;);
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRICE_CANNOT_BE_NULL</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        Item saveItem <span style="color:#000;font-weight:bold">=</span> itemService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">saveItem</span><span style="color:#000;font-weight:bold">(</span>item<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 新增成功返回201状态码 并且显示新增对象
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CREATED</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">body</span><span style="color:#000;font-weight:bold">(</span>saveItem<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ItemServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> ItemService <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Item <span style="color:#900;font-weight:bold">saveItem</span><span style="color:#000;font-weight:bold">(</span>Item item<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 商品新增
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">int</span> id <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Random<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">nextInt</span><span style="color:#000;font-weight:bold">(</span>100<span style="color:#000;font-weight:bold">);</span>
+        item<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> item<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>代码中可以看出，我最开始的做法是：<code>return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);</code>，直接通过 <code>ResponseEntity</code> 返回状态码和错误信息，但是我插入数据后显示了新增的对象，既然有返回值，那么<code>ResponseEntity</code> 的泛型必须是这个返回的对象的类型。不能在 <code>body()</code> 里面写 String 类型的错误信息。想显示错误信息，然后我又 <code>throw new RuntimeException(&quot;价格不能为空!&quot;);</code> 。然后新建了个通用异常处理器。</p>
+<p>因为在一个微服务项目中，会有多个微服务，既然是异常处理模块，那么每个服务都会用到的，因此我把统一异常处理写在一个公用的模块，在这里要注意包结构。</p>
+<h2 id="二定义通用异常处理器">二、定义通用异常处理器</h2>
+<p>看下面的代码，<code>@ExceptionHandler(RuntimeException.class)</code> 和 <code>return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());</code>，现在 String 错误信息是可以显示了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname CommonExceptionHandler
+</span><span style="color:#998;font-style:italic"> * @Description controller通用异常处理器
+</span><span style="color:#998;font-style:italic"> * 这个通用异常处理器想生效全靠 @ControllerAdvice 注解 这个注解在com.leyou.common
+</span><span style="color:#998;font-style:italic"> * 这里在ly-item-service中使用到这个异常处理器 我们的ly-item-service模块中的启动类在com.leyou
+</span><span style="color:#998;font-style:italic"> * 因此启动类在扫描的时候会扫描com.leyou 自然可以扫到 @ControllerAdvice
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/2 21:31
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@ControllerAdvice</span><span style="color:#998;font-style:italic">//拦截所有controller 有异常则执行handleException
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CommonExceptionHandler</span> <span style="color:#000;font-weight:bold">{</span>
+
+<span style="color:#998;font-style:italic">//    @ExceptionHandler(RuntimeException.class)//拦截RuntimeException类型的异常
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@ExceptionHandler</span><span style="color:#000;font-weight:bold">(</span>LyException<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>ExceptionResult<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">handleException</span><span style="color:#000;font-weight:bold">(</span>LyException e<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#998;font-style:italic">// 这里的状态码写死了 但是因为这是通用异常处理器 所以不一定是这个BAD_REQUEST这个
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 想在ItemController中RuntimeException中再传一个状态码过来 但发现RuntimeException不能传
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 因此自定义异常类继承RuntimeException来实现 并且事先在枚举中统一状态码和异常信息
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+</span><span style="color:#998;font-style:italic"></span>        ExceptionEnum exceptionEnum <span style="color:#000;font-weight:bold">=</span> e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getExceptionEnum</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>exceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCode</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">body</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ExceptionResult<span style="color:#000;font-weight:bold">(</span>exceptionEnum<span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>虽然现在 String 错误信息是可以显示了，但是这种方式返回的状态码是固定的，我们这是个通用的异常处理模块，这样肯定是不行的。想在前面的 controller 中抛 RuntimeException 异常的时候带上状态码，可是 RuntimeException 并没有相应的构造函数。因此，我想自己造一个异常类继承 RuntimeException 来实现，并且事先在枚举中统一状态码和异常信息。</p>
+<h2 id="三定义异常类型枚举">三、定义异常类型枚举</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ExceptionEnum
+</span><span style="color:#998;font-style:italic"> * @Description 枚举是指具有固定实例个数的类
+</span><span style="color:#998;font-style:italic"> * getter noArgsConstructor allArgsConstructor
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/2 21:54
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">enum</span> ExceptionEnum <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">// 写在最前 这些随着项目的开发迭代可能会日益变多
+</span><span style="color:#998;font-style:italic"></span>    PRICE_CANNOT_BE_NULL<span style="color:#000;font-weight:bold">(</span>400<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;价格不能为空!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    CATEGORY_NOT_FOUND<span style="color:#000;font-weight:bold">(</span>404<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;商品分类没查到!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    BRAND_NOT_FOUND<span style="color:#000;font-weight:bold">(</span>404<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;品牌没查到!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    BRAND_SAVE_ERROR<span style="color:#000;font-weight:bold">(</span>500<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;新增品牌失败!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    UPLOAD_FILE_ERROR<span style="color:#000;font-weight:bold">(</span>500<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;文件上传失败!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    INVALID_FILE_TYPE<span style="color:#000;font-weight:bold">(</span>400<span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;无效的文件类型!&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    <span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> code<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String msg<span style="color:#000;font-weight:bold">;</span>
+
+    ExceptionEnum<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    ExceptionEnum<span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> code<span style="color:#000;font-weight:bold">,</span> String msg<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">code</span> <span style="color:#000;font-weight:bold">=</span> code<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">msg</span> <span style="color:#000;font-weight:bold">=</span> msg<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">getCode</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> code<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getMsg</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> msg<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h2 id="四自定义异常类">四、自定义异常类</h2>
+<p>引入自定义的 ExceptionEnum ，并完成相应的所有构造。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname LyException
+</span><span style="color:#998;font-style:italic"> * @Description 自定义异常 getter noArgsConstructor allArgsConstructor
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/2 21:53
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LyException</span> <span style="color:#000;font-weight:bold">extends</span> RuntimeException <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionEnum</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">,</span> ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionEnum</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">,</span> Throwable cause<span style="color:#000;font-weight:bold">,</span> ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">,</span> cause<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionEnum</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>Throwable cause<span style="color:#000;font-weight:bold">,</span> ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>cause<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionEnum</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">,</span> Throwable cause<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> enableSuppression<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> writableStackTrace<span style="color:#000;font-weight:bold">,</span> ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">,</span> cause<span style="color:#000;font-weight:bold">,</span> enableSuppression<span style="color:#000;font-weight:bold">,</span> writableStackTrace<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionEnum</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">,</span> Throwable cause<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">,</span> cause<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>Throwable cause<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>cause<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LyException</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">,</span> Throwable cause<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> enableSuppression<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> writableStackTrace<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">,</span> cause<span style="color:#000;font-weight:bold">,</span> enableSuppression<span style="color:#000;font-weight:bold">,</span> writableStackTrace<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> ExceptionEnum <span style="color:#900;font-weight:bold">getExceptionEnum</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> exceptionEnum<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>到此，在通用异常处理器中 <code>@ExceptionHandler(LyException.class)</code> ，<code>return ResponseEntity.status(exceptionEnum.getCode()).body(exceptionEnum.getMsg());</code> 所有问题迎刃而解！但是有个问题，这里显示的错误信息只有一段字符串，显得太单调了。。。所以我又封装了一个异常结果类。</p>
+<h2 id="五封装异常结果类">五、封装异常结果类</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ExceptionResult
+</span><span style="color:#998;font-style:italic"> * @Description 因为之前返回的错误信息只有一个字符串太简陋了 因此我们自定义一个返回结果对象
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/2 22:19
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ExceptionResult</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> status<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String message<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String timestamp<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">// 怎么构建这个对象呢? 通过刚刚的枚举类来构建
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">ExceptionResult</span><span style="color:#000;font-weight:bold">(</span>ExceptionEnum exceptionEnum<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCode</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">message</span> <span style="color:#000;font-weight:bold">=</span> exceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMsg</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">timestamp</span> <span style="color:#000;font-weight:bold">=</span> DateUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getDateToString</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">currentTimeMillis</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">getStatus</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> status<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setStatus</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> status<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span> <span style="color:#000;font-weight:bold">=</span> status<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getMessage</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> message<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setMessage</span><span style="color:#000;font-weight:bold">(</span>String message<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">message</span> <span style="color:#000;font-weight:bold">=</span> message<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getTimestamp</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> timestamp<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setTimestamp</span><span style="color:#000;font-weight:bold">(</span>String timestamp<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">timestamp</span> <span style="color:#000;font-weight:bold">=</span> timestamp<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>在通用异常处理器中，<code>return ResponseEntity.status(exceptionEnum.getCode()).body(new ExceptionResult(exceptionEnum));</code> ，在 controller 中，这样抛异常：<code>throw new LyException(ExceptionEnum.PRICE_CANNOT_BE_NULL);</code> 。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/02/05/error-common-deal.html">https://chanservy.github.io/2021/02/05/error-common-deal.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/01/29/some-idea-about-divide.html">前后端分离开发中权限管理的一点思路</a></li>
+        
+        <li><a href="/2021/01/14/front-behind-divied.html">一个Java程序猿眼中的前后端分离以及Vue.js入门</a></li>
+        
+        <li><a href="/2020/12/22/vue-saomang.html">Vue扫盲</a></li>
+        
+        <li><a href="/2020/12/25/lianluzhuizong.html">链路追踪</a></li>
+        
+        <li><a href="/2020/12/22/cloud-stream.html">Spring Cloud Stream消息驱动</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

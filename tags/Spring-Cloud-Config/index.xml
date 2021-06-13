@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Cloud Config on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Spring-Cloud-Config/</link>
+    <description>Recent content in Spring Cloud Config on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 18:14:57 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Spring-Cloud-Config/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud Config配置中心</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-config.html</link>
+      <pubDate>Tue, 22 Dec 2020 18:14:57 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-config.html</guid>
+      <description>前言：SpringCloudConfig配置中心。 Spring Cloud Config 一、简介 一个分布式系统配置管理的解决方案，包含了Client和Server。配置文件放在Server端，通过接口的形式提供给Client。 Spring Cloud Config的主要功能： 集中管理各个环境、各个微服务的配置文件 提供服务端和客户端支</description>
+    </item>
+    
+  </channel>
+</rss>

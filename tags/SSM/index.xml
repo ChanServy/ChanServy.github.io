@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SSM on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/SSM/</link>
+    <description>Recent content in SSM on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 12 Dec 2020 15:10:32 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/SSM/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>抛弃web.xml，纯Java搭建的SSM环境</title>
+      <link>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</link>
+      <pubDate>Sat, 12 Dec 2020 15:10:32 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</guid>
+      <description>&lt;p&gt;&lt;strong&gt;前言&lt;/strong&gt;：在Spring boot的项目中，是不涉及到xml的配置的，是因为Spring boot不推荐使用xml，并非不支持。Spring Boot 中，大量的自动化配置都是通过 Java 配置来实现的，因此在学习Spring boot之前，我们抛弃之前的xml的方式，使用纯Java搭建一套SSM的环境。即，在项目的配置中，完全使用Java来配置，不使用任何的xml配置文件，包括web.xml。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>通用mapper on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/</link>
+    <description>Recent content in 通用mapper on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Apr 2021 18:18:11 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot之集成通用Mapper</title>
+      <link>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</link>
+      <pubDate>Fri, 09 Apr 2021 18:18:11 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</guid>
+      <description>前言：Spring Boot之集成通用Mapper。 通用Mapper的接口，不同的接口会有不同的方法，适应不同的业务需求，因此为了满足大部分的业务需求，我们应该自定义Mapper接口，继承通用Mapper提供的各个接口。在项目中，如果使用通用Mapper，那么必然不止一个微服务会用</description>
+    </item>
+    
+  </channel>
+</rss>

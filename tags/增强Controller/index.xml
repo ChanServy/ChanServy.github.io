@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>增强Controller on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/</link>
+    <description>Recent content in 增强Controller on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 11:43:24 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>说说不常见的@ControllerAdvice</title>
+      <link>https://chanservy.github.io/2020/12/21/controller-advice.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:43:24 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/controller-advice.html</guid>
+      <description>前言：@Controller，是我们大家耳熟能详的注解，但是它有一个增强的注解，那便是@ControllerAdvice，这个注解不知道大家常用不，反正我不是很常用它，所以对于这个注解一直不是很熟悉，即使之前见到过，那也并没有系统的总结过这个注解的用途，今天想好好的总结一下。 说说</description>
+    </item>
+    
+  </channel>
+</rss>

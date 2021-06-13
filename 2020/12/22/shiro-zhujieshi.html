@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Shiro注解式开发揉入项目 | 迩东陈的博客</title>
+    <meta property="og:title" content="Shiro注解式开发揉入项目 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-21T13:23:40&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-21T13:23:40&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Shiro注解式开发揉入项目.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/shiro-zhujieshi.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#注解开发">注解开发</a>
+      <ul>
+        <li><a href="#建库">建库</a></li>
+        <li><a href="#shiro相关的依赖">shiro相关的依赖:</a></li>
+        <li><a href="#更新login和register的handler">更新login和register的handler</a></li>
+        <li><a href="#自定义的realm">自定义的realm</a></li>
+        <li><a href="#userserviceimpljava">UserServiceImpl.java</a></li>
+        <li><a href="#webxml">web.xml</a></li>
+        <li><a href="#新建applicationcontext-shiroxml文件">新建applicationContext-shiro.xml文件</a></li>
+        <li><a href="#springmvcxml">springmvc.xml</a></li>
+        <li><a href="#applicationcontext-servicexml中加入">applicationContext-service.xml中加入</a></li>
+        <li><a href="#异常处理">异常处理</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Shiro注解式开发揉入项目</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月21日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Shiro'>Shiro</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：这是个很久之前的项目案例了，今天做一下总结，在博客中写出了大致的步骤，以及配置文件等等。（这个是在原先的SSM架构的项目（好像是毕设）的基础上加入的Shiro权限校验。）</p>
+<h1 id="shiro注解式开发揉入项目">Shiro注解式开发揉入项目</h1>
+<h2 id="注解开发">注解开发</h2>
+<blockquote>
+<p><strong>shiro提供了一系列的访问控制的注解，可以简化开发过程。</strong></p>
+</blockquote>
+<h3 id="建库">建库</h3>
+<p>(案例参考)</p>
+<p>别忘了在用户表新加一列salt盐值</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#000;font-weight:bold">create</span> <span style="color:#000;font-weight:bold">table</span> t_user(
+	id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">primary</span> <span style="color:#000;font-weight:bold">key</span> auto_increment,
+    username <span style="color:#0086b3">varchar</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">null</span> <span style="color:#000;font-weight:bold">unique</span>,
+    password <span style="color:#0086b3">varchar</span>(<span style="color:#099">100</span>) <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">null</span>
+)engine<span style="color:#000;font-weight:bold">=</span>innodb <span style="color:#000;font-weight:bold">default</span> charset<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#000;font-weight:bold">create</span> <span style="color:#000;font-weight:bold">table</span> t_role(
+	id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">primary</span> <span style="color:#000;font-weight:bold">key</span> auto_increment,
+	role_name <span style="color:#0086b3">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">null</span> <span style="color:#000;font-weight:bold">unique</span>,
+	create_time <span style="color:#000;font-weight:bold">timestamp</span> <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">null</span>
+)engine<span style="color:#000;font-weight:bold">=</span>innodb <span style="color:#000;font-weight:bold">default</span> charset<span style="color:#000;font-weight:bold">=</span>utf8;
+  
+<span style="color:#000;font-weight:bold">create</span> <span style="color:#000;font-weight:bold">table</span> t_permission(
+	id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">primary</span> <span style="color:#000;font-weight:bold">key</span> auto_increment,
+	permission_name <span style="color:#0086b3">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">not</span> <span style="color:#000;font-weight:bold">null</span> <span style="color:#000;font-weight:bold">unique</span>,
+	create_time <span style="color:#000;font-weight:bold">timestamp</span>
+)engine<span style="color:#000;font-weight:bold">=</span>innodb <span style="color:#000;font-weight:bold">default</span> charset<span style="color:#000;font-weight:bold">=</span>utf8;
+  
+<span style="color:#000;font-weight:bold">create</span> <span style="color:#000;font-weight:bold">table</span> t_user_role(
+	id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">primary</span> <span style="color:#000;font-weight:bold">key</span> auto_increment,
+	user_id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">references</span> t_user(id),
+	role_id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">references</span> t_role(id),
+	<span style="color:#000;font-weight:bold">unique</span>(user_id,role_id)
+)engine<span style="color:#000;font-weight:bold">=</span>innodb <span style="color:#000;font-weight:bold">default</span> charset<span style="color:#000;font-weight:bold">=</span>utf8;
+
+<span style="color:#000;font-weight:bold">create</span> <span style="color:#000;font-weight:bold">table</span> t_role_permission(
+	id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">primary</span> <span style="color:#000;font-weight:bold">key</span> auto_increment,
+	permission_id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">references</span> t_user(id),
+	role_id <span style="color:#0086b3">int</span> <span style="color:#000;font-weight:bold">references</span> t_role(id),
+	<span style="color:#000;font-weight:bold">unique</span>(permission_id,role_id)
+)engine<span style="color:#000;font-weight:bold">=</span>innodb <span style="color:#000;font-weight:bold">default</span> charset<span style="color:#000;font-weight:bold">=</span>utf8;
+</code></pre></div><p>因为注解涉及到了spring的aop的思想, 因此不要忘记导入spring-aspects依赖.</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-aspects<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>4.3.6.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><h3 id="shiro相关的依赖">shiro相关的依赖:</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#998;font-style:italic">&lt;!-- shiro --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.apache.shiro<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>shiro-core<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.4.0<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.apache.shiro<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>shiro-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.4.0<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- log  --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>log4j<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>log4j<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.2.17<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.slf4j<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>slf4j-api<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.7.12<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.slf4j<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>slf4j-log4j12<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.7.12<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- 其他依赖和web集成中 一致 ，此处省略--&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- 新增一个依赖 --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.apache.shiro<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>shiro-spring<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.4.0<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><h3 id="更新login和register的handler">更新login和register的handler</h3>
+<p>这里需要在原先的项目上重新写登录(用shiro的登录)和注册(用shiro加密)的handler了</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.shiro.controller</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.pojo.User</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.service.UserService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.SecurityUtils</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authc.AuthenticationException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authc.IncorrectCredentialsException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authc.UnknownAccountException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authc.UsernamePasswordToken</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.annotation.Logical</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.annotation.RequiresAuthentication</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.annotation.RequiresPermissions</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.annotation.RequiresRoles</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.subject.Subject</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Controller</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.web.bind.annotation.RequestMapping</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @author ChanServy
+</span><span style="color:#998;font-style:italic"> * @date 2019/5/28 19:13
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/user&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    UserService userService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/login/page&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">loginPage</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;login&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/login&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">login</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span>String password<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#998;font-style:italic">//需要验证权限
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//获取当前用户
+</span><span style="color:#998;font-style:italic"></span>        Subject currentUser <span style="color:#000;font-weight:bold">=</span> SecurityUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSubject</span><span style="color:#000;font-weight:bold">();</span>
+        UsernamePasswordToken token <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UsernamePasswordToken<span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">,</span>password<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">//记住我
+</span><span style="color:#998;font-style:italic"></span>        token<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setRememberMe</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            currentUser<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">login</span><span style="color:#000;font-weight:bold">(</span>token<span style="color:#000;font-weight:bold">);</span>
+            String userPrincipal <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">)</span> currentUser<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrincipal</span><span style="color:#000;font-weight:bold">();</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;用户名:&#34;</span><span style="color:#000;font-weight:bold">+</span>userPrincipal<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>UnknownAccountException e<span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#998;font-style:italic">//账户不存在 重定向到登录
+</span><span style="color:#998;font-style:italic"></span>            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;redirect:login/page&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>IncorrectCredentialsException ice<span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#998;font-style:italic">//密码错误 重定向到登录
+</span><span style="color:#998;font-style:italic"></span>            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>ice<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;redirect:login/page&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>AuthenticationException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//其他错误 重定向到登录
+</span><span style="color:#998;font-style:italic"></span>            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;redirect:login/page&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;index&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequiresAuthentication</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/query&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">query</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#998;font-style:italic">//;用户身份认证了(登陆了)才能查询
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;index&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequiresAuthentication</span><span style="color:#998;font-style:italic">//登陆了
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@RequiresRoles</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#34;manager&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;employer&#34;</span><span style="color:#000;font-weight:bold">},</span>logical <span style="color:#000;font-weight:bold">=</span> Logical<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OR</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//角色是manager或者employer的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/update&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">update</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#998;font-style:italic">//;登陆了 并且角色是manager或者employer的才能访问的路径
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;index&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/delete&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequiresAuthentication</span><span style="color:#998;font-style:italic">//登陆了
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@RequiresPermissions</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#34;user:save&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;user:delete&#34;</span><span style="color:#000;font-weight:bold">},</span>logical <span style="color:#000;font-weight:bold">=</span> Logical<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">AND</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//有用户的save和delete的权限的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">delete</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#998;font-style:italic">//;登陆了 并且有用户的save和delete的权限的 才能访问的路径
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;index&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">//用了shiro的注解 登出的handler就得自己写了
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/logout&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">logout</span><span style="color:#000;font-weight:bold">(){</span>
+        Subject subject <span style="color:#000;font-weight:bold">=</span> SecurityUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSubject</span><span style="color:#000;font-weight:bold">();</span>
+        subject<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">logout</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;logout&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+	
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/register&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">register</span><span style="color:#000;font-weight:bold">(</span>User user<span style="color:#000;font-weight:bold">){</span>
+        userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertUser</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;login&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+	<span style="color:#998;font-style:italic">//跳到错误页面
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/error&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">error</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;error&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><h3 id="自定义的realm">自定义的realm</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.shiro.realm</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.pojo.User</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.service.UserService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authc.*</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.AuthorizationInfo</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.authz.SimpleAuthorizationInfo</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.realm.AuthorizingRealm</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.subject.PrincipalCollection</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.util.ByteSource</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Set</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @author ChanServy
+</span><span style="color:#998;font-style:italic"> * @date 2019/5/29 19:12
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyRealm</span> <span style="color:#000;font-weight:bold">extends</span> AuthorizingRealm <span style="color:#000;font-weight:bold">{</span>
+
+
+    UserService userService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setUserService</span><span style="color:#000;font-weight:bold">(</span>UserService userService<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userService</span> <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 判断 参数中获得的token令牌是否是UsernamePasswordToken类型的
+</span><span style="color:#998;font-style:italic">     * @param token
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">supports</span><span style="color:#000;font-weight:bold">(</span>AuthenticationToken token<span style="color:#000;font-weight:bold">){</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;shiro-realm-type-support&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>token <span style="color:#000;font-weight:bold">instanceof</span> UsernamePasswordToken<span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 角色和权限封装到SimpleAuthorizationInfo
+</span><span style="color:#998;font-style:italic">     * @param principalCollection
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> AuthorizationInfo <span style="color:#900;font-weight:bold">doGetAuthorizationInfo</span><span style="color:#000;font-weight:bold">(</span>PrincipalCollection principalCollection<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;角色和权限封装到SimpleAuthorizationInfo......&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        String username <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">)</span> principalCollection<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrimaryPrincipal</span><span style="color:#000;font-weight:bold">();</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;用户名:&#34;</span><span style="color:#000;font-weight:bold">+</span>username<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">//        WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+</span><span style="color:#998;font-style:italic">//        UserService userService = (UserService) context.getBean(&#34;userServiceImpl&#34;);
+</span><span style="color:#998;font-style:italic"></span>        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;的所有角色&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> roles <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findRoleByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>String role <span style="color:#000;font-weight:bold">:</span> roles<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">print</span><span style="color:#000;font-weight:bold">(</span>role<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;\t&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;的所有权限&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> perms <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findPermByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>String perm <span style="color:#000;font-weight:bold">:</span> perms<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">print</span><span style="color:#000;font-weight:bold">(</span>perm<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;\t&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        SimpleAuthorizationInfo info <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SimpleAuthorizationInfo<span style="color:#000;font-weight:bold">();</span>
+        info<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setRoles</span><span style="color:#000;font-weight:bold">(</span>roles<span style="color:#000;font-weight:bold">);</span>
+        info<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStringPermissions</span><span style="color:#000;font-weight:bold">(</span>perms<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> info<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 将认证信息封装到SimpleAuthenticationInfo
+</span><span style="color:#998;font-style:italic">     * @param token
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     * @throws AuthenticationException
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> AuthenticationInfo <span style="color:#900;font-weight:bold">doGetAuthenticationInfo</span><span style="color:#000;font-weight:bold">(</span>AuthenticationToken token<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AuthenticationException <span style="color:#000;font-weight:bold">{</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;将身份的认证信息封装到SimpleAuthenticationInfo......&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        String username <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">)</span> token<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrincipal</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">//        WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+</span><span style="color:#998;font-style:italic">//        UserService userService = (UserService) context.getBean(&#34;userServiceImpl&#34;);
+</span><span style="color:#998;font-style:italic"></span>        User user <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findUserByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;user&#34;</span><span style="color:#000;font-weight:bold">+</span>user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>user <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;用户不存在&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> UnknownAccountException<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;username:&#34;</span><span style="color:#000;font-weight:bold">+</span>username<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;不存在&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span><span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+            SimpleAuthenticationInfo info <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SimpleAuthenticationInfo<span style="color:#000;font-weight:bold">(</span>
+                    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getUsername</span><span style="color:#000;font-weight:bold">(),</span>
+                    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPassword</span><span style="color:#000;font-weight:bold">(),</span>
+                    ByteSource<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Util</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">bytes</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSalt</span><span style="color:#000;font-weight:bold">()),</span><span style="color:#998;font-style:italic">//将盐值转成字节输入
+</span><span style="color:#998;font-style:italic"></span>                    getName<span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">return</span> info<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><h3 id="userserviceimpljava">UserServiceImpl.java</h3>
+<p>在之前要先在数据库的用户表加入一列salt盐值 用于加密的时候提高安全性</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.shiro.service.impl</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.mapper.UserMapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.pojo.User</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.shiro.service.UserService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.shiro.crypto.hash.Sha256Hash</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Service</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Set</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.UUID</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @author ChanServy
+</span><span style="color:#998;font-style:italic"> * @date 2019/5/29 19:19
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> UserService <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    UserMapper userMapper<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> User <span style="color:#900;font-weight:bold">findUserByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        User user <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findUserByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> user<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">insertUser</span><span style="color:#000;font-weight:bold">(</span>User user<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//生成盐值
+</span><span style="color:#998;font-style:italic"></span>        user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSalt</span><span style="color:#000;font-weight:bold">(</span>UUID<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">randomUUID</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#998;font-style:italic">//用shiro提供的Sha256Hash加密 设置加密属性：sha256算法，随机盐，迭代1024次(和applicationContext-shiro中的配置一致)
+</span><span style="color:#998;font-style:italic"></span>        Sha256Hash sha256Hash <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Sha256Hash<span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPassword</span><span style="color:#000;font-weight:bold">(),</span>user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSalt</span><span style="color:#000;font-weight:bold">(),</span>1024<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">//将原先的简单的密码设置为新加密完的密文 并格式化成base64
+</span><span style="color:#998;font-style:italic"></span>        user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPassword</span><span style="color:#000;font-weight:bold">(</span>sha256Hash<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toBase64</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#998;font-style:italic">//存库
+</span><span style="color:#998;font-style:italic"></span>        userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertUser</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findRoleByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> set <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findRoleByUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> set<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findPermByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        Set<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> set <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findPermByUserName</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> set<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><h3 id="webxml">web.xml</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#998;font-style:italic">&lt;!-- ShiroFilter Shiro集成核心
+</span><span style="color:#998;font-style:italic">       找到spring工厂，从中获取 ShiroFilter    getBean(&#34;xxx&#34;,Filter.class)
+</span><span style="color:#998;font-style:italic">       此Filter的name，即工厂中的ShiroFilterFactoryBean的BeanID
+</span><span style="color:#998;font-style:italic">   --&gt;</span>
+  <span style="color:#000080">&lt;filter&gt;</span>
+    <span style="color:#000080">&lt;filter-name&gt;</span>shirofilter<span style="color:#000080">&lt;/filter-name&gt;</span>
+    <span style="color:#000080">&lt;filter-class&gt;</span>org.springframework.web.filter.DelegatingFilterProxy<span style="color:#000080">&lt;/filter-class&gt;</span>
+    <span style="color:#000080">&lt;init-param&gt;</span>
+      <span style="color:#000080">&lt;param-name&gt;</span>targetFilterLifecycle<span style="color:#000080">&lt;/param-name&gt;</span>
+      <span style="color:#000080">&lt;param-value&gt;</span>true<span style="color:#000080">&lt;/param-value&gt;</span>
+    <span style="color:#000080">&lt;/init-param&gt;</span>
+  <span style="color:#000080">&lt;/filter&gt;</span>
+  <span style="color:#000080">&lt;filter-mapping&gt;</span>
+    <span style="color:#000080">&lt;filter-name&gt;</span>shirofilter<span style="color:#000080">&lt;/filter-name&gt;</span>
+    <span style="color:#000080">&lt;url-pattern&gt;</span>/*<span style="color:#000080">&lt;/url-pattern&gt;</span>
+  <span style="color:#000080">&lt;/filter-mapping&gt;</span>
+</code></pre></div><h3 id="新建applicationcontext-shiroxml文件">新建applicationContext-shiro.xml文件</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;beans</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/beans&#34;</span>
+       <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+       <span style="color:#008080">xmlns:context=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/context&#34;</span>
+       <span style="color:#008080">xmlns:aop=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/aop&#34;</span>
+       <span style="color:#008080">xmlns:tx=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/tx&#34;</span>
+       <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+</span><span style="color:#d14">		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+</span><span style="color:#d14">		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+</span><span style="color:#d14">		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- shiro组件 --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;myRealm&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;com.chan.shiro.realm.MyRealm&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 注入Service --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;userService&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;userServiceImpl&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 注入密码匹配器 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;credentialsMatcher&#34;</span><span style="color:#000080">&gt;</span>
+            <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.authc.credential.HashedCredentialsMatcher&#34;</span><span style="color:#000080">&gt;</span>
+                <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;hashAlgorithmName&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;sha-256&#34;</span><span style="color:#000080">/&gt;</span>
+                <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;hashIterations&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;1024&#34;</span><span style="color:#000080">/&gt;</span>
+                <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;storedCredentialsHexEncoded&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;false&#34;</span><span style="color:#000080">/&gt;</span>
+            <span style="color:#000080">&lt;/bean&gt;</span>
+        <span style="color:#000080">&lt;/property&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 开启shiro的缓存 提高性能 --&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 默认为false 因为用户的认证信息是放在session中的  session是自动进入缓存的  因此默认为false --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;authenticationCachingEnabled&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;false&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 默认为true 查询出的角色和权限信息封装到info中之后 会放到缓存中 因此默认为true --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;authorizationCachingEnabled&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;true&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 本地缓存组件，存于本地的Map 用户主动logout，或session过期被检测到后，缓存会被移除 --&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!--开启shiro的realm的缓存!!!!!!!! 当使用shiro整合redis 使用redis缓存的时候 这里就不用写了 --&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- name=&#34;cacheManager&#34;要写在DefaultWebSecurityManager中 ref到自定义的ShiroRedisCacheManager的id上 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;cacheManager&#34;</span><span style="color:#000080">&gt;</span>
+            <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.cache.MemoryConstrainedCacheManager&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#000080">&lt;/property&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- SecurityManager 加注解也保留 --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;securityManager&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.web.mgt.DefaultWebSecurityManager&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;realm&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;myRealm&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;rememberMeManager&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;rememberMeManager&#34;</span><span style="color:#000080">/&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+    
+    <span style="color:#998;font-style:italic">&lt;!-- ShiroFilter --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.spring.web.ShiroFilterFactoryBean&#34;</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;shirofilter&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 依赖SecurityManager --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;securityManager&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;securityManager&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 需要登录(认证身份)时 跳转 注解的时候可省略 --&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 过滤器链(注解的时候可以省略) --&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+
+    <span style="color:#998;font-style:italic">&lt;!--&#34;记住我&#34;的功能--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- SimpleCookie帮我们创建cookie并设置相关的参数 --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;rememberMeCookie&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.web.servlet.SimpleCookie&#34;</span><span style="color:#000080">&gt;</span>
+
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;name&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;rememberMe&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- cookie只在http请求中可用，那么通过js脚本将无法读取到cookie信息，有效防止cookie被窃取 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;httpOnly&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;true&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- cookie的生命周期，单位：秒 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;maxAge&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;2592000&#34;</span><span style="color:#000080">/&gt;</span><span style="color:#998;font-style:italic">&lt;!-- 30天 --&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!--接受SecurityManager调度，获取用户信息，加密数据，并调度SimpleCookie写出cookie--&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;rememberMeManager&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.web.mgt.CookieRememberMeManager&#34;</span><span style="color:#000080">&gt;</span>
+
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;cipherKey&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;#{T(org.apache.shiro.codec.Base64).decode(&#39;c+3hFGPjbgzGdrC+MHgoRQ==&#39;)}&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 注入SimpleCookie --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;cookie&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;rememberMeCookie&#34;</span><span style="color:#000080">/&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- SessionManager --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;sessionManager&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.web.session.mgt.DefaultWebSessionManager&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- session全局超时时间, 单位:毫秒 ，30分钟 默认值为1800000--&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;globalSessionTimeout&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;5000&#34;</span><span style="color:#000080">/&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!--配置session检测--&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;sessionValidationInterval&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;10000&#34;</span><span style="color:#000080">/&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+<span style="color:#000080">&lt;/beans&gt;</span>
+</code></pre></div><h3 id="springmvcxml">springmvc.xml</h3>
+<p>注意加上aop的 xml约束  所有的都是在原来项目的基础上添加</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;beans</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/beans&#34;</span>
+       <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+       <span style="color:#008080">xmlns:context=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/context&#34;</span>
+       <span style="color:#008080">xmlns:mvc=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/mvc&#34;</span>
+       <span style="color:#008080">xmlns:aop=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/aop&#34;</span>
+       <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+</span><span style="color:#d14">		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+</span><span style="color:#d14">		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+</span><span style="color:#d14">        http://www.springframework.org/schema/aop
+</span><span style="color:#d14">        http://www.springframework.org/schema/aop/spring-aop.xsd &#34;</span><span style="color:#000080">&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- 扫描注解
+</span><span style="color:#998;font-style:italic">         通过 【，；】分隔的多个包，包中的类如果有注解，会被扫描
+</span><span style="color:#998;font-style:italic">         当然也可以被多个要扫描的包，定义一个父包
+</span><span style="color:#998;font-style:italic">    --&gt;</span>
+    <span style="color:#000080">&lt;context:component-scan</span> <span style="color:#008080">base-package=</span><span style="color:#d14">&#34;com.chan.shiro.controller&#34;</span><span style="color:#000080">/&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- 注解开发驱动：识别，解析后端控制器中的注解 --&gt;</span>
+    <span style="color:#000080">&lt;mvc:annotation-driven&gt;&lt;/mvc:annotation-driven&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- 视图解析器
+</span><span style="color:#998;font-style:italic">         解析过程：捕获后端控制器的方法返回值，并做前后缀拼接的处理，得到完整的视图路径
+</span><span style="color:#998;font-style:italic">     --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.springframework.web.servlet.view.InternalResourceViewResolver&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;prefix&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;/&#34;</span><span style="color:#000080">&gt;&lt;/property&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;suffix&#34;</span> <span style="color:#008080">value=</span><span style="color:#d14">&#34;.jsp&#34;</span><span style="color:#000080">&gt;&lt;/property&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+
+    <span style="color:#000080">&lt;mvc:default-servlet-handler/&gt;</span>
+
+
+    <span style="color:#998;font-style:italic">&lt;!-- enable shiro&#39;s annotation 开启shiro的注解模式--&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">id=</span><span style="color:#d14">&#34;lifecycleBeanPostProcessor&#34;</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.spring.LifecycleBeanPostProcessor&#34;</span><span style="color:#000080">/&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 自动代理生成器，等价于aop:config;
+</span><span style="color:#998;font-style:italic">         aop:config 或 AutoProxyCreator两者选其一，spring官方提醒千万不要同时使用。
+</span><span style="color:#998;font-style:italic">
+</span><span style="color:#998;font-style:italic">    &lt;bean class=&#34;org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator&#34;
+</span><span style="color:#998;font-style:italic">          depends-on=&#34;lifecycleBeanPostProcessor&#34;/&gt;
+</span><span style="color:#998;font-style:italic">    --&gt;</span>
+    <span style="color:#000080">&lt;aop:config&gt;&lt;/aop:config&gt;</span>
+
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;securityManager&#34;</span> <span style="color:#008080">ref=</span><span style="color:#d14">&#34;securityManager&#34;</span><span style="color:#000080">/&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+    <span style="color:#998;font-style:italic">&lt;!-- 在使用shiro注解的方式限制权限的时候 身份验证失败了或者角色权限失败了的时候就会报异常 可通过这种方式处理使之跳转到相应期望的页面--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- springmvc提供的简单异常处理器 --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.springframework.web.servlet.handler.SimpleMappingExceptionResolver&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 定义需要特殊处理的异常，这是重要点 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;exceptionMappings&#34;</span><span style="color:#000080">&gt;</span>
+            <span style="color:#000080">&lt;props&gt;</span>
+                <span style="color:#998;font-style:italic">&lt;!-- Subject 身份认证没通过 跳转的页面 --&gt;</span>
+                <span style="color:#000080">&lt;prop</span> <span style="color:#008080">key=</span><span style="color:#d14">&#34;org.apache.shiro.authz.UnauthenticatedException&#34;</span><span style="color:#000080">&gt;</span>redirect:/user/login/page<span style="color:#000080">&lt;/prop&gt;</span>
+                <span style="color:#998;font-style:italic">&lt;!-- 当前用户权限或者角色验证没通过 跳转的页面 --&gt;</span>
+                <span style="color:#000080">&lt;prop</span> <span style="color:#008080">key=</span><span style="color:#d14">&#34;org.apache.shiro.authz.UnauthorizedException&#34;</span><span style="color:#000080">&gt;</span>redirect:/user/error<span style="color:#000080">&lt;/prop&gt;</span>
+            <span style="color:#000080">&lt;/props&gt;</span>
+            <span style="color:#998;font-style:italic">&lt;!-- 还可以定义其他的自定义异常 --&gt;</span>
+        <span style="color:#000080">&lt;/property&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+
+<span style="color:#000080">&lt;/beans&gt;</span>
+</code></pre></div><h3 id="applicationcontext-servicexml中加入">applicationContext-service.xml中加入</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;import</span> <span style="color:#008080">resource=</span><span style="color:#d14">&#34;applicationContext-shiro&#34;</span><span style="color:#000080">&gt;&lt;/import&gt;</span>
+</code></pre></div><h3 id="异常处理">异常处理</h3>
+<p>我们在用注解的时候  我们是如果身份角色或者权限信息验证失败  正常通过ini或者spring中的配置是会跳到登录页面(身份验证失败时)或者错误页面(没有权限的页面)  但是用了注解之后就不能了  因此要自己制定异常处理</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#998;font-style:italic">&lt;!-- mvc.xml中：MVC的自定义异常处理器,用于处理权限或身份认证不通过时的异常处理--&gt;</span>
+<span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;com.chan.ex.handler.MyExHandler&#34;</span><span style="color:#000080">&gt;&lt;/bean&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyExHandler</span> <span style="color:#000;font-weight:bold">implements</span> HandlerExceptionResolver <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> ModelAndView <span style="color:#900;font-weight:bold">resolveException</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse 
+                                         response<span style="color:#000;font-weight:bold">,</span> Object handler<span style="color:#000;font-weight:bold">,</span> Exception ex<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        ModelAndView mv <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ModelAndView<span style="color:#000;font-weight:bold">();</span>
+        ex<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+        mv<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setViewName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;redirect:/login.jsp&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> mv<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>在这里 除了自己自定义异常处理器 还可以通过如下的方式来解决, 在springmvc.xml中加入 springmvc提供的简单异常处理器</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#998;font-style:italic">&lt;!-- springmvc提供的简单异常处理器 --&gt;</span>
+    <span style="color:#000080">&lt;bean</span> <span style="color:#008080">class=</span><span style="color:#d14">&#34;org.springframework.web.servlet.handler.SimpleMappingExceptionResolver&#34;</span><span style="color:#000080">&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 定义需要特殊处理的异常，这是重要点 --&gt;</span>
+        <span style="color:#000080">&lt;property</span> <span style="color:#008080">name=</span><span style="color:#d14">&#34;exceptionMappings&#34;</span><span style="color:#000080">&gt;</span>
+            <span style="color:#000080">&lt;props&gt;</span>
+                <span style="color:#000080">&lt;prop</span> <span style="color:#008080">key=</span><span style="color:#d14">&#34;org.apache.shiro.authz.UnauthenticatedException&#34;</span><span style="color:#000080">&gt;</span>redirect:/user/login/page<span style="color:#000080">&lt;/prop&gt;</span>
+            <span style="color:#000080">&lt;/props&gt;</span>
+            <span style="color:#998;font-style:italic">&lt;!-- 还可以定义其他的自定义异常 --&gt;</span>
+        <span style="color:#000080">&lt;/property&gt;</span>
+    <span style="color:#000080">&lt;/bean&gt;</span>
+</code></pre></div><p>简易且独立的demo地址：</p>
+<p><a href="https://gitee.com/erdochan/shiro_demo">https://gitee.com/erdochan/shiro_demo</a></p>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/shiro-zhujieshi.html">https://chanservy.github.io/2020/12/22/shiro-zhujieshi.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/shiro-xinde.html">Shiro心得</a></li>
+        
+        <li><a href="/2020/12/22/boot-rebushu.html">Spring Boot的热部署</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-springcache.html">Spring Boot整合Spring Cache操作Redis</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-mybaties.html">Spring Boot整合Mybatis案例</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-redis.html">Spring Boot整合Redis</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Shiro'>Shiro</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>静态资源配置 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/</link>
+    <description>Recent content in 静态资源配置 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 11:25:46 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot中的静态资源配置</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:25:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</guid>
+      <description>&lt;p&gt;前言：“卧槽！我的HTML页面没有样式！”，相信刚入门的时候的我们基本上都会遇到这个问题。没错，在SSM中，当我们使用SpringMVC框架的时候，静态资源会被拦截，需要添加额外配置，所以在说Spring Boot之前，首先我们从Spring MVC说起。那是一个月黑风高的夜晚，我独自走在林间的小路上，啊呸，跑题了，下面步入正题。。。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Java/</link>
+    <description>Recent content in Java on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 06 May 2021 17:52:22 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Java/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Java基础</title>
+      <link>https://chanservy.github.io/2021/05/06/java-foundation.html</link>
+      <pubDate>Thu, 06 May 2021 17:52:22 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/06/java-foundation.html</guid>
+      <description>&lt;p&gt;前言：Java 语言是美国 Sun 公司，在1995年推出的高级编程语言。所谓编程语言，是计算机的语言，人们可以使用编程语言对计算机下达命令，让计算机完成人们需要的功能。Java 语言主要应用在互联网程序的开发领域。常见的互联网程序比如天猫、京东、物流系统、网银系统等，以及服务器后台处理大数据的存储、查询、数据挖掘等也有很多应用。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>抛弃web.xml，纯Java搭建的SSM环境</title>
+      <link>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</link>
+      <pubDate>Sat, 12 Dec 2020 15:10:32 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</guid>
+      <description>&lt;p&gt;&lt;strong&gt;前言&lt;/strong&gt;：在Spring boot的项目中，是不涉及到xml的配置的，是因为Spring boot不推荐使用xml，并非不支持。Spring Boot 中，大量的自动化配置都是通过 Java 配置来实现的，因此在学习Spring boot之前，我们抛弃之前的xml的方式，使用纯Java搭建一套SSM的环境。即，在项目的配置中，完全使用Java来配置，不使用任何的xml配置文件，包括web.xml。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

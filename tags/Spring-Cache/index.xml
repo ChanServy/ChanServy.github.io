@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Cache on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Spring-Cache/</link>
+    <description>Recent content in Spring Cache on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 13:00:21 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Spring-Cache/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot整合Spring Cache操作Redis</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:00:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</guid>
+      <description>前言： 经过 Spring Boot 的整合封装与自动化配置，在 Spring Boot 中整合Redis 已经变得非常容易了，开发者只需要引入 Spring Data Redis 依赖，然后简单配下 redis 的基本信息，系统就会提供一个 RedisTemplate 供开发者使用，但是这篇文章聊的不是这种用法，而是结合 Cache 的用法。Spring3.1 中开始引入了令人激动的 Cache，在 Spring Boot 中，可以</description>
+    </item>
+    
+  </channel>
+</rss>

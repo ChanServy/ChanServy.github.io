@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Zuul on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Zuul/</link>
+    <description>Recent content in Zuul on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 16:27:46 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Zuul/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Zuul网关(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-zuul.html</link>
+      <pubDate>Tue, 22 Dec 2020 16:27:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-zuul.html</guid>
+      <description>前言：Spring Cloud之Zuul网关(H版)。 一、什么是网关 API Gateway，是系统的唯一对外的入口，介于客户端和服务器端之间的中间层，处理非业务功能 提供路由请求、鉴权、监控、缓存、限流等功能。 统一接入 智能路由 AB测试、灰度测试 负载均衡、容灾处理 日志埋点（类似Nginx日志</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Security结合OAuth2 | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Security结合OAuth2 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-22T11:04:12&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-22T11:04:12&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Security结合OAuth2.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/security-oauth2.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#oauth-20-的一个简单解释">OAuth 2.0 的一个简单解释</a>
+      <ul>
+        <li><a href="#一快递员问题">一、快递员问题</a></li>
+        <li><a href="#二授权机制的设计">二、授权机制的设计</a></li>
+        <li><a href="#三互联网场景">三、互联网场景</a></li>
+        <li><a href="#四令牌与密码">四、令牌与密码</a></li>
+      </ul>
+    </li>
+    <li><a href="#oauth-20-的四种方式">OAuth 2.0 的四种方式</a>
+      <ul>
+        <li><a href="#一第一种授权方式授权码">一、第一种授权方式：授权码</a></li>
+        <li><a href="#二第二种方式隐藏式">二、第二种方式：隐藏式</a></li>
+        <li><a href="#三第三种方式密码式">三、第三种方式：密码式</a></li>
+        <li><a href="#四第四种方式凭证式">四、第四种方式：凭证式</a></li>
+        <li><a href="#五令牌的使用">五、令牌的使用</a></li>
+        <li><a href="#六更新令牌">六、更新令牌</a></li>
+      </ul>
+    </li>
+    <li><a href="#搭建项目">搭建项目</a></li>
+    <li><a href="#项目运行">项目运行</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Security结合OAuth2</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月22日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Security'>Spring Security</a></span>
+            
+            <span class="meta-category"><a href='/categories/OAuth2'>OAuth2</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：<a href="http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html">OAuth 2.0</a> 是目前最流行的授权机制，用来授权第三方应用，获取用户数据。这个标准比较抽象，使用了很多术语，初学者不容易理解。其实说起来并不复杂，下面我就通过一个简单的类比，帮助大家轻松理解，OAuth 2.0 到底是什么。</p>
+<h1 id="spring-security结合oauth2">Spring Security结合OAuth2</h1>
+<h2 id="oauth-20-的一个简单解释">OAuth 2.0 的一个简单解释</h2>
+<h3 id="一快递员问题">一、快递员问题</h3>
+<p>我住在一个大型的居民小区。 小区有门禁系统。 进入的时候需要输入密码。 我经常网购和外卖，每天都有快递员来送货。我必须找到一个办法，让快递员通过门禁系统，进入小区。</p>
+<p>如果我把自己的密码，告诉快递员，他就拥有了与我同样的权限，这样好像不太合适。万一我想取消他进入小区的权力，也很麻烦，我自己的密码也得跟着改了，不容易记住，而且还得通知其他的快递员。</p>
+<p>有没有一种办法，让快递员能够自由进入小区，又不必知道小区居民的密码，而且他的唯一权限就是送货，其他需要密码的场合，他都没有权限？</p>
+<h3 id="二授权机制的设计">二、授权机制的设计</h3>
+<p>于是，我设计了一套授权机制。</p>
+<p>第一步，门禁系统的密码输入器下面，增加一个按钮，叫做”获取授权”。快递员需要首先按这个按钮，去申请授权。</p>
+<p>第二步，他按下按钮以后，屋主（也就是我）的手机就会跳出对话框：有人正在要求授权。系统还会显示该快递员的姓名、工号和所属的快递公司。</p>
+<p>我确认请求属实，就点击按钮，告诉门禁系统，我同意给予他进入小区的授权。</p>
+<p>第三步，门禁系统得到我的确认以后，系统向快递员显示一个进入小区的令牌（access token）。令牌就是类似密码的一串数字，只在短期内（比如七天）有效。</p>
+<p>第四步，快递员向门禁系统输入令牌，进入小区。</p>
+<p>有人可能会问，为什么不是远程为快递员开门，而要为他单独生成一个令牌？这是因为快递员可能每天都会来送货，第二天他还可以复用这个令牌。另外，有的小区有多重门禁，快递员可以使用同一个令牌通过它们。</p>
+<h3 id="三互联网场景">三、互联网场景</h3>
+<p>我们把上面的例子搬到互联网，就是 OAuth 的设计了。</p>
+<p>首先，居民小区就是储存用户数据的网络服务。 比如，微信储存了我的好友信息，获取这些信息，就必须经过微信的”门禁系统”。</p>
+<p>其次，快递员（或者说快递公司）就是第三方应用，想要穿过门禁系统，进入小区。</p>
+<p>最后，我就是用户本人，同意授权第三方应用进入小区，获取我的数据。</p>
+<p><strong>简单说，OAuth 就是一种授权机制。数据的所有者告诉系统，同意授权第三方应用进入系统，获取这些数据。系统从而产生一个短期的进入令牌（token），用来代替密码，供第三方应用使用。</strong></p>
+<h3 id="四令牌与密码">四、令牌与密码</h3>
+<p>令牌（token）与密码（password）的作用是一样的，都可以进入系统，但是有三点差异。</p>
+<p>（1）令牌是短期的，到期会自动失效，用户自己无法修改。密码一般长期有效，用户不修改，就不会发生变化。</p>
+<p>（2）令牌可以被数据所有者撤销，会立即失效。以上例而言，屋主可以随时取消快递员的令牌。密码一般不允许被他人撤销。</p>
+<p>（3）令牌有权限范围（scope），比如只能进小区的二号门。对于网络服务来说，只读令牌就比读写令牌更安全。密码一般是完整权限。</p>
+<p>上面这些设计，保证了令牌既可以让第三方应用获得权限，同时又随时可控，不会危及系统安全。这就是 OAuth 2.0 的优点。</p>
+<p>注意，只要知道了令牌，就能进入系统。系统一般不会再次确认身份，所以<strong>令牌必须保密，泄漏令牌与泄漏密码的后果是一样的。</strong> 这也是为什么令牌的有效期，一般都设置得很短的原因。</p>
+<p>OAuth 2.0 对于如何颁发令牌的细节，规定得非常详细。具体来说，一共分成四种授权类型（authorization grant），即四种颁发令牌的方式，适用于不同的互联网场景。</p>
+<h2 id="oauth-20-的四种方式">OAuth 2.0 的四种方式</h2>
+<p>OAuth 2.0 的标准是 RFC 6749 文件。该文件先解释了 OAuth 是什么。</p>
+<blockquote>
+<p>OAuth 引入了一个授权层，用来分离两种不同的角色：客户端和资源所有者。……资源所有者同意以后，资源服务器可以向客户端颁发令牌。客户端通过令牌，去请求数据。</p>
+</blockquote>
+<p>这段话的意思就是，**OAuth 的核心就是向第三方应用颁发令牌。**然后，RFC 6749 接着写道：</p>
+<blockquote>
+<p>（由于互联网有多种场景，）本标准定义了获得令牌的四种授权方式（authorization grant ）。</p>
+</blockquote>
+<p>也就是说，**OAuth 2.0 规定了四种获得令牌的流程。你可以选择最适合自己的那一种，向第三方应用颁发令牌。**下面就是这四种授权方式。</p>
+<ul>
+<li>授权码（authorization-code）</li>
+<li>隐藏式（implicit）</li>
+<li>密码式（password）：</li>
+<li>客户端凭证（client credentials）</li>
+</ul>
+<p>注意，不管哪一种授权方式，第三方应用申请令牌之前，都必须先到系统备案，说明自己的身份，然后会拿到两个身份识别码：客户端 ID（client ID）和客户端密钥（client secret）。这是为了防止令牌被滥用，没有备案过的第三方应用，是不会拿到令牌的。</p>
+<h3 id="一第一种授权方式授权码">一、第一种授权方式：授权码</h3>
+<p><strong>授权码（authorization code）方式，指的是第三方应用先申请一个授权码，然后再用该码获取令牌。</strong></p>
+<p>这种方式是最常用的流程，安全性也最高，它适用于那些有后端的 Web 应用。授权码通过前端传送，令牌则是储存在后端，而且所有与资源服务器的通信都在后端完成。这样的<code>前后端分离</code>，可以避免令牌泄漏。</p>
+<p>第一步，A 网站提供一个链接，用户点击后就会跳转到 B 网站，授权用户数据给 A 网站使用。我的理解就是A网站相当于快递公司的快递员，B网站就是我住的小区，有我的个人信息，我就是数据的所有者。一个常见的场景就是我在网易云音乐中想通过微信登录到网易云音乐，那网易云就相当于上面说的快递公司，微信就是我住的小区，我就是数据的所有者。下面就是 A 网站跳转 B 网站的一个示意链接。</p>
+<blockquote>
+<p>https://b.com/oauth/authorize?response_type=code&amp;client_id=CLIENT_ID&amp;redirect_uri=CALLBACK_URL&amp;scope=read</p>
+</blockquote>
+<p>上面的 URL 中，<code>response_type</code>参数表示要求返回授权码（<code>code</code>），<code>client_id</code>参数让 B 知道是谁在请求，<code>redirect_uri</code>参数是 B 接受或拒绝请求后的跳转网址，<code>scope</code>参数表示要求的授权范围（这里是只读）。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/1.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/1.jpg" />
+        </a>
+    </p>
+<p>第二步，用户跳转后，B 网站会要求用户登录，然后询问是否同意给予 A 网站授权。用户表示同意，这时 B 网站就会跳回redirect_uri参数指定的网址。跳转时，会传回一个授权码，就像下面这样。</p>
+<blockquote>
+<p>https://a.com/callback?code=AUTHORIZATION_CODE</p>
+</blockquote>
+<p>上面 URL 中，<code>code</code>参数就是授权码。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/2.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/2.jpg" />
+        </a>
+    </p>
+<p>第三步，A 网站拿到授权码以后，就可以在后端，向 B 网站请求令牌。</p>
+<blockquote>
+<p>https://b.com/oauth/token?client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET&amp;grant_type=authorization_code&amp;code=AUTHORIZATION_CODE&amp;redirect_uri=CALLBACK_URL</p>
+</blockquote>
+<p>上面的 URL 中，<code>client_id</code>参数和<code>client_secret</code>参数用来让 B 确认 A 的身份（<code>client_secret</code>参数是保密的，因此只能在后端发请求），<code>grant_type</code>参数的值是<code>AUTHORIZATION_CODE</code>，表示采用的授权方式是授权码，<code>code</code>参数是上一步拿到的授权码，<code>redirect_uri</code>参数是令牌颁发后的回调网址。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/3.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/3.jpg" />
+        </a>
+    </p>
+<p>第四步，B 网站收到请求以后，就会颁发令牌。具体做法是向<code>redirect_uri</code>指定的网址，发送一段 JSON 数据。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{    
+  <span style="color:#000080">&#34;access_token&#34;</span>:<span style="color:#d14">&#34;ACCESS_TOKEN&#34;</span>,
+  <span style="color:#000080">&#34;token_type&#34;</span>:<span style="color:#d14">&#34;bearer&#34;</span>,
+  <span style="color:#000080">&#34;expires_in&#34;</span>:<span style="color:#099">2592000</span>,
+  <span style="color:#000080">&#34;refresh_token&#34;</span>:<span style="color:#d14">&#34;REFRESH_TOKEN&#34;</span>,
+  <span style="color:#000080">&#34;scope&#34;</span>:<span style="color:#d14">&#34;read&#34;</span>,
+  <span style="color:#000080">&#34;uid&#34;</span>:<span style="color:#099">100101</span>,
+  <span style="color:#000080">&#34;info&#34;</span>:{<span style="color:#a61717;background-color:#e3d2d2">...</span>}
+}
+</code></pre></div><p>上面 JSON 数据中，<code>access_token</code>字段就是令牌，A 网站在后端拿到了。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/4.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/4.jpg" />
+        </a>
+    </p>
+<h3 id="二第二种方式隐藏式">二、第二种方式：隐藏式</h3>
+<p>有些 Web 应用是纯前端应用，没有后端。这时就不能用上面的方式了，必须将令牌储存在前端。<strong>RFC 6749 就规定了第二种方式，允许直接向前端颁发令牌。这种方式没有授权码这个中间步骤，所以称为（授权码）”隐藏式”（implicit）。</strong></p>
+<p>第一步，A 网站提供一个链接，要求用户跳转到 B 网站，授权用户数据给 A 网站使用。</p>
+<blockquote>
+<p>https://b.com/oauth/authorize?response_type=token&amp;client_id=CLIENT_ID&amp;redirect_uri=CALLBACK_URL&amp;scope=read</p>
+</blockquote>
+<p>上面的 URL 中，<code>response_type</code>参数为<code>token</code>，表示要求直接返回令牌。</p>
+<p>第二步，用户跳转到 B 网站，登录后同意给予 A 网站授权。这时，B 网站就会跳回<code>redirect_uri</code>参数指定的跳转网址，并且把令牌作为 URL 参数，传给 A 网站。</p>
+<blockquote>
+<p>https://a.com/callback#token=ACCESS_TOKEN</p>
+</blockquote>
+<p>上面的 URL 中，<code>token</code>参数就是令牌，A 网站因此直接在前端拿到令牌。</p>
+<p>注意，令牌的位置是 URL 锚点（fragment），而不是查询字符串（querystring），这是因为 OAuth 2.0 允许跳转网址是 HTTP 协议，因此存在”中间人攻击”的风险，而浏览器跳转时，锚点不会发到服务器，就减少了泄漏令牌的风险。</p>
+<p>这种方式把令牌直接传给前端，是很不安全的。因此，只能用于一些安全要求不高的场景，并且令牌的有效期必须非常短，通常就是会话期间（session）有效，浏览器关掉，令牌就失效了。</p>
+<h3 id="三第三种方式密码式">三、第三种方式：密码式</h3>
+<p><strong>如果你高度信任某个应用，RFC 6749 也允许用户把用户名和密码，直接告诉该应用。该应用就使用你的密码，申请令牌，这种方式称为&quot;密码式&quot;（password）。</strong></p>
+<p>第一步，A 网站要求用户提供 B 网站的用户名和密码。拿到以后，A 就直接向 B 请求令牌。</p>
+<blockquote>
+<p><a href="https://oauth.b.com/token?grant_type=password&amp;username=USERNAME&amp;password=PASSWORD&amp;client_id=CLIENT_ID">https://oauth.b.com/token?grant_type=password&amp;username=USERNAME&amp;password=PASSWORD&amp;client_id=CLIENT_ID</a></p>
+</blockquote>
+<p>上面 URL 中，<code>grant_type</code>参数是授权方式，这里的<code>password</code>表示&quot;密码式&quot;，<code>username</code>和<code>password</code>是 B 的用户名和密码。</p>
+<p>第二步，B 网站验证身份通过后，直接给出令牌。注意，这时不需要跳转，而是把令牌放在 JSON 数据里面，作为 HTTP 回应，A 因此拿到令牌。</p>
+<p>这种方式需要用户给出自己的用户名/密码，显然风险很大，因此只适用于其他授权方式都无法采用的情况，而且必须是用户高度信任的应用。</p>
+<h3 id="四第四种方式凭证式">四、第四种方式：凭证式</h3>
+<p><strong>最后一种方式是凭证式（client credentials），适用于没有前端的命令行应用，即在命令行下请求令牌。</strong></p>
+<p>第一步，A 应用在命令行向 B 发出请求。</p>
+<blockquote>
+<p><a href="https://oauth.b.com/token?grant_type=client_credentials&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET">https://oauth.b.com/token?grant_type=client_credentials&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET</a></p>
+</blockquote>
+<p>上面 URL 中，<code>grant_type</code>参数等于<code>client_credentials</code>表示采用凭证式，<code>client_id</code>和<code>client_secret</code>用来让 B 确认 A 的身份。</p>
+<p>第二步，B 网站验证通过以后，直接返回令牌。</p>
+<p>这种方式给出的令牌，是针对第三方应用的，而不是针对用户的，即有可能多个用户共享同一个令牌。</p>
+<h3 id="五令牌的使用">五、令牌的使用</h3>
+<p>A 网站拿到令牌以后，就可以向 B 网站的 API 请求数据了。</p>
+<p>此时，每个发到 API 的请求，都必须带有令牌。具体做法是在请求的头信息，加上一个<code>Authorization</code>字段，令牌就放在这个字段里面。</p>
+<blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl -H <span style="color:#d14">&#34;Authorization: Bearer ACCESS_TOKEN&#34;</span> <span style="color:#d14">\
+</span><span style="color:#d14"></span><span style="color:#d14">&#34;https://api.b.com&#34;</span>
+</code></pre></div></blockquote>
+<p>上面命令中，<code>ACCESS_TOKEN</code>就是拿到的令牌。</p>
+<h3 id="六更新令牌">六、更新令牌</h3>
+<p>令牌的有效期到了，如果让用户重新走一遍上面的流程，再申请一个新的令牌，很可能体验不好，而且也没有必要。OAuth 2.0 允许用户自动更新令牌。</p>
+<p>具体方法是，B 网站颁发令牌的时候，一次性颁发两个令牌，一个用于获取数据，另一个用于获取新的令牌（refresh token 字段）。令牌到期前，用户使用 refresh token 发一个请求，去更新令牌。</p>
+<blockquote>
+<p>https://b.com/oauth/token?grant_type=refresh_token&amp;client_id=CLIENT_ID&amp;client_secret=CLIENT_SECRET&amp;refresh_token=REFRESH_TOKEN</p>
+</blockquote>
+<p>上面 URL 中，<code>grant_type</code>参数为<code>refresh_token</code>表示要求更新令牌，<code>client_id</code>参数和<code>client_secret</code>参数用于确认身份，<code>refresh_token</code>参数就是用于更新令牌的令牌。</p>
+<p>B 网站验证通过以后，就会颁发新的令牌。</p>
+<h2 id="搭建项目">搭建项目</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;parent&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-parent<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>2.1.8.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/parent&gt;</span>
+
+<span style="color:#000080">&lt;properties&gt;</span>
+    <span style="color:#000080">&lt;java.version&gt;</span>1.8<span style="color:#000080">&lt;/java.version&gt;</span>
+<span style="color:#000080">&lt;/properties&gt;</span>
+
+<span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-security<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.security.oauth<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-security-oauth2<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>2.3.6.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.security<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-security-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;build&gt;</span>
+    <span style="color:#000080">&lt;plugins&gt;</span>
+        <span style="color:#000080">&lt;plugin&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/plugin&gt;</span>
+    <span style="color:#000080">&lt;/plugins&gt;</span>
+<span style="color:#000080">&lt;/build&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Oauth2Application
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:29
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Oauth2Application</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>Oauth2Application<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">redis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">121.36.15.48</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">6379</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">database</span>:<span style="color:#bbb"> </span><span style="color:#099">0</span><span style="color:#bbb">
+</span></code></pre></div><p>加密测试类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Oauth2ApplicationTest
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:40
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootTest</span>
+<span style="color:#3c5d5d;font-weight:bold">@RunWith</span><span style="color:#000;font-weight:bold">(</span>SpringRunner<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Oauth2ApplicationTest</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">contextLoads</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> BCryptPasswordEncoder<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">encode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;123&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>Security核心配置类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.oauth2.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Bean</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.AuthenticationManager</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.builders.HttpSecurity</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.userdetails.UserDetailsService</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO /oauth/token post拼资源;  /hello?access_token=...  /user/hello?access_token=...  /admin/hello?access_token=...
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:42
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityConfig</span> <span style="color:#000;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 注入到Spring 的工厂 在授权服务器中有使用
+</span><span style="color:#998;font-style:italic">     * @Param [] 
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.security.authentication.AuthenticationManager
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:45
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> AuthenticationManager <span style="color:#900;font-weight:bold">authenticationManager</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authenticationManager</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> UserDetailsService <span style="color:#900;font-weight:bold">userDetailsService</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userDetailsService</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>AuthenticationManagerBuilder auth<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        auth<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">inMemoryAuthentication</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">withUser</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;admin&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">password</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;$2a$10$h5A72fcth5BNrT9oJ1UrL.xUwuuZBtbfuBOBSzvY24R3eSNsEs0Yy&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;admin&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">withUser</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">password</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;$2a$10$h5A72fcth5BNrT9oJ1UrL.xUwuuZBtbfuBOBSzvY24R3eSNsEs0Yy&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;user&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 设置不拦截 因为有几个和oauth相关的请求不需要拦截 比如说登录的接口啥的 因为拦截了就获取不到token了
+</span><span style="color:#998;font-style:italic">     * @Param [http] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:50
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>HttpSecurity http<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">antMatcher</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/oauth/**&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizeRequests</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">antMatchers</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/oauth/**&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">permitAll</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">csrf</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">disable</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><p>授权服务器配置类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.oauth2.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Bean</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.redis.connection.RedisConnectionFactory</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.AuthenticationManager</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.userdetails.UserDetailsService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.crypto.password.PasswordEncoder</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname AuthorizationServerConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO 授权服务器配置  继承自 AuthorizationServerConfigurerAdapter
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:51
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableAuthorizationServer</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AuthorizationServerConfig</span> <span style="color:#000;font-weight:bold">extends</span> AuthorizationServerConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    AuthenticationManager authenticationManager<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//它用来支持password的认证模式 password的认证模式更适用于前后端分离的项目
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    RedisConnectionFactory redisConnectionFactory<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//配了redis就有了它
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    UserDetailsService userDetailsService<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">//主要是刷新token的时候会用到
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    PasswordEncoder <span style="color:#900;font-weight:bold">passwordEncoder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> BCryptPasswordEncoder<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 配置授权模式等等 
+</span><span style="color:#998;font-style:italic">     * @Param [clients] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:53
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>ClientDetailsServiceConfigurer clients<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        clients<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">inMemory</span><span style="color:#000;font-weight:bold">()</span><span style="color:#998;font-style:italic">//配置在内存里的
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">withClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;password&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//设置clientId
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizedGrantTypes</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;password&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;refresh_token&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//配置授权模式 refresh_token本不是oauth中的一种模式 但是在Spring Boot集成oauth是在Spring Security的基础上集成的 在Spring Security中将refresh_token也作为一种模式
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">accessTokenValiditySeconds</span><span style="color:#000;font-weight:bold">(</span>1800<span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//token的过期时间
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">resourceIds</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;rid&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//设置资源的id
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">scopes</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;all&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//拿到token后的权限
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">secret</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;$2a$10$h5A72fcth5BNrT9oJ1UrL.xUwuuZBtbfuBOBSzvY24R3eSNsEs0Yy&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//加密后的密码
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 主要配置令牌的存储
+</span><span style="color:#998;font-style:italic">     * @Param [endpoints] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:54
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>AuthorizationServerEndpointsConfigurer endpoints<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        endpoints<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">tokenStore</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> RedisTokenStore<span style="color:#000;font-weight:bold">(</span>redisConnectionFactory<span style="color:#000;font-weight:bold">))</span><span style="color:#998;font-style:italic">//存到redis中
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authenticationManager</span><span style="color:#000;font-weight:bold">(</span>authenticationManager<span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">userDetailsService</span><span style="color:#000;font-weight:bold">(</span>userDetailsService<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 表示支持clientId 和client_Secret 做登录认证
+</span><span style="color:#998;font-style:italic">     * @Param [security] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:57
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>AuthorizationServerSecurityConfigurer security<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        security<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowFormAuthenticationForClients</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>资源服务器配置类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.oauth2.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.builders.HttpSecurity</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ResourceServerConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO 资源服务器配置 继承自 ResourceServerConfigurerAdapter
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:57
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableResourceServer</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ResourceServerConfig</span> <span style="color:#000;font-weight:bold">extends</span> ResourceServerConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO  对应资源id
+</span><span style="color:#998;font-style:italic">     * @Param [resources] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:58
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>ResourceServerSecurityConfigurer resources<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        resources<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">resourceId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;rid&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">stateless</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//资源id 这里的资源id要和刚才在授权服务器中配置的资源id一致 否则clientId和client_secret对应不上拿不到资源  stateless配置资源是基于令牌来认证的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 配置资源  (先从授权服务器上获取token 拿到token后请求资源就从这里走)
+</span><span style="color:#998;font-style:italic">     * @Param [http] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/7/17 21:59
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>HttpSecurity http<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizeRequests</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">antMatchers</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/admin/**&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">hasRole</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;admin&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">antMatchers</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/user/**&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">hasRole</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;user&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">anyRequest</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">authenticated</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>测试的Controller</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname HelloController
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/17 21:38
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HelloController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/admin/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">admin</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello admin!&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/user/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">user</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello user&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>以上的项目仅为个人练习的demo，并且将用户、角色、资源都在程序中写固定了，并没有入库。</p>
+<h2 id="项目运行">项目运行</h2>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/1.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/1.png" />
+        </a>
+    </p>
+<p>这里我使用chan用户，给chan用户令牌，这个令牌我设置的时间为1800s，只要时间没到期限，那么chan的这个令牌就可用，在登陆的时候带上令牌的参数，如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/2.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/2.png" />
+        </a>
+    </p>
+<p>上面是当访问/hello接口的时候的运行结果，当访问/user/hello接口的时候如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/3.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/3.png" />
+        </a>
+    </p>
+<p>当访问/admin/hello接口的时候，由于用户chan只有user权限，没有admin的权限，运行结果如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/4.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/4.png" />
+        </a>
+    </p>
+<p>当chan的令牌过了1800秒到期之后，我们可以使用<code>refresh_token</code>来刷新chan的令牌。如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/5.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/5.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/c9d20143/6.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/c9d20143/6.png" />
+        </a>
+    </p>
+<p>如上图所示，测试通过！</p>
+<p>上面的都是chan用户（user角色）的令牌，如果在chan的令牌没过期的情况下，为admin用户（admin角色）申请令牌的话，那就相当于chan和admin用户都拥有令牌了，都可以完成oauth2的密码式的校验。</p>
+<blockquote>
+<p>案例地址： <a href="https://gitee.com/erdochan/oauth2">https://gitee.com/erdochan/oauth2</a></p>
+</blockquote>
+<blockquote>
+<p>本文参考：</p>
+<p><a href="http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html">http://www.ruanyifeng.com/blog/2019/04/oauth-grant-types.html</a></p>
+<p><a href="http://www.ruanyifeng.com/blog/2019/04/oauth_design.html">http://www.ruanyifeng.com/blog/2019/04/oauth_design.html</a></p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/security-oauth2.html">https://chanservy.github.io/2020/12/22/security-oauth2.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/security-by-db.html">Security基于数据库动态配置权限</a></li>
+        
+        <li><a href="/2020/12/22/security-tianjiayanzhengma.html">Spring Security添加验证码</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-security.html">Spring Boot整合Spring Security</a></li>
+        
+        <li><a href="/2020/12/22/websocket-zaixianliaotian.html">WebSocket在线聊天</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-rabbitmq.html">Spring Boot整合RabbitMQ</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Security'>Spring Security</a></li>
+                
+                <li><a href='/tags/OAuth2'>OAuth2</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

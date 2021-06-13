@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Feign on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Feign/</link>
+    <description>Recent content in Feign on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 15:41:31 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Feign/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Feign(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-feignH.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:41:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-feignH.html</guid>
+      <description>前言：Spring Cloud之Feign(H版)。 一、Feign简介 Feign是一个声明式的伪Http客户端，它使得写Http客户端变得更简单。使用Feign，只需要创建一个接口并注解。它具有可插拔的注解特性，可使用Feign 注解和JAX-RS注解。Feign支持可插拔的编码器和</description>
+    </item>
+    
+  </channel>
+</rss>

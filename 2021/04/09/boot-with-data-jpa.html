@@ -1,0 +1,1918 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Boot整合Spring Data JPA | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Boot整合Spring Data JPA - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T18:08:19&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T18:08:19&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Boot整合Spring Data JPA">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一spring-data-jpa介绍">一、Spring Data JPA介绍</a></li>
+    <li><a href="#二spring-boot整合spring-data-jpa">二、Spring Boot整合Spring Data JPA</a>
+      <ul>
+        <li><a href="#1导入依赖">1.导入依赖</a></li>
+        <li><a href="#2配置文件">2.配置文件</a></li>
+        <li><a href="#3实体类">3.实体类</a></li>
+      </ul>
+    </li>
+    <li><a href="#三spring-data-jpa提供的核心接口">三、Spring Data JPA提供的核心接口</a></li>
+    <li><a href="#四repository方法的null值处理">四、Repository方法的Null值处理</a></li>
+    <li><a href="#五查询方法">五、查询方法</a>
+      <ul>
+        <li><a href="#1查询创建query-creation">1.查询创建Query Creation</a></li>
+        <li><a href="#2限制查询结果">2.限制查询结果</a></li>
+        <li><a href="#3自定义查询using-query">3.自定义查询Using @Query</a></li>
+        <li><a href="#4使用命名参数using-named-parameters">4.使用命名参数Using Named Parameters</a></li>
+        <li><a href="#5原生查询native-queries">5.原生查询Native Queries</a></li>
+        <li><a href="#6分页查询及排序">6.分页查询及排序</a></li>
+        <li><a href="#7query-in-集合">7.@Query In 集合</a></li>
+        <li><a href="#8自定义修改删除-modifying-queries">8.自定义修改、删除 Modifying Queries</a></li>
+        <li><a href="#9specifications动态查询">9.Specifications动态查询</a></li>
+      </ul>
+    </li>
+    <li><a href="#六案例">六、案例</a></li>
+    <li><a href="#写在最后">写在最后</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Boot整合Spring Data JPA</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：Spring Boot整合Spring Data JPA。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/2.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/2.png" />
+        </a>
+    </p>
+<h2 id="一spring-data-jpa介绍">一、Spring Data JPA介绍</h2>
+<p>Spring Data：其实 Spring Data 就是 Spring 提供的一个操作数据的框架。而 Spring Data JPA 只是 Spring Data 框架下的一个基于 JPA 标准操作数据的模块。</p>
+<p>Spring Data JPA：基于 JPA 的标准数据进行操作。简化操作持久层的代码。只需要编写接口就可以。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/1.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/1.png" />
+        </a>
+    </p>
+<h2 id="二spring-boot整合spring-data-jpa">二、Spring Boot整合Spring Data JPA</h2>
+<h3 id="1导入依赖">1.导入依赖</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-data-jpa<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>mysql<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>5.1.47<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+</code></pre></div><p>XML</p>
+<h3 id="2配置文件">2.配置文件</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">datasource</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">driver-class-name</span>:<span style="color:#bbb"> </span>com.mysql.jdbc.Driver<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span>jdbc:mysql://localhost:3306/hibernate?useUnicode=true&amp;characterEncoding=UTF8&amp;useSSL=false<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>root<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123456</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">jpa</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">database</span>:<span style="color:#bbb"> </span>mysql<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">database-platform</span>:<span style="color:#bbb"> </span>org.hibernate.dialect.MySQL5InnoDBDialect<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">show-sql</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">hibernate</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">ddl-auto</span>:<span style="color:#bbb"> </span>update<span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<ul>
+<li>create：每次加载 Hibernate 时都会删除上一次生成的表，然后根据 model 类再重新来生成新表，哪怕两次没有任何改变也要这样执行，这就是导致数据库表数据丢失的一个重要原因。</li>
+<li>create-drop：每次加载 Hibernate 时根据 model 类生成表，但是 sessionFactory 一关闭，表就自动删除。</li>
+<li>update：最常用的属性，第一次加载 Hibernate 时根据 model 类会自动建立起表的结构（前提是先建立好数据库），以后加载 Hibernate 时根据 model 类自动更新表结构，即使表结构改变了，但表中的行仍然存在，不会删除以前的行。要注意的是当部署到服务器后，表结构是不会被马上建立起来的，是要等应用第一次运行起来后才会。</li>
+<li>validate ：每次加载 Hibernate 时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值。</li>
+</ul>
+<h3 id="3实体类">3.实体类</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.*</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.Serializable</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> *          @Entity
+</span><span style="color:#998;font-style:italic"> *            作用：指定当前类是实体类。
+</span><span style="color:#998;font-style:italic"> *         @Table
+</span><span style="color:#998;font-style:italic"> *            作用：指定实体类和表之间的对应关系。
+</span><span style="color:#998;font-style:italic"> *         	属性：
+</span><span style="color:#998;font-style:italic"> *         		name：指定数据库表的名称
+</span><span style="color:#998;font-style:italic"> *         @Id
+</span><span style="color:#998;font-style:italic"> *            作用：指定当前字段是主键。
+</span><span style="color:#998;font-style:italic"> *         @GeneratedValue
+</span><span style="color:#998;font-style:italic"> *            作用：指定主键的生成方式。。
+</span><span style="color:#998;font-style:italic"> *         	属性：
+</span><span style="color:#998;font-style:italic"> *         		strategy ：指定主键生成策略。
+</span><span style="color:#998;font-style:italic"> *         @Column
+</span><span style="color:#998;font-style:italic"> *            作用：指定实体类属性和数据库表之间的对应关系
+</span><span style="color:#998;font-style:italic"> *         	属性：
+</span><span style="color:#998;font-style:italic"> *         		name：指定数据库表的列名称。
+</span><span style="color:#998;font-style:italic"> *         		unique：是否唯一
+</span><span style="color:#998;font-style:italic"> *         		nullable：是否可以为空
+</span><span style="color:#998;font-style:italic"> *         		inserttable：是否可以插入
+</span><span style="color:#998;font-style:italic"> *         		updateable：是否可以更新
+</span><span style="color:#998;font-style:italic"> *         		columnDefinition: 定义建表时创建此列的DDL
+</span><span style="color:#998;font-style:italic"> *         		secondaryTable: 从表名。如果此列不建在主表上（默认建在主表），该属性定义该列所在从表的名字
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> *        @GeneratedValue 的GenerationType有四种, JPA提供的四种标准用法为TABLE,SEQUENCE,IDENTITY,AUTO。
+</span><span style="color:#998;font-style:italic"> *        IDENTITY:主键由数据库自动生成（主要是自动增长型）mysql的自增
+</span><span style="color:#998;font-style:italic"> *        SEQUENCE：根据底层数据库的序列来生成主键，条件是数据库支持序列。Oracle的自增
+</span><span style="color:#998;font-style:italic"> *        AUTO：由程序自动的帮助我们选择主键生成策略(了解)
+</span><span style="color:#998;font-style:italic"> *        TABLE：使用一个特定的数据库表格来保存主键(了解)
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> *        JPQL全称Java Persistence Query Language
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> */</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Customer
+</span><span style="color:#998;font-style:italic"> * @Description 客户：指的是一家公司。
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/17 13:38
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cst_customer&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Customer</span> <span style="color:#000;font-weight:bold">implements</span> Serializable <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     *       @Id ：声明主键的配置
+</span><span style="color:#998;font-style:italic">     *       @GeneratedValue :配置主键的生成策略
+</span><span style="color:#998;font-style:italic">     *            strategy
+</span><span style="color:#998;font-style:italic">     *                GenerationType.IDENTITY ：自增，mysql
+</span><span style="color:#998;font-style:italic">     *                       * 底层数据库必须支持自动增长（底层数据库支持的自动增长方式，对id自增）
+</span><span style="color:#998;font-style:italic">     *                GenerationType.SEQUENCE : 序列，oracle
+</span><span style="color:#998;font-style:italic">     *                        * 底层数据库必须支持序列
+</span><span style="color:#998;font-style:italic">     *                GenerationType.TABLE : jpa提供的一种机制，通过一张数据库表的形式帮助我们完成主键自增
+</span><span style="color:#998;font-style:italic">     *                GenerationType.AUTO ： 由程序自动的帮助我们选择主键生成策略
+</span><span style="color:#998;font-style:italic">     *       @Column :配置属性和字段的映射关系
+</span><span style="color:#998;font-style:italic">     *            name：数据库表中字段的名称
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy <span style="color:#000;font-weight:bold">=</span> GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long custId<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custName<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_source&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custSource<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_industry&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custIndustry<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_level&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custLevel<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_address&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custAddress<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_phone&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String custPhone<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Transient</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> linkmen<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCustId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustId</span><span style="color:#000;font-weight:bold">(</span>Long custId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custId</span> <span style="color:#000;font-weight:bold">=</span> custId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustName</span><span style="color:#000;font-weight:bold">(</span>String custName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custName</span> <span style="color:#000;font-weight:bold">=</span> custName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustSource</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custSource<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustSource</span><span style="color:#000;font-weight:bold">(</span>String custSource<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custSource</span> <span style="color:#000;font-weight:bold">=</span> custSource<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustIndustry</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custIndustry<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustIndustry</span><span style="color:#000;font-weight:bold">(</span>String custIndustry<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custIndustry</span> <span style="color:#000;font-weight:bold">=</span> custIndustry<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustLevel</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custLevel<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustLevel</span><span style="color:#000;font-weight:bold">(</span>String custLevel<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custLevel</span> <span style="color:#000;font-weight:bold">=</span> custLevel<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustAddress</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custAddress<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustAddress</span><span style="color:#000;font-weight:bold">(</span>String custAddress<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custAddress</span> <span style="color:#000;font-weight:bold">=</span> custAddress<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getCustPhone</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custPhone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustPhone</span><span style="color:#000;font-weight:bold">(</span>String custPhone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custPhone</span> <span style="color:#000;font-weight:bold">=</span> custPhone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getLinkmen</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> linkmen<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLinkmen</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> linkmen<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">linkmen</span> <span style="color:#000;font-weight:bold">=</span> linkmen<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Customer{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;custId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custId <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custName=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custSource=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custSource <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custIndustry=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custIndustry <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custLevel=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custLevel <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custAddress=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custAddress <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custPhone=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> custPhone <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, linkmen=&#34;</span> <span style="color:#000;font-weight:bold">+</span> linkmen <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.*</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Linkman
+</span><span style="color:#998;font-style:italic"> * @Description 联系人：指的是公司中的员工。
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/18 21:19
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Entity</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cst_linkman&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Linkman</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GeneratedValue</span><span style="color:#000;font-weight:bold">(</span>strategy <span style="color:#000;font-weight:bold">=</span> GenerationType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">IDENTITY</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long lkmId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;cust_id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long custId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_gender&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">char</span> lkmGender<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_phone&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmPhone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_mobile&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmMobile<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_email&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmEmail<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_position&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmPosition<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Column</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;lkm_memo&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String lkmMemo<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transient</span>
+    <span style="color:#000;font-weight:bold">private</span> Customer customer<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getLkmId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmId</span><span style="color:#000;font-weight:bold">(</span>Long lkmId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmId</span> <span style="color:#000;font-weight:bold">=</span> lkmId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCustId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> custId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustId</span><span style="color:#000;font-weight:bold">(</span>Long custId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">custId</span> <span style="color:#000;font-weight:bold">=</span> custId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmName</span><span style="color:#000;font-weight:bold">(</span>String lkmName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmName</span> <span style="color:#000;font-weight:bold">=</span> lkmName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">char</span> <span style="color:#900;font-weight:bold">getLkmGender</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmGender<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmGender</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">char</span> lkmGender<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmGender</span> <span style="color:#000;font-weight:bold">=</span> lkmGender<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmPhone</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmPhone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmPhone</span><span style="color:#000;font-weight:bold">(</span>String lkmPhone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmPhone</span> <span style="color:#000;font-weight:bold">=</span> lkmPhone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmMobile</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmMobile<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmMobile</span><span style="color:#000;font-weight:bold">(</span>String lkmMobile<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmMobile</span> <span style="color:#000;font-weight:bold">=</span> lkmMobile<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmEmail</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmEmail<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmEmail</span><span style="color:#000;font-weight:bold">(</span>String lkmEmail<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmEmail</span> <span style="color:#000;font-weight:bold">=</span> lkmEmail<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmPosition</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmPosition<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmPosition</span><span style="color:#000;font-weight:bold">(</span>String lkmPosition<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmPosition</span> <span style="color:#000;font-weight:bold">=</span> lkmPosition<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getLkmMemo</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lkmMemo<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLkmMemo</span><span style="color:#000;font-weight:bold">(</span>String lkmMemo<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lkmMemo</span> <span style="color:#000;font-weight:bold">=</span> lkmMemo<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Customer <span style="color:#900;font-weight:bold">getCustomer</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> customer<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCustomer</span><span style="color:#000;font-weight:bold">(</span>Customer customer<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">customer</span> <span style="color:#000;font-weight:bold">=</span> customer<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Linkman{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;lkmId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmId <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, custId=&#34;</span> <span style="color:#000;font-weight:bold">+</span> custId <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmName=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmGender=&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmGender <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmPhone=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmPhone <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmMobile=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmMobile <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmEmail=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmEmail <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmPosition=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmPosition <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, lkmMemo=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> lkmMemo <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, customer=&#34;</span> <span style="color:#000;font-weight:bold">+</span> customer <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>注解:</p>
+<ul>
+<li>@Entity(name=&ldquo;EntityName&rdquo;) 必须，用来标注一个数据库对应的实体，数据库中创建的表名默认和类名一致。其中，name 为可选，对应数据库中一个表，使用此注解标记 Pojo 是一个 JPA 实体。</li>
+<li>@Table(name=&quot;&quot;，catalog=&quot;&quot;，schema=&quot;&quot;) 可选，用来标注一个数据库对应的实体，数据库中创建的表名默认和类名一致。通常和 @Entity 配合使用，只能标注在实体的 class 定义处，表示实体对应的数据库表的信息。</li>
+<li>@Id 必须，@Id 定义了映射到数据库表的主键的属性，一个实体只能有一个属性被映射为主键。</li>
+<li>@GeneratedValue(strategy=GenerationType，generator=&quot;&quot;) 可选，strategy: 表示主键生成策略，有 AUTO、INDENTITY、SEQUENCE 和 TABLE 4 种，分别表示让 ORM 框架自动选择，generator: 表示主键生成器的名称。</li>
+<li>@Column(name = &ldquo;user_code&rdquo;， nullable = false， length=32) 可选，@Column 描述了数据库表中该字段的详细定义，这对于根据 JPA 注解生成数据库表结构的工具。name: 表示数据库表中该字段的名称，默认情形属性名称一致；nullable: 表示该字段是否允许为 null，默认为 true；unique: 表示该字段是否是唯一标识，默认为 false；length: 表示该字段的大小，仅对 String 类型的字段有效。</li>
+<li>@Transient可选，@Transient 表示该属性并非一个到数据库表的字段的映射，ORM 框架将忽略该属性。</li>
+<li>@Enumerated 可选，使用枚举的时候，我们希望数据库中存储的是枚举对应的 String 类型，而不是枚举的索引值，需要在属性上面添加 @Enumerated(EnumType.STRING) 注解。</li>
+</ul>
+<h2 id="三spring-data-jpa提供的核心接口">三、Spring Data JPA提供的核心接口</h2>
+<ol>
+<li>Repository接口</li>
+<li>CrudRepository接口</li>
+<li>PagingAndSortingRepository接口</li>
+<li>JpaRepository接口</li>
+<li>JPASpecificationExecutor接口</li>
+</ol>
+<p>CrudRepository接口，主要是完成一些增删改查的操作。注意：CrudRepository接口继承了Repository接口； PagingAndSortingRepository接口提供了分页与排序的操作，注意：该接口继承了CrudRepository接口；JpaRepository接口继承了PagingAndSortingRepository，对继承的父接口中方法的返回值进行适配。</p>
+<p>最后，JPASpecificationExecutor接口主要是提供了多条件查询的支持，并且可以在查询中添加排序与分页。注意JPASpecificationExecutor是单独存在的。完全独立。</p>
+<p>因此，我们只需要自己定义接口继承JpaRepository，JPASpecificationExecutor两接口就可以了。</p>
+<p>我们自定义的Dao层接口继承上述两个接口后会自动注入到Spring的工厂中，直接@Autowired就行，可以直接调用接口中提供好的方法，如果没有，可以按照规则使用参数名称命名方法名的查询方式在接口中定义方法，如果条件实在比较复杂，我们可以使用基于@Query注解结合jpql或者sql的查询与更新，或者在Specification接口的匿名内部类中拼接条件的方式。</p>
+<h2 id="四repository方法的null值处理">四、Repository方法的Null值处理</h2>
+<p>从Spring Data2.0开始对于返回单个聚合实例的CRUD方法可以使用java8 Optional接口作为方法返回值来表明可能存在的缺省值，典型示例为CrudRepository的findById方法，另外Spring也提供了几个注解来处理Null值：</p>
+<ul>
+<li><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/javadoc-api/org/springframework/lang/NonNullApi.html"><code>@NonNullApi</code></a>: 在包级别使用来声明参数和返回值不能为Null</li>
+<li><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/javadoc-api/org/springframework/lang/NonNull.html"><code>@NonNull</code></a>: 在参数或返回值上使用，当它们不能为Null时（如果在包级别上使用了@NonNullApi注解则没有必要再使用@NonNull注解了）</li>
+<li><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/javadoc-api/org/springframework/lang/Nullable.html"><code>@Nullable</code></a>: 在参数或返回值上使用，当它们可以为Null时</li>
+</ul>
+<h2 id="五查询方法">五、查询方法</h2>
+<h3 id="1查询创建query-creation">1.查询创建Query Creation</h3>
+<p>Spring Data Jpa通过解析方法名创建查询，框架在进行方法名解析时，会先把方法名多余的前缀find…By, read…By, query…By, count…By以及get…By截取掉，然后对剩下部分进行解析，第一个By会被用作分隔符来指示实际查询条件的开始。 我们可以在<code>实体属性</code>上定义条件，并将它们与And和Or连接起来，从而创建大量查询：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">User <span style="color:#900;font-weight:bold">findByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByUsernameIgnoreCase</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByUsernameLike</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+
+User <span style="color:#900;font-weight:bold">findByUsernameAndPassword</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> String password<span style="color:#000;font-weight:bold">);</span>
+
+User <span style="color:#900;font-weight:bold">findByEmail</span><span style="color:#000;font-weight:bold">(</span>String email<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByEmailLike</span><span style="color:#000;font-weight:bold">(</span>String email<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByIdIn</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> ids<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByIdInOrderByUsername</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> ids<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">deleteByIdIn</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> ids<span style="color:#000;font-weight:bold">);</span>
+
+Long <span style="color:#900;font-weight:bold">countByUsernameLike</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>支持的关键字、示例及JPQL片段如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Keyword</th>
+<th style="text-align:left">Sample</th>
+<th style="text-align:left">JPQL snippet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">And</td>
+<td style="text-align:left">findByLastnameAndFirstname</td>
+<td style="text-align:left">… where x.lastname = ?1 and x.firstname = ?2</td>
+</tr>
+<tr>
+<td style="text-align:left">Or</td>
+<td style="text-align:left">findByLastnameOrFirstname</td>
+<td style="text-align:left">… where x.lastname = ?1 or x.firstname = ?2</td>
+</tr>
+<tr>
+<td style="text-align:left">Is,Equals</td>
+<td style="text-align:left">findByFirstname,findByFirstnameIs,findByFirstnameEquals</td>
+<td style="text-align:left">… where x.firstname = ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">Between</td>
+<td style="text-align:left">findByStartDateBetween</td>
+<td style="text-align:left">… where x.startDate between ?1 and ?2</td>
+</tr>
+<tr>
+<td style="text-align:left">LessThan</td>
+<td style="text-align:left">findByAgeLessThan</td>
+<td style="text-align:left">… where x.age &lt; ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">LessThanEqual</td>
+<td style="text-align:left">findByAgeLessThanEqual</td>
+<td style="text-align:left">… where x.age &lt;= ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">GreaterThan</td>
+<td style="text-align:left">findByAgeGreaterThan</td>
+<td style="text-align:left">… where x.age &gt; ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">GreaterThanEqual</td>
+<td style="text-align:left">findByAgeGreaterThanEqual</td>
+<td style="text-align:left">… where x.age &gt;= ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">After</td>
+<td style="text-align:left">findByStartDateAfter</td>
+<td style="text-align:left">… where x.startDate &gt; ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">Before</td>
+<td style="text-align:left">findByStartDateBefore</td>
+<td style="text-align:left">… where x.startDate &lt; ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">IsNull</td>
+<td style="text-align:left">findByAgeIsNull</td>
+<td style="text-align:left">… where x.age is null</td>
+</tr>
+<tr>
+<td style="text-align:left">IsNotNull,NotNull</td>
+<td style="text-align:left">findByAge(Is)NotNull</td>
+<td style="text-align:left">… where x.age not null</td>
+</tr>
+<tr>
+<td style="text-align:left">Like</td>
+<td style="text-align:left">findByFirstnameLike</td>
+<td style="text-align:left">… where x.firstname like ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">NotLike</td>
+<td style="text-align:left">findByFirstnameNotLike</td>
+<td style="text-align:left">&hellip; findByFirstnameNotLike</td>
+</tr>
+<tr>
+<td style="text-align:left">StartingWith</td>
+<td style="text-align:left">findByFirstnameStartingWith</td>
+<td style="text-align:left">… where x.firstname like ?1 (parameter bound with appended %)</td>
+</tr>
+<tr>
+<td style="text-align:left">EndingWith</td>
+<td style="text-align:left">findByFirstnameEndingWith</td>
+<td style="text-align:left">… where x.firstname like ?1 (parameter bound with prepended %)</td>
+</tr>
+<tr>
+<td style="text-align:left">Containing</td>
+<td style="text-align:left">findByFirstnameContaining</td>
+<td style="text-align:left">… where x.firstname like ?1 (parameter bound wrapped in %)</td>
+</tr>
+<tr>
+<td style="text-align:left">OrderBy</td>
+<td style="text-align:left">findByAgeOrderByLastnameDesc</td>
+<td style="text-align:left">… where x.age = ?1 order by x.lastname desc</td>
+</tr>
+<tr>
+<td style="text-align:left">Not</td>
+<td style="text-align:left">findByLastnameNot</td>
+<td style="text-align:left">… where x.lastname &lt;&gt; ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">In</td>
+<td style="text-align:left">findByAgeIn(Collection ages)</td>
+<td style="text-align:left">… where x.age in ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">NotIn</td>
+<td style="text-align:left">findByAgeNotIn(Collection ages)</td>
+<td style="text-align:left">… where x.age not in ?1</td>
+</tr>
+<tr>
+<td style="text-align:left">True</td>
+<td style="text-align:left">findByActiveTrue()</td>
+<td style="text-align:left">… where x.active = true</td>
+</tr>
+<tr>
+<td style="text-align:left">False</td>
+<td style="text-align:left">findByActiveFalse()</td>
+<td style="text-align:left">… where x.active = false</td>
+</tr>
+<tr>
+<td style="text-align:left">IgnoreCase</td>
+<td style="text-align:left">findByFirstnameIgnoreCase</td>
+<td style="text-align:left">… where UPPER(x.firstame) = UPPER(?1)</td>
+</tr>
+</tbody>
+</table>
+<p>具体Spring Data Jpa对方法名的解析规则可参看<a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.query-methods.query-property-expressions">官方文档4.4.3. Property Expressions</a></p>
+<h3 id="2限制查询结果">2.限制查询结果</h3>
+<p>Spring Data Jpa支持使用<code>first</code>、<code>top</code>以及<code>Distinct</code> 关键字来限制查询结果，如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">User <span style="color:#900;font-weight:bold">findFirstByUsernameOrderByUsernameAsc</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findTop10ByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> Sort sort<span style="color:#000;font-weight:bold">);</span>
+    
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findTop10ByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> Pageable pageable<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="3自定义查询using-query">3.自定义查询Using @Query</h3>
+<p>@Query 注解的使用非常简单，只需在声明的方法上面标注该注解，同时提供一个 JPQL 查询语句即可</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.email = ?1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">getByEmail</span><span style="color:#000;font-weight:bold">(</span>String eamil<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.username = ?1 and u.password = ?2&#34;</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">getByUsernameAndPassword</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> String password<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.username like %?1%&#34;</span><span style="color:#000;font-weight:bold">)</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getByUsernameLike</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="4使用命名参数using-named-parameters">4.使用命名参数Using Named Parameters</h3>
+<p>默认情况下，Spring Data JPA使用基于位置的参数绑定，如前面所有示例中所述。 这使得查询方法在重构参数位置时容易出错。 要解决此问题，可以使用<code>@Param</code>注解为方法参数指定具体名称并在查询中绑定名称，如以下示例所示：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.id = :id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">getById</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> String userId<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.username = :username or u.email = :email&#34;</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">getByUsernameOrEmail</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">)</span> String username<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;email&#34;</span><span style="color:#000;font-weight:bold">)</span> String email<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>方法参数中传递对象而非属性时：只能用@Param的方式，数字占位符的方式会报错。</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//jpql 方法的参数传对象的时候, 需要用@Param注解 jpql语句写法如下  :#{#param注解中的属性.对应对象中的属性}
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;update Customer set custAddress = :#{#customer.custAddress}, custSource = :#{#customer.custSource} where custId = :#{#customer.custId}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateCustomerInPojo</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">)</span> Customer customer<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="5原生查询native-queries">5.原生查询Native Queries</h3>
+<p>@Query注解还支持通过将<code>nativeQuery</code>标志设置为true来执行原生查询，同样支持基于位置的参数绑定及命名参数，如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from tb_user u where u.email = ?1&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">queryByEmail</span><span style="color:#000;font-weight:bold">(</span>String email<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from tb_user u where u.email = :email&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+User <span style="color:#900;font-weight:bold">queryByEmail</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;email&#34;</span><span style="color:#000;font-weight:bold">)</span> String email<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>注意：Spring Data Jpa目前不支持对原生查询进行动态排序，但可以通过自己指定计数查询<code>countQuery</code>来使用原生查询进行分页、排序，如：</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from tb_user u where u.username like %?1%&#34;</span><span style="color:#000;font-weight:bold">,</span>
+            countQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select count(1) from tb_user u where u.username = %?1%&#34;</span><span style="color:#000;font-weight:bold">,</span>
+            nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+Page<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">queryByUsernameLike</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> Pageable pageable<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="6分页查询及排序">6.分页查询及排序</h3>
+<p>Spring Data Jpa可以在方法参数中直接传入<code>Pageable</code>或<code>Sort</code>来完成动态分页或排序，通常Pageable或Sort会是方法的最后一个参数，如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.username like %?1%&#34;</span><span style="color:#000;font-weight:bold">)</span>
+Page<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByUsernameLike</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> Pageable pageable<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;select u from User u where u.username like %?1%&#34;</span><span style="color:#000;font-weight:bold">)</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByUsernameAndSort</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> Sort sort<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>那调用repository方法时传入什么参数呢？ 对于Pageable参数，在Spring Data 2.0之前我们可以new一个<code>org.springframework.data.domain.PageRequest</code>对象，现在这些构造方法已经废弃，取而代之Spring推荐我们使用PageRequest的of方法</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">new</span> PageRequest<span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">new</span> PageRequest<span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">,</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ASC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">new</span> PageRequest<span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">new</span> Sort<span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ASC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">));</span>
+        
+PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">);</span>
+PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">,</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ASC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">);</span>
+PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">,</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">by</span><span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ASC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">));</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>注意：*<strong>Spring Data PageRequest的page参数是从0开始的 zero-based page index*</strong></p>
+</blockquote>
+<p>对于Sort参数，同样可以new一个<code>org.springframework.data.domain.Sort</code>，但推荐使用Sort.by方法</p>
+<h3 id="7query-in-集合">7.@Query In 集合</h3>
+<p>custIds集合在传入这个方法之前，需要保证非空！传入之前，可以在业务层判断一下集合非空，然后在传入到这个方法中。要使用@Param的方式。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from cst_customer where cust_id in (:custIds)&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getCustomerByIdList</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custIds&#34;</span><span style="color:#000;font-weight:bold">)</span> List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> custIds<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;from Customer where custId in (:custIds)&#34;</span><span style="color:#000;font-weight:bold">)</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getCustomerByIdList2</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custIds&#34;</span><span style="color:#000;font-weight:bold">)</span>List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> custIds<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="8自定义修改删除-modifying-queries">8.自定义修改、删除 Modifying Queries</h3>
+<p>单独使用@Query注解只是查询，如涉及到修改、删除则需要再加上<code>@Modifying</code>注解，如：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Transactional</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;update User u set u.password = ?2 where u.username = ?1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">updatePasswordByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> String password<span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Transactional</span><span style="color:#000;font-weight:bold">()</span>
+<span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+<span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;delete from User where username = ?1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">deleteByUsername</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>注意：Modifying queries can only use void or int/Integer as return type!</p>
+</blockquote>
+<h3 id="9specifications动态查询">9.Specifications动态查询</h3>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/3.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/jpa/3.png" />
+        </a>
+    </p>
+<h2 id="六案例">六、案例</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa.dao</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Customer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.JpaRepository</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.JpaSpecificationExecutor</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.Modifying</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.Query</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.repository.query.Param</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname CustomerDao
+</span><span style="color:#998;font-style:italic"> * @Description
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * 符合SpringDataJpa的dao层接口规范
+</span><span style="color:#998;font-style:italic"> *      JpaRepository&lt;操作的实体类类型，实体类中主键属性的类型&gt;
+</span><span style="color:#998;font-style:italic"> *      * 封装了基本CRUD操作
+</span><span style="color:#998;font-style:italic"> *      JpaSpecificationExecutor&lt;操作的实体类类型&gt;
+</span><span style="color:#998;font-style:italic"> *      * 封装了复杂查询 (可以实现根据条件分页)
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * SpringDataJPA提供的核心接口:
+</span><span style="color:#998;font-style:italic"> *  1、Repository接口
+</span><span style="color:#998;font-style:italic"> *  2、CrudRepository接口
+</span><span style="color:#998;font-style:italic"> *  3、PagingAndSortingRepository接口
+</span><span style="color:#998;font-style:italic"> *  4、JpaRepository接口
+</span><span style="color:#998;font-style:italic"> *  5、JPASpecificationExecutor接口
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * CrudRepository接口,主要是完成一些增删改查的操作。注意：CrudRepository接口继承了Repository接口
+</span><span style="color:#998;font-style:italic"> * PagingAndSortingRepository接口,该接口提供了分页与排序的操作，注意：该接口继承了CrudRepository接口
+</span><span style="color:#998;font-style:italic"> * JpaRepository接口,该接口继承了PagingAndSortingRepository。对继承的父接口中方法的返回值进行适配。
+</span><span style="color:#998;font-style:italic"> * JPASpecificationExecutor接口,该接口主要是提供了多条件查询的支持，并且可以在查询中添加排序与分页。
+</span><span style="color:#998;font-style:italic"> * 注意JPASpecificationExecutor是单独存在的。完全独立
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * 综上, 我们需要继承JpaRepository&lt;Customer, Long&gt;, JpaSpecificationExecutor&lt;Customer&gt; 就可以涵盖所有
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/18 22:02
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">CustomerDao</span> <span style="color:#000;font-weight:bold">extends</span> JpaRepository<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">,</span> Long<span style="color:#000;font-weight:bold">&gt;,</span> JpaSpecificationExecutor<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">// jpql查询 根据客户名称查询客户
+</span><span style="color:#998;font-style:italic">//    @Query(value = &#34;select c from Customer c where c.custName = ?1&#34;)
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;from Customer where custName = ?1&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    Customer <span style="color:#900;font-weight:bold">findCustomerByNameWithJpql</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// sql查询
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from cst_customer where cust_name = ?1&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    Customer <span style="color:#900;font-weight:bold">findCustomerByNameWithSql</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// jpql查询 根据客户名称和客户id查询客户
+</span><span style="color:#998;font-style:italic">//    @Query(value = &#34;select c from Customer c where c.custId = :id and c.custName = :name&#34;)
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;from Customer where custId = :id and custName = :name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    Customer <span style="color:#900;font-weight:bold">testFindCustomerByNameAndId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#458;font-weight:bold">long</span> id<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">)</span> String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//sql查询
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from cst_customer where cust_id = :id and cust_name = :name&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    Customer <span style="color:#900;font-weight:bold">testFindCustomerByNameAndIdBySql</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#458;font-weight:bold">long</span> id<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">)</span> String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//jpql
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;update Customer set custAddress = :addr where custId = :id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Modifying</span> <span style="color:#998;font-style:italic">// 当前执行的是一个更新数据的操作 增删改
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateCustomer</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#458;font-weight:bold">long</span> id<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;addr&#34;</span><span style="color:#000;font-weight:bold">)</span> String address<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//sql
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;update cst_customer set cust_address = :addr where cust_id = :id&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateCustomerBySql</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#458;font-weight:bold">long</span> id<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;addr&#34;</span><span style="color:#000;font-weight:bold">)</span> String address<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//jpql 方法的参数传对象的时候, 需要用@Param注解 jpql语句写法如下  :#{#param注解中的属性.对应对象中的属性}
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;update Customer set custAddress = :#{#customer.custAddress}, custSource = :#{#customer.custSource} where custId = :#{#customer.custId}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateCustomerInPojo</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">)</span> Customer customer<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//sql
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;update cst_customer set cust_address = :#{#customer.custAddress}, cust_source = :#{#customer.custSource} where cust_id = :#{#customer.custId}&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Modifying</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">updateCustomerInPojoBySql</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;customer&#34;</span><span style="color:#000;font-weight:bold">)</span> Customer customer<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//jpql  以参数name开头 右侧模糊匹配
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;from Customer where custName like ?1%&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findCustomerLikeName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//sql  传入参数式查询, （完全模糊  like  %:name%）;  索引式查询（ 完全模糊 like   %?1%）
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from cst_customer where cust_name like %?1%&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findCustomerLikeNameBySql</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 方法名的约定：
+</span><span style="color:#998;font-style:italic">     *      findBy : 查询
+</span><span style="color:#998;font-style:italic">     *            对象中的属性名（首字母大写） ： 查询的条件
+</span><span style="color:#998;font-style:italic">     *            CustName
+</span><span style="color:#998;font-style:italic">     *            * 默认情况 ： 使用等于的方式查询
+</span><span style="color:#998;font-style:italic">     *                  还有特殊的查询方式
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     *  findByCustName   --   根据客户名称=查询
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     *  在springdataJpa的运行阶段
+</span><span style="color:#998;font-style:italic">     *          会根据方法名称进行解析  findBy    from  xxx(实体类)
+</span><span style="color:#998;font-style:italic">     *                                      属性名称      where  custName =
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     *      1.findBy  + 属性名称 （根据属性名称进行完成匹配的查询=）
+</span><span style="color:#998;font-style:italic">     *      2.findBy  + 属性名称 + “查询方式（Like | isnull）”
+</span><span style="color:#998;font-style:italic">     *          findByCustNameLike  --  根据客户名称模糊查询
+</span><span style="color:#998;font-style:italic">     *      3.多条件查询
+</span><span style="color:#998;font-style:italic">     *          findBy + 属性名 + “查询方式”   + “多条件的连接符（and|or）”  + 属性名 + “查询方式”
+</span><span style="color:#998;font-style:italic">     */</span>
+    Customer <span style="color:#900;font-weight:bold">findByCustName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByCustNameLike</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// 使用客户名称模糊匹配和客户所属行业精准匹配的查询 方法参数的定义顺序需要和方法名中的一致
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByCustNameLikeAndCustIndustry</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">,</span> String industry<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">//@query in 集合
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;select * from cst_customer where cust_id in (:custIds)&#34;</span><span style="color:#000;font-weight:bold">,</span> nativeQuery <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getCustomerByIdList</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custIds&#34;</span><span style="color:#000;font-weight:bold">)</span> List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> custIds<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Query</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;from Customer where custId in (:custIds)&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getCustomerByIdList2</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custIds&#34;</span><span style="color:#000;font-weight:bold">)</span>List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> custIds<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa.dao</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Linkman</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.JpaRepository</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.repository.JpaSpecificationExecutor</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname LinkmanDao
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/18 22:03
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">LinkmanDao</span> <span style="color:#000;font-weight:bold">extends</span> JpaRepository<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">,</span> Long<span style="color:#000;font-weight:bold">&gt;,</span> JpaSpecificationExecutor<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findByCustId</span><span style="color:#000;font-weight:bold">(</span>Long custId<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.dao.CustomerDao</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.dao.LinkmanDao</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Customer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.junit.jupiter.api.Test</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.boot.test.context.SpringBootTest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.transaction.annotation.Transactional</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Optional</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootTest</span>
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">JpaDemoApplicationTests</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    LinkmanDao linkmanDao<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 根据id查询
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindOne</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Optional<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customerOptional <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findById</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> customerOptional<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">//        Customer customer = customerDao.findById(4l).get();
+</span><span style="color:#998;font-style:italic"></span>        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * save: 保存或者更新
+</span><span style="color:#998;font-style:italic">     *      根据传递的对象的主键id
+</span><span style="color:#998;font-style:italic">     *      如果没有id主键属性：保存
+</span><span style="color:#998;font-style:italic">     *      如果有id主键属性, 数据库中没有这个id值, 保存
+</span><span style="color:#998;font-style:italic">     *      如果有id主键属性，数据库中有这个id值, 更新
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testSave</span><span style="color:#000;font-weight:bold">(){</span>
+        Customer customer  <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Customer<span style="color:#000;font-weight:bold">();</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ccc&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustLevel</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;vip&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustIndustry</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;it&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;鞍山&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustPhone</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;16666666666&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustSource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;hhhhhhhhh&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#998;font-style:italic">//        List&lt;Customer&gt; customers = Arrays.asList(c1, c2, c3, c4);
+</span><span style="color:#998;font-style:italic">//        customerDao.saveAll(customers);// 批量插入
+</span><span style="color:#998;font-style:italic"></span>        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 注意: save()方法在进行Update操作的时候，null属性也会更新到数据库, 其实还不如自己写update语句=.=
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testUpdate</span><span style="color:#000;font-weight:bold">(){</span>
+        Customer customer  <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Customer<span style="color:#000;font-weight:bold">();</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustId</span><span style="color:#000;font-weight:bold">(</span>4L<span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ccc&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustLevel</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;vip&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustIndustry</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;it&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;北京&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustPhone</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;16666666666&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">save</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 根据id删除
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testDelete</span> <span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">deleteById</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 查询所有
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindAll</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> list <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">for</span><span style="color:#000;font-weight:bold">(</span>Customer customer <span style="color:#000;font-weight:bold">:</span> list<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 测试统计查询：查询客户的总数量
+</span><span style="color:#998;font-style:italic">     *      count:统计总条数
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testCount</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">long</span> count <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">count</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//查询全部的客户数量
+</span><span style="color:#998;font-style:italic"></span>        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>count<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 测试：判断id为4的客户是否存在
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span>  <span style="color:#900;font-weight:bold">testExists</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">boolean</span> exists <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">existsById</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id为4的客户 是否存在：&#34;</span><span style="color:#000;font-weight:bold">+</span>exists<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 根据id从数据库查询
+</span><span style="color:#998;font-style:italic">     *      @Transactional : 保证getOne()正常运行
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     *  findById：立即加载
+</span><span style="color:#998;font-style:italic">     *  getOne：延迟加载
+</span><span style="color:#998;font-style:italic">     *          回的是一个客户的动态代理对象
+</span><span style="color:#998;font-style:italic">     *          什么时候用，什么时候查询
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span>  <span style="color:#900;font-weight:bold">testGetOne</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getOne</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.dao.CustomerDao</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.dao.LinkmanDao</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Customer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Linkman</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.junit.jupiter.api.Test</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.boot.test.context.SpringBootTest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Page</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.PageRequest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Pageable</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Sort</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.test.annotation.Rollback</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.transaction.annotation.Transactional</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.ArrayList</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname JpqlTest
+</span><span style="color:#998;font-style:italic"> * @Description
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/19 14:46
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootTest</span>
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">JpqlTest</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    LinkmanDao linkmanDao<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindCustomerByName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findCustomerByNameWithSql</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chen&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        Long custId <span style="color:#000;font-weight:bold">=</span> customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCustId</span><span style="color:#000;font-weight:bold">();</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> linkmen <span style="color:#000;font-weight:bold">=</span> linkmanDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByCustId</span><span style="color:#000;font-weight:bold">(</span>custId<span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLinkmen</span><span style="color:#000;font-weight:bold">(</span>linkmen<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindCustomerByNameAndId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">testFindCustomerByNameAndIdBySql</span><span style="color:#000;font-weight:bold">(</span>1l<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chen&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        Long custId <span style="color:#000;font-weight:bold">=</span> customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCustId</span><span style="color:#000;font-weight:bold">();</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Linkman<span style="color:#000;font-weight:bold">&gt;</span> linkmen <span style="color:#000;font-weight:bold">=</span> linkmanDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByCustId</span><span style="color:#000;font-weight:bold">(</span>custId<span style="color:#000;font-weight:bold">);</span>
+        linkmen<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setLinkmen</span><span style="color:#000;font-weight:bold">(</span>linkmen<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 测试jpql的更新操作
+</span><span style="color:#998;font-style:italic">     * * springDataJpa中使用jpql自主完成 更新/删除操作
+</span><span style="color:#998;font-style:italic">     * * 需要手动添加事务的支持
+</span><span style="color:#998;font-style:italic">     * * 默认会执行结束之后，回滚事务
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @Rollback : 设置是否自动回滚
+</span><span style="color:#998;font-style:italic">     * false | true
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#998;font-style:italic">// 默认是true 证明springdatajpa中 执行事务后不会提交 默认是回滚的 提交需要设置Rollback为false
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testUpdateCustomer</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">updateCustomerBySql</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;鞍山&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Rollback</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#998;font-style:italic">// 默认是true 证明springdatajpa中 执行事务后不会提交 默认是回滚的 提交需要设置Rollback为false
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testUpdateCustomerInPojo</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Customer<span style="color:#000;font-weight:bold">();</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustId</span><span style="color:#000;font-weight:bold">(</span>4l<span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;大连&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCustSource</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;啦啦啦啦啦啦啦啦绿绿绿绿绿绿绿绿绿绿&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">updateCustomerInPojoBySql</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 模糊查询
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">findCustomerLikeName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customers <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findCustomerLikeNameBySql</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;c&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customers<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">//测试方法命名规则的查询
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testNaming</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByCustName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chen&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">//测试方法命名规则的查询
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindByCustNameLike</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> list <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByCustNameLike</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;c%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Customer customer <span style="color:#000;font-weight:bold">:</span> list<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">//测试方法命名规则的查询
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindByCustNameLikeAndCustIndustry</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> list <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findByCustNameLikeAndCustIndustry</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;%c%&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;it&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Customer customer <span style="color:#000;font-weight:bold">:</span> list<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">//排序
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testSortCustomer</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#998;font-style:italic">//        Sort sort = new Sort(Sort.Direction.DESC,&#34;custId&#34;);// 旧版本
+</span><span style="color:#998;font-style:italic"></span>        Sort sort <span style="color:#000;font-weight:bold">=</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">by</span><span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">DESC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;custId&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 新版本 源码中 Sort的构造变成私有了 写法变成.by
+</span><span style="color:#998;font-style:italic"></span>        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customers <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">(</span>sort<span style="color:#000;font-weight:bold">);</span>
+        customers<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">//分页并排序
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testPageCustomer</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Sort sort <span style="color:#000;font-weight:bold">=</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">by</span><span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">DESC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;custId&#34;</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">//        Pageable pageable = new PageRequest(0,2);//旧版本写法
+</span><span style="color:#998;font-style:italic"></span>        Pageable pageable <span style="color:#000;font-weight:bold">=</span> PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 2<span style="color:#000;font-weight:bold">,</span> sort<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 新版本写法为.of 原因是版本更新后PageRequest类的构造函数私有了
+</span><span style="color:#998;font-style:italic"></span>        Page<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> page <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">(</span>pageable<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#458;font-weight:bold">long</span> totalElements <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotalElements</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到总条数
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">int</span> totalPages <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotalPages</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到总页数
+</span><span style="color:#998;font-style:italic"></span>        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customersByPage <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getContent</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到每页的数据集合
+</span><span style="color:#998;font-style:italic"></span>        customersByPage<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;总条数======&#34;</span> <span style="color:#000;font-weight:bold">+</span> totalElements<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;总页数======&#34;</span> <span style="color:#000;font-weight:bold">+</span> totalPages<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// query in 集合
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">testFindByIdList</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> list <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+        list<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>1l<span style="color:#000;font-weight:bold">);</span>
+        list<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>2l<span style="color:#000;font-weight:bold">);</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customerByIdList <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCustomerByIdList2</span><span style="color:#000;font-weight:bold">(</span>list<span style="color:#000;font-weight:bold">);</span>
+        customerByIdList<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.jpa</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.dao.CustomerDao</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.jpa.pojo.Customer</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.junit.jupiter.api.Test</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.boot.test.context.SpringBootTest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Page</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.PageRequest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Pageable</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.domain.Sort</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.jpa.domain.Specification</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.criteria.*</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Optional</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SpecTest
+</span><span style="color:#998;font-style:italic"> * @Description
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/19 22:19
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootTest</span>
+<span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SpecTest</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    CustomerDao customerDao<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">test</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;hhh&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 根据条件, 查询单个对象
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">test1</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//匿名内部类
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">         * 自定义查询条件
+</span><span style="color:#998;font-style:italic">         *      1.实现Specification接口（提供泛型：查询的对象类型）
+</span><span style="color:#998;font-style:italic">         *      2.实现toPredicate方法（构造查询条件）
+</span><span style="color:#998;font-style:italic">         *      3.需要借助方法参数中的两个参数（
+</span><span style="color:#998;font-style:italic">         *          root：获取需要查询的对象属性
+</span><span style="color:#998;font-style:italic">         *          CriteriaBuilder：构造查询条件的，内部封装了很多的查询条件（模糊匹配，精准匹配）
+</span><span style="color:#998;font-style:italic">         *       ）
+</span><span style="color:#998;font-style:italic">         *  案例：根据客户名称查询，查询客户名为chen的客户
+</span><span style="color:#998;font-style:italic">         *          查询条件
+</span><span style="color:#998;font-style:italic">         *              1.查询方式
+</span><span style="color:#998;font-style:italic">         *                  cb对象
+</span><span style="color:#998;font-style:italic">         *              2.比较的属性名称
+</span><span style="color:#998;font-style:italic">         *                  root对象
+</span><span style="color:#998;font-style:italic">         *
+</span><span style="color:#998;font-style:italic">         */</span>
+        Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> spec <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> criteriaQuery<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder criteriaBuilder<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">// 获取比较的属性
+</span><span style="color:#998;font-style:italic"></span>                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custName <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#998;font-style:italic">//2.构造查询条件  ：    select * from cst_customer where cust_name = &#39;chen&#39;
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">                 * 第一个参数：需要比较的属性（path对象）
+</span><span style="color:#998;font-style:italic">                 * 第二个参数：当前需要比较的取值
+</span><span style="color:#998;font-style:italic">                 */</span>
+                Predicate predicate <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equal</span><span style="color:#000;font-weight:bold">(</span>custName<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chen&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//进行精准的匹配  （比较的属性，比较属性的取值）
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">return</span> predicate<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">};</span>
+        Optional<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> one <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findOne</span><span style="color:#000;font-weight:bold">(</span>spec<span style="color:#000;font-weight:bold">);</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> one<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">();</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 多条件查询
+</span><span style="color:#998;font-style:italic">     * 案例：根据客户名（chen）和客户所属行业查询（it）
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">test2</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">         *  root:获取属性
+</span><span style="color:#998;font-style:italic">         *      客户名
+</span><span style="color:#998;font-style:italic">         *      所属行业
+</span><span style="color:#998;font-style:italic">         *  cb：构造查询
+</span><span style="color:#998;font-style:italic">         *      1.构造客户名的精准匹配查询
+</span><span style="color:#998;font-style:italic">         *      2.构造所属行业的精准匹配查询
+</span><span style="color:#998;font-style:italic">         *      3.将以上两个查询联系起来
+</span><span style="color:#998;font-style:italic">         */</span>
+        Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> specification <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> criteriaQuery<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder criteriaBuilder<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custName <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 客户名
+</span><span style="color:#998;font-style:italic"></span>                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custIndustry <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custIndustry&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 所属行业
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">// 构造查询
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">//1.根据客户名精确匹配查询
+</span><span style="color:#998;font-style:italic"></span>                Predicate p1 <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equal</span><span style="color:#000;font-weight:bold">(</span>custName<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chen&#34;</span><span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//第一个参数，path（属性），第二个参数，属性的取值
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">//2..构造所属行业的精准匹配查询
+</span><span style="color:#998;font-style:italic"></span>                Predicate p2 <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equal</span><span style="color:#000;font-weight:bold">(</span>custIndustry<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;it&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#998;font-style:italic">//3.将多个查询条件组合到一起：组合（满足条件一并且满足条件二：与关系，满足条件一或满足条件二即可：或关系）
+</span><span style="color:#998;font-style:italic"></span>                Predicate and <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">(</span>p1<span style="color:#000;font-weight:bold">,</span> p2<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//以与的形式拼接多个查询条件
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">// criteriaBuilder.or();//以或的形式拼接多个查询条件
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">return</span> and<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">};</span>
+        Optional<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> one <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findOne</span><span style="color:#000;font-weight:bold">(</span>specification<span style="color:#000;font-weight:bold">);</span>
+        Customer customer <span style="color:#000;font-weight:bold">=</span> one<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">();</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>customer<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 案例：完成根据客户名称的模糊匹配，返回客户列表
+</span><span style="color:#998;font-style:italic">     * 客户名称以 ’c‘ 开头
+</span><span style="color:#998;font-style:italic">     * &lt;p&gt;
+</span><span style="color:#998;font-style:italic">     * equal ：直接的到path对象（属性），然后进行比较即可
+</span><span style="color:#998;font-style:italic">     * gt,lt,ge,le,like : 得到path对象，根据path指定比较的参数类型，再去进行比较
+</span><span style="color:#998;font-style:italic">     * 指定参数类型：path.as(类型的字节码对象)
+</span><span style="color:#998;font-style:italic">     * &lt;p&gt;
+</span><span style="color:#998;font-style:italic">     * 方法名称	                    Sql对应关系
+</span><span style="color:#998;font-style:italic">     * equle	                    filed = value
+</span><span style="color:#998;font-style:italic">     * gt（greaterThan）	        filed &gt; value
+</span><span style="color:#998;font-style:italic">     * lt（lessThan ）	            filed &lt; value
+</span><span style="color:#998;font-style:italic">     * ge（greaterThanOrEqualTo）	    filed &gt;= value
+</span><span style="color:#998;font-style:italic">     * le（ lessThanOrEqualTo）	    filed &lt;= value
+</span><span style="color:#998;font-style:italic">     * notEqule	                filed != value
+</span><span style="color:#998;font-style:italic">     * like	                filed like value
+</span><span style="color:#998;font-style:italic">     * notLike	                filed not like value
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">test3</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 构造查询条件
+</span><span style="color:#998;font-style:italic"></span>        Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> specification <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> criteriaQuery<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder criteriaBuilder<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custName <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                Predicate like <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">like</span><span style="color:#000;font-weight:bold">(</span>custName<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">as</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#d14">&#34;c%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">return</span> like<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">};</span>
+        <span style="color:#998;font-style:italic">//添加排序
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//创建排序对象,需要调用构造方法实例化sort对象(旧版本),调用by方法(新版本)
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//第一个参数：排序的顺序（倒序，正序）
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//   Sort.Direction.DESC:倒序
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//   Sort.Direction.ASC :升序
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//第二个参数：排序的属性名称
+</span><span style="color:#998;font-style:italic"></span>        Sort sort <span style="color:#000;font-weight:bold">=</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">by</span><span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">DESC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;custId&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customers <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">(</span>specification<span style="color:#000;font-weight:bold">,</span> sort<span style="color:#000;font-weight:bold">);</span>
+        customers<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">//        for (Customer customer : customers) {
+</span><span style="color:#998;font-style:italic">//            System.out.println(customer);
+</span><span style="color:#998;font-style:italic">//        }
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 分页查询
+</span><span style="color:#998;font-style:italic">     * Specification: 查询条件
+</span><span style="color:#998;font-style:italic">     * Pageable：分页参数
+</span><span style="color:#998;font-style:italic">     * 分页参数：查询的页码，每页查询的条数
+</span><span style="color:#998;font-style:italic">     * findAll(Specification,Pageable)：带有条件的分页
+</span><span style="color:#998;font-style:italic">     * findAll(Pageable)：没有条件的分页
+</span><span style="color:#998;font-style:italic">     * 返回：Page（springDataJpa为我们封装好的pageBean对象，数据列表，共条数）
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">test4</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> specification <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Specification<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> Predicate <span style="color:#900;font-weight:bold">toPredicate</span><span style="color:#000;font-weight:bold">(</span>Root<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> root<span style="color:#000;font-weight:bold">,</span> CriteriaQuery<span style="color:#000;font-weight:bold">&lt;?&gt;</span> criteriaQuery<span style="color:#000;font-weight:bold">,</span> CriteriaBuilder criteriaBuilder<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custName <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custName&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                Path<span style="color:#000;font-weight:bold">&lt;</span>Object<span style="color:#000;font-weight:bold">&gt;</span> custLevel <span style="color:#000;font-weight:bold">=</span> root<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;custLevel&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                Predicate p1 <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">like</span><span style="color:#000;font-weight:bold">(</span>custName<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">as</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">),</span> <span style="color:#d14">&#34;%c%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                Predicate p2 <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equal</span><span style="color:#000;font-weight:bold">(</span>custLevel<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;vip&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                Predicate and <span style="color:#000;font-weight:bold">=</span> criteriaBuilder<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">(</span>p1<span style="color:#000;font-weight:bold">,</span> p2<span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">return</span> and<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">};</span>
+        Sort sort <span style="color:#000;font-weight:bold">=</span> Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">by</span><span style="color:#000;font-weight:bold">(</span>Sort<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Direction</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ASC</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;custId&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">//PageRequest对象是Pageable接口的实现类
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">         * 创建PageRequest的过程中，需要调用他的构造方法传入两个参数
+</span><span style="color:#998;font-style:italic">         *      第一个参数：当前查询的页数（从0开始）
+</span><span style="color:#998;font-style:italic">         *      第二个参数：每页查询的数量
+</span><span style="color:#998;font-style:italic">         *      第三个参数：排序(可选)
+</span><span style="color:#998;font-style:italic">         */</span>
+<span style="color:#998;font-style:italic">//        Pageable pageable = new PageRequest(0,2);//旧版本写法
+</span><span style="color:#998;font-style:italic"></span>        Pageable pageable <span style="color:#000;font-weight:bold">=</span> PageRequest<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">of</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span> 2<span style="color:#000;font-weight:bold">,</span> sort<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 新版本写法 原因是版本更新后PageRequest类的构造函数私有了
+</span><span style="color:#998;font-style:italic"></span>        Page<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> page <span style="color:#000;font-weight:bold">=</span> customerDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findAll</span><span style="color:#000;font-weight:bold">(</span>specification<span style="color:#000;font-weight:bold">,</span> pageable<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#458;font-weight:bold">long</span> totalElements <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotalElements</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到总条数
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">int</span> totalPages <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotalPages</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到总页数
+</span><span style="color:#998;font-style:italic"></span>        List<span style="color:#000;font-weight:bold">&lt;</span>Customer<span style="color:#000;font-weight:bold">&gt;</span> customersByPage <span style="color:#000;font-weight:bold">=</span> page<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getContent</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//得到每页的数据集合
+</span><span style="color:#998;font-style:italic"></span>        customersByPage<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">forEach</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">::</span>println<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;总条数======&#34;</span> <span style="color:#000;font-weight:bold">+</span> totalElements<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;总页数======&#34;</span> <span style="color:#000;font-weight:bold">+</span> totalPages<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h2 id="写在最后">写在最后</h2>
+<p>两个表间关联查询不一定非要有外键。多表联查，两表之间相互关联，不一定需要有主外键关系，字段对应匹配就行。</p>
+<p>我目前认为mybatis中的xml文件的resultmap中的collection和association标签是一对多和一对一的关联查询，并且这种写法表与表之间需要外键关联。</p>
+<p>在日常开发中我们尽量少用外键关联，因为会影响查询的效率，增删改也不方便，所以一般的业务中我们尽量不用外键关联，然后都是对单表操作，将数据在业务层做封装，得到想要的。比如我们可以看页面需要什么数据自己封装一个vo类，然后将数据set进去返给页面；或者我们可以根据业务新建一个业务对象bo类，将需要的数据通过各自的单表查询出之后封装到这个业务类中；或者有时我们也可以根据业务需要在一般的pojo类中加入个别需要的属性，这个属性是我们业务需要的，在业务层set进去，但是这个属性在pojo对应的数据库表中没有，我们可以加@Transient，让通用mapper或jpa忽视它。至于数据库的设计，由于我们不用外键，那到了一对一或者一对多的时候，我们可以在多的一方的表中设置一个普通字段，这个字段的值就跟随一的一方的表的主键的值，但是并不做任何的外键关联，我们都是在业务层进行封装的。最后查值得到之后再set到我们需要的pojo或者vo或者bo里面。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">主表对象  <span style="color:#000;font-weight:bold">=</span>  主表mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>params<span style="color:#000;font-weight:bold">);</span>
+子表list  <span style="color:#000;font-weight:bold">=</span> 子表mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>主表对象<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCode</span><span style="color:#000;font-weight:bold">());</span>
+主表对象<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setXxxList</span><span style="color:#000;font-weight:bold">(</span>子表list<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">return</span> 主表对象<span style="color:#000;font-weight:bold">;</span>
+</code></pre></div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html">https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/redis-load-operating.html">Redis的安装及操作</a></li>
+        
+        <li><a href="/2021/04/09/thymeleaf-study.html">Thymeleaf语法入门</a></li>
+        
+        <li><a href="/2021/01/29/some-idea-about-divide.html">前后端分离开发中权限管理的一点思路</a></li>
+        
+        <li><a href="/2020/12/22/security-tianjiayanzhengma.html">Spring Security添加验证码</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-security.html">Spring Boot整合Spring Security</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Boot'>Spring Boot</a></li>
+                
+                <li><a href='/tags/Spring-Data-JPA'>Spring Data JPA</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

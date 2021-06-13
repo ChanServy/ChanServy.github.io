@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hystrix Dashboard on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Hystrix-Dashboard/</link>
+    <description>Recent content in Hystrix Dashboard on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 17:12:49 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Hystrix-Dashboard/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud之Hystrix Dashboard</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-hystrix-dashboard.html</link>
+      <pubDate>Tue, 22 Dec 2020 17:12:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-hystrix-dashboard.html</guid>
+      <description>前言：Spring Cloud之Hystrix Dashboard。 一、Hystrix Dashboard是什么？ Hystrix提供了对于微服务调用状态的监控信息，但是需要结合spring-boot-actuator模块一起使用。 Hystrix Dashboard主要用来实时监控Hystrix的各项</description>
+    </item>
+    
+  </channel>
+</rss>

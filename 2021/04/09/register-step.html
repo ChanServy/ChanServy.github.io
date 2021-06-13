@@ -1,0 +1,1830 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>项目中的注册流程 | 迩东陈的博客</title>
+    <meta property="og:title" content="项目中的注册流程 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T17:23:04&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T17:23:04&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="项目中的注册流程">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/register-step.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1创建用户中心">1.创建用户中心</a>
+      <ul>
+        <li><a href="#11创建父module">1.1.创建父module</a></li>
+        <li><a href="#12创建ly-user-interface">1.2.创建ly-user-interface</a></li>
+        <li><a href="#13创建ly-user-service">1.3.创建ly-user-service</a></li>
+        <li><a href="#14添加网关路由">1.4.添加网关路由</a></li>
+      </ul>
+    </li>
+    <li><a href="#2后台功能准备">2.后台功能准备</a>
+      <ul>
+        <li><a href="#21接口文档">2.1.接口文档</a></li>
+        <li><a href="#22数据结构">2.2.数据结构</a></li>
+        <li><a href="#23基本代码">2.3.基本代码</a></li>
+      </ul>
+    </li>
+    <li><a href="#3数据验证功能">3.数据验证功能</a>
+      <ul>
+        <li><a href="#31接口说明">3.1.接口说明</a></li>
+        <li><a href="#32controller">3.2.controller</a></li>
+        <li><a href="#33service">3.3.Service</a></li>
+        <li><a href="#34测试">3.4.测试</a></li>
+      </ul>
+    </li>
+    <li><a href="#4阿里大于短信服务">4.阿里大于短信服务</a>
+      <ul>
+        <li><a href="#41demo">4.1.demo</a></li>
+        <li><a href="#42创建短信微服务">4.2.创建短信微服务</a></li>
+        <li><a href="#43编写短信工具类">4.3.编写短信工具类</a></li>
+        <li><a href="#44编写消息监听器">4.4.编写消息监听器</a></li>
+        <li><a href="#45启动">4.5.启动</a></li>
+      </ul>
+    </li>
+    <li><a href="#5发送短信功能">5.发送短信功能</a>
+      <ul>
+        <li><a href="#51接口说明">5.1.接口说明</a></li>
+        <li><a href="#53controller">5.3.controller</a></li>
+        <li><a href="#54service">5.4.service</a></li>
+        <li><a href="#55测试">5.5.测试</a></li>
+      </ul>
+    </li>
+    <li><a href="#6注册功能">6.注册功能</a>
+      <ul>
+        <li><a href="#61接口说明">6.1.接口说明</a></li>
+        <li><a href="#62controller">6.2.controller</a></li>
+        <li><a href="#63service">6.3.service</a></li>
+        <li><a href="#65服务端数据校验">6.5.服务端数据校验</a></li>
+      </ul>
+    </li>
+    <li><a href="#7根据用户名和密码查询用户">7.根据用户名和密码查询用户</a>
+      <ul>
+        <li><a href="#71接口说明">7.1.接口说明</a></li>
+        <li><a href="#72controller">7.2.controller</a></li>
+        <li><a href="#73service">7.3.service</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">项目中的注册流程</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：记一次项目中的注册流程。</p>
+<h2 id="1创建用户中心">1.创建用户中心</h2>
+<p>用户搜索到自己心仪的商品，接下来就要去购买，但是购买必须先登录。所以接下来我们编写用户中心，实现用户的登录和注册功能。</p>
+<p>用户中心的提供的服务：</p>
+<ul>
+<li>用户的注册</li>
+<li>用户登录</li>
+<li>用户个人信息管理</li>
+<li>用户地址管理</li>
+<li>用户收藏管理</li>
+<li>我的订单</li>
+<li>优惠券管理</li>
+</ul>
+<p>这里我们暂时先实现基本的：<code>注册和登录</code>功能，其它功能大家可以自行补充完整。</p>
+<p>因为用户中心的服务其它微服务也会调用，因此这里我们做聚合。</p>
+<p>leyou-user：父工程，包含2个子工程：</p>
+<ul>
+<li>leyou-user-interface：实体及接口</li>
+<li>leyou-user-service：业务和服务</li>
+</ul>
+<h3 id="11创建父module">1.1.创建父module</h3>
+<p>省略。</p>
+<h3 id="12创建ly-user-interface">1.2.创建ly-user-interface</h3>
+<p>pom：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>ly-user<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-user-interface<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+    <span style="color:#000080">&lt;dependencies&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mapper-core<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.4<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.fasterxml.jackson.core<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>jackson-annotations<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>2.11.4<span style="color:#000080">&lt;/version&gt;</span>
+            <span style="color:#000080">&lt;scope&gt;</span>compile<span style="color:#000080">&lt;/scope&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.hibernate.validator<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>hibernate-validator<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-webmvc<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<h3 id="13创建ly-user-service">1.3.创建ly-user-service</h3>
+<p>pom</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>ly-user<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-user-service<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+    <span style="color:#000080">&lt;dependencies&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-jdbc<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- mybatis启动器 --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.mybatis.spring.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mybatis-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 通用Mapper启动器 --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mapper-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- mysql驱动 --&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>mysql<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.alibaba<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>druid-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-user-interface<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.common<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-amqp<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<p>启动类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableDiscoveryClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@MapperScan</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;com.leyou.user.mapper&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>UserApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>配置：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8085</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>ly-user-service<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">datasource</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">type</span>:<span style="color:#bbb"> </span>com.alibaba.druid.pool.DruidDataSource<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">driver-class-name</span>:<span style="color:#bbb"> </span>com.mysql.jdbc.Driver<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span>jdbc:mysql://127.0.0.1:3306/leyou?useUnicode=true&amp;characterEncoding=UTF8&amp;useSSL=false<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>root<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123456</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">rabbitmq</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">virtual-host</span>:<span style="color:#bbb"> </span>/leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span>localhost<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">redis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">192.168.1.100</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">eureka</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">client</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">service-url</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">defaultZone</span>:<span style="color:#bbb"> </span>http://127.0.0.1:10086/eureka<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">instance</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">prefer-ip-address</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ip-address</span>:<span style="color:#bbb"> </span><span style="color:#099">127.0.0.1</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">instance-id</span>:<span style="color:#bbb"> </span>${eureka.instance.ip-address}.${server.port}<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">lease-renewal-interval-in-seconds</span>:<span style="color:#bbb"> </span><span style="color:#099">5</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">lease-expiration-duration-in-seconds</span>:<span style="color:#bbb"> </span><span style="color:#099">15</span><span style="color:#bbb">
+</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">mybatis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">type-aliases-package</span>:<span style="color:#bbb"> </span>com.leyou.user.pojo<span style="color:#bbb">
+</span></code></pre></div><p>YAML</p>
+<p>父工程leyou-user的pom：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>leyou<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.parent<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.user<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>leyou-user<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;packaging&gt;</span>pom<span style="color:#000080">&lt;/packaging&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;modules&gt;</span>
+        <span style="color:#000080">&lt;module&gt;</span>leyou-user-interface<span style="color:#000080">&lt;/module&gt;</span>
+        <span style="color:#000080">&lt;module&gt;</span>leyou-user-service<span style="color:#000080">&lt;/module&gt;</span>
+    <span style="color:#000080">&lt;/modules&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<h3 id="14添加网关路由">1.4.添加网关路由</h3>
+<p>我们修改<code>ly-gateway</code>，添加路由规则，对<code>ly-user-service</code>进行路由:</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1.png">
+            <img class="mx-auto" alt="1532779772325" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1.png" />
+        </a>
+    </p>
+<p>1532779772325</p>
+<h2 id="2后台功能准备">2.后台功能准备</h2>
+<h3 id="21接口文档">2.1.接口文档</h3>
+<p>整个用户中心的开发，公司内面向接口的开发。</p>
+<p>现在项目经理已经设计好了接口文档。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527174356711.png">
+            <img class="mx-auto" alt="1527174356711" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527174356711.png" />
+        </a>
+    </p>
+<p>1527174356711</p>
+<p>我们将根据文档直接编写后台功能，不关心页面实现。</p>
+<h3 id="22数据结构">2.2.数据结构</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>tb_user<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> <span style="color:#000;font-weight:bold">AUTO_INCREMENT</span>,
+  <span style="color:#000;font-weight:bold">`</span>username<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;用户名&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>password<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">32</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;密码，加密存储&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>phone<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;注册手机号&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>created<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;创建时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>salt<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">32</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;密码加密的salt值&#39;</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span> (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>),
+  <span style="color:#000;font-weight:bold">UNIQUE</span> <span style="color:#000;font-weight:bold">KEY</span> <span style="color:#000;font-weight:bold">`</span>username<span style="color:#000;font-weight:bold">`</span> (<span style="color:#000;font-weight:bold">`</span>username<span style="color:#000;font-weight:bold">`</span>) <span style="color:#000;font-weight:bold">USING</span> BTREE
+) <span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB <span style="color:#000;font-weight:bold">AUTO_INCREMENT</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">28</span> <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">CHARSET</span><span style="color:#000;font-weight:bold">=</span>utf8 COMMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;用户表&#39;</span>;
+</code></pre></div><p>MYSQL</p>
+<p>数据结构比较简单，因为根据用户名查询的频率较高，所以我们给用户名创建了索引</p>
+<h3 id="23基本代码">2.3.基本代码</h3>
+<h4 id="231实体类">2.3.1.实体类</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_user&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">User</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#998;font-style:italic">//@GeneratedValue(strategy = GenerationType.IDENTITY)
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String username<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 用户名
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#000;font-weight:bold">private</span> String password<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 密码
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> String phone<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 电话
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> Date created<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 创建时间
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#000;font-weight:bold">private</span> String salt<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 密码的盐值
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>注意：为了安全考虑。这里对password和salt添加了注解@JsonIgnore，这样在json序列化时，就不会把password和salt返回。</p>
+<h4 id="232mapper">2.3.2.mapper</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">UserMapper</span> <span style="color:#000;font-weight:bold">extends</span> Mapper<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="233service">2.3.3.Service</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserService</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> UserMapper userMapper<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="234controller">2.3.4.controller</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UserController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> UserService userService<span style="color:#000;font-weight:bold">;</span>
+    
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h2 id="3数据验证功能">3.数据验证功能</h2>
+<h3 id="31接口说明">3.1.接口说明</h3>
+<p>实现用户数据的校验，主要包括对：手机号、用户名的唯一性校验。</p>
+<p><strong>接口路径：</strong></p>
+<pre><code class="language-fallback" data-lang="fallback">GET /check/{data}/{type}
+</code></pre><p><strong>参数说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>是否必须</th>
+<th>数据类型</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>data</td>
+<td>要校验的数据</td>
+<td>是</td>
+<td>String</td>
+<td>无</td>
+</tr>
+<tr>
+<td>type</td>
+<td>要校验的数据类型：1：用户名；2：手机；</td>
+<td>否</td>
+<td>Integer</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>返回结果：</strong></p>
+<p>返回布尔类型结果：</p>
+<ul>
+<li>true：可用</li>
+<li>false：不可用</li>
+</ul>
+<p>状态码：</p>
+<ul>
+<li>200：校验成功</li>
+<li>400：参数有误</li>
+<li>500：服务器内部异常</li>
+</ul>
+<h3 id="32controller">3.2.controller</h3>
+<p>因为有了接口，我们可以不关心页面，所有需要的东西都一清二楚：</p>
+<ul>
+<li>请求方式：GET</li>
+<li>请求路径：/check/{data}/{type}</li>
+<li>请求参数：data,type</li>
+<li>返回结果：true或false</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * 校验数据是否可用
+</span><span style="color:#998;font-style:italic">  * @param data
+</span><span style="color:#998;font-style:italic">  * @param type
+</span><span style="color:#998;font-style:italic">  * @return
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/check/{data}/{type}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Boolean<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">checkData</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;data&#34;</span><span style="color:#000;font-weight:bold">)</span> String data<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;type&#34;</span><span style="color:#000;font-weight:bold">)</span> Integer type<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Boolean flag <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">checkData</span><span style="color:#000;font-weight:bold">(</span>data<span style="color:#000;font-weight:bold">,</span> type<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>flag<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="33service">3.3.Service</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> Boolean <span style="color:#900;font-weight:bold">checkData</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">,</span> Integer type<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    User user <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> User<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">switch</span> <span style="color:#000;font-weight:bold">(</span>type<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">case</span> 1<span style="color:#000;font-weight:bold">:</span>
+            user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setUsername</span><span style="color:#000;font-weight:bold">(</span>data<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">break</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">case</span> 2<span style="color:#000;font-weight:bold">:</span>
+            user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPhone</span><span style="color:#000;font-weight:bold">(</span>data<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">break</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">default</span><span style="color:#000;font-weight:bold">:</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">INVALID_USER_DATA_TYPE</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">// 校验user是否可用 返回1表示已经被注册过则不可用 返回0则可用
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">int</span> count <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectCount</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> count <span style="color:#000;font-weight:bold">==</span> 0<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="34测试">3.4.测试</h3>
+<p>我们在数据库插入一条假数据：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781696303.png">
+            <img class="mx-auto" alt="1532781696303" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781696303.png" />
+        </a>
+    </p>
+<p>1532781696303</p>
+<p>然后在浏览器调用接口，测试：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781679924.png">
+            <img class="mx-auto" alt="1532781679924" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781679924.png" />
+        </a>
+    </p>
+<p>1532781679924</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781726835.png">
+            <img class="mx-auto" alt="1532781726835" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1532781726835.png" />
+        </a>
+    </p>
+<p>1532781726835</p>
+<h2 id="4阿里大于短信服务">4.阿里大于短信服务</h2>
+<h3 id="41demo">4.1.demo</h3>
+<p>注册页面上有短信发送的按钮，当用户点击发送短信，我们需要生成验证码，发送给用户。我们使用阿里提供的阿里大于来实现短信发送。</p>
+<h3 id="42创建短信微服务">4.2.创建短信微服务</h3>
+<p>因为系统中不止注册一个地方需要短信发送，因此我们将短信发送抽取为微服务：<code>leyou-sms-service</code>，凡是需要的地方都可以使用。</p>
+<p>另外，因为短信发送API调用时长的不确定性，为了提高程序的响应速度，短信发送我们都将采用异步发送方式，即：</p>
+<ul>
+<li>短信服务监听MQ消息，收到消息后发送短信。</li>
+<li>其它服务要发送短信时，通过MQ通知短信微服务。</li>
+</ul>
+<h4 id="421创建module">4.2.1.创建module</h4>
+<p>省略。</p>
+<h4 id="422pom">4.2.2.pom</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>leyou<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.parent<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-sms<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+    <span style="color:#000080">&lt;dependencies&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-amqp<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.aliyun<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>aliyun-java-sdk-core<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>4.0.6<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.aliyun<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>aliyun-java-sdk-dysmsapi<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.1.0<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<h4 id="423编写启动类">4.2.3.编写启动类</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SmsApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>SmsApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="424编写applicationyml">4.2.4.编写application.yml</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8086</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>ly-sms-service<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">rabbitmq</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span>localhost<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">virtual-host</span>:<span style="color:#bbb"> </span>/leyou<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">redis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">6379</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">192.168.1.105</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">leyou</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">sms</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">accessKeyId</span>:<span style="color:#bbb"> </span>JWffwFJIwada<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 你自己的accessKeyId</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">accessKeySecret</span>:<span style="color:#bbb"> </span>aySRliswq8fe7rF9gQyy1Izz4MQ<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 你自己的AccessKeySecret</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">signName</span>:<span style="color:#bbb"> </span>乐优商城<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 签名名称</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">verifyCodeTemplate</span>:<span style="color:#bbb"> </span>SMS_133976814<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 模板名称</span><span style="color:#bbb">
+</span></code></pre></div><p>YAML</p>
+<h3 id="43编写短信工具类">4.3.编写短信工具类</h3>
+<h4 id="431属性抽取">4.3.1.属性抽取</h4>
+<p>我们在application.yml中写了属性：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">leyou</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">sms</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">accessKeyId</span>:<span style="color:#bbb"> </span>JWffwFJIwada<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 你自己的accessKeyId</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">accessKeySecret</span>:<span style="color:#bbb"> </span>aySRliswq8fe7rF9gQyy1Izz4MQ<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 你自己的AccessKeySecret</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">signName</span>:<span style="color:#bbb"> </span>乐优商城<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 签名名称</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">verifyCodeTemplate</span>:<span style="color:#bbb"> </span>SMS_133976814<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 模板名称</span><span style="color:#bbb">
+</span></code></pre></div><p>YAML</p>
+<p>然后注入到属性类中：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SmsProperties
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/8 11:08
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#3c5d5d;font-weight:bold">@ConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>prefix <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;leyou.sms&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SmsProperties</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> String accessKeyId<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String accessKeySecret<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String signName<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String verifyCodeTemplate<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getAccessKeyId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> accessKeyId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setAccessKeyId</span><span style="color:#000;font-weight:bold">(</span>String accessKeyId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">accessKeyId</span> <span style="color:#000;font-weight:bold">=</span> accessKeyId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getAccessKeySecret</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> accessKeySecret<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setAccessKeySecret</span><span style="color:#000;font-weight:bold">(</span>String accessKeySecret<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">accessKeySecret</span> <span style="color:#000;font-weight:bold">=</span> accessKeySecret<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getSignName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> signName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setSignName</span><span style="color:#000;font-weight:bold">(</span>String signName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">signName</span> <span style="color:#000;font-weight:bold">=</span> signName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getVerifyCodeTemplate</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> verifyCodeTemplate<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setVerifyCodeTemplate</span><span style="color:#000;font-weight:bold">(</span>String verifyCodeTemplate<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">verifyCodeTemplate</span> <span style="color:#000;font-weight:bold">=</span> verifyCodeTemplate<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="432工具类">4.3.2.工具类</h4>
+<p>我们把阿里提供的demo进行简化和抽取，封装一个工具类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.sms.utils</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.DefaultAcsClient</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.IAcsClient</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.http.MethodType</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.profile.DefaultProfile</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.aliyuncs.profile.IClientProfile</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.leyou.sms.config.SmsProperties</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.apache.commons.lang3.StringUtils</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.slf4j.Logger</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.slf4j.LoggerFactory</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.boot.context.properties.EnableConfigurationProperties</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.data.redis.core.StringRedisTemplate</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Component</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.concurrent.TimeUnit</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SmsUtils
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/8 11:12
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>SmsProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SmsUtils</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SmsProperties prop<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> StringRedisTemplate redisTemplate<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">//产品名称:云通信短信API产品,开发者无需替换
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String product <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;Dysmsapi&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">//产品域名,开发者无需替换
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String domain <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;dysmsapi.aliyuncs.com&#34;</span><span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>SmsUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String KEY_PREFIX <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;sms:phone:&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">long</span> SMS_MIN_INTERVAL_IN_MILLIS <span style="color:#000;font-weight:bold">=</span> 60000<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 1min
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> SendSmsResponse <span style="color:#900;font-weight:bold">sendSms</span><span style="color:#000;font-weight:bold">(</span>String phone<span style="color:#000;font-weight:bold">,</span> String code<span style="color:#000;font-weight:bold">,</span> String signName<span style="color:#000;font-weight:bold">,</span> String template<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 按照手机号码限流 根据手机号取出时间 与当前时间对比 小于1分钟 就不能再发
+</span><span style="color:#998;font-style:italic"></span>        String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> phone<span style="color:#000;font-weight:bold">;</span>
+        String lastTime <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">opsForValue</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isNotBlank</span><span style="color:#000;font-weight:bold">(</span>lastTime<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            Long last <span style="color:#000;font-weight:bold">=</span> Long<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valueOf</span><span style="color:#000;font-weight:bold">(</span>lastTime<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">currentTimeMillis</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">-</span> last <span style="color:#000;font-weight:bold">&lt;</span> SMS_MIN_INTERVAL_IN_MILLIS<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;【短信服务】发送短信频率过高，被拦截，手机号码：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> phone<span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//可自助调整超时时间
+</span><span style="color:#998;font-style:italic"></span>            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setProperty</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;sun.net.client.defaultConnectTimeout&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;10000&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setProperty</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;sun.net.client.defaultReadTimeout&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;10000&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">//初始化acsClient,暂不支持region化
+</span><span style="color:#998;font-style:italic"></span>            IClientProfile profile <span style="color:#000;font-weight:bold">=</span> DefaultProfile<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getProfile</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;cn-hangzhou&#34;</span><span style="color:#000;font-weight:bold">,</span> prop<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAccessKeyId</span><span style="color:#000;font-weight:bold">(),</span> prop<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAccessKeySecret</span><span style="color:#000;font-weight:bold">());</span>
+            DefaultProfile<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addEndpoint</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;cn-hangzhou&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;cn-hangzhou&#34;</span><span style="color:#000;font-weight:bold">,</span> product<span style="color:#000;font-weight:bold">,</span> domain<span style="color:#000;font-weight:bold">);</span>
+            IAcsClient acsClient <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> DefaultAcsClient<span style="color:#000;font-weight:bold">(</span>profile<span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">//组装请求对象-具体描述见控制台-文档部分内容
+</span><span style="color:#998;font-style:italic"></span>            SendSmsRequest request <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SendSmsRequest<span style="color:#000;font-weight:bold">();</span>
+            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setMethod</span><span style="color:#000;font-weight:bold">(</span>MethodType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">POST</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">//必填:待发送手机号
+</span><span style="color:#998;font-style:italic"></span>            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPhoneNumbers</span><span style="color:#000;font-weight:bold">(</span>phone<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">//必填:短信签名-可在短信控制台中找到
+</span><span style="color:#998;font-style:italic"></span>            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSignName</span><span style="color:#000;font-weight:bold">(</span>signName<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">//必填:短信模板-可在短信控制台中找到
+</span><span style="color:#998;font-style:italic"></span>            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setTemplateCode</span><span style="color:#000;font-weight:bold">(</span>template<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">//可选:模板中的变量替换JSON串,如模板内容为&#34;亲爱的${name},您的验证码为${code}&#34;时,此处的值为
+</span><span style="color:#998;font-style:italic"></span>            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setTemplateParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;{\&#34;code\&#34;:\&#34;&#34;</span> <span style="color:#000;font-weight:bold">+</span> code <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;\&#34;}&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">//选填-上行短信扩展码(无特殊需求用户请忽略此字段)
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//request.setSmsUpExtendCode(&#34;90997&#34;);
+</span><span style="color:#998;font-style:italic"></span>
+            <span style="color:#998;font-style:italic">//可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
+</span><span style="color:#998;font-style:italic"></span>            request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOutId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;123456&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">//hint 此处可能会抛出异常，注意catch
+</span><span style="color:#998;font-style:italic"></span>            SendSmsResponse sendSmsResponse <span style="color:#000;font-weight:bold">=</span> acsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAcsResponse</span><span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">);</span>
+
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;发送短信状态：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> sendSmsResponse<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCode</span><span style="color:#000;font-weight:bold">());</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;发送短信消息：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> sendSmsResponse<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span><span style="color:#d14">&#34;OK&#34;</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>sendSmsResponse<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCode</span><span style="color:#000;font-weight:bold">()))</span> <span style="color:#000;font-weight:bold">{</span>
+                logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;【短信服务】发送短信失败，phone：{}，原因：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> phone<span style="color:#000;font-weight:bold">,</span> sendSmsResponse<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#998;font-style:italic">// 发送短信日志
+</span><span style="color:#998;font-style:italic"></span>            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;【短信服务】，发送短信验证码。手机号：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> phone<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 这里发送成功之后将手机号和当前时间存入redis 指定生存时间为1min 1min后自动删除
+</span><span style="color:#998;font-style:italic"></span>            redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">opsForValue</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">set</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valueOf</span><span style="color:#000;font-weight:bold">(</span>System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">currentTimeMillis</span><span style="color:#000;font-weight:bold">()),</span> 1<span style="color:#000;font-weight:bold">,</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MINUTES</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> sendSmsResponse<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;【短信服务】发送短信异常，手机号码：{}，原因：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> phone<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="44编写消息监听器">4.4.编写消息监听器</h3>
+<p>接下来，编写消息监听器，当接收到消息后，我们发送短信。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SmsListener
+</span><span style="color:#998;font-style:italic"> * @Description 异步发送短信
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/8 11:16
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>SmsProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SmsListener</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SmsUtils smsUtils<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SmsProperties prop<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>SmsListener<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description 发送短信验证码
+</span><span style="color:#998;font-style:italic">     * @Param [msg]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/8 11:18
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>bindings <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@QueueBinding</span><span style="color:#000;font-weight:bold">(</span>
+            value <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Queue</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;leyou.sms.queue&#34;</span><span style="color:#000;font-weight:bold">,</span> durable <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+            exchange <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Exchange</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;leyou.sms.exchange&#34;</span><span style="color:#000;font-weight:bold">,</span> type <span style="color:#000;font-weight:bold">=</span> ExchangeTypes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">TOPIC</span><span style="color:#000;font-weight:bold">,</span> ignoreDeclarationExceptions <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+            key <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#34;sms.verify.code&#34;</span><span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">))</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">listenSms</span><span style="color:#000;font-weight:bold">(</span>Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> msg<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#998;font-style:italic">//        if (msg == null || msg.size() &lt;= 0) {
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>msg<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 放弃处理
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        String phone <span style="color:#000;font-weight:bold">=</span> msg<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;phone&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        String code <span style="color:#000;font-weight:bold">=</span> msg<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;code&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isBlank</span><span style="color:#000;font-weight:bold">(</span>phone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">||</span> StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isBlank</span><span style="color:#000;font-weight:bold">(</span>code<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 放弃处理
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#998;font-style:italic">// 发送消息
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">smsUtils</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendSms</span><span style="color:#000;font-weight:bold">(</span>phone<span style="color:#000;font-weight:bold">,</span> code<span style="color:#000;font-weight:bold">,</span> prop<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSignName</span><span style="color:#000;font-weight:bold">(),</span> prop<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getVerifyCodeTemplate</span><span style="color:#000;font-weight:bold">());</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>我们注意到，消息体是一个Map，里面有两个属性：</p>
+<ul>
+<li>phone：电话号码</li>
+<li>code：短信验证码</li>
+</ul>
+<h3 id="45启动">4.5.启动</h3>
+<p>启动项目，然后查看RabbitMQ控制台，发现交换机已经创建：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239600218.png">
+            <img class="mx-auto" alt="1527239600218" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239600218.png" />
+        </a>
+    </p>
+<p>1527239600218</p>
+<p>队列也已经创建：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239658153.png">
+            <img class="mx-auto" alt="1527239658153" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239658153.png" />
+        </a>
+    </p>
+<p>1527239658153</p>
+<p>并且绑定：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239743836.png">
+            <img class="mx-auto" alt="1527239743836" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527239743836.png" />
+        </a>
+    </p>
+<p>1527239743836</p>
+<h2 id="5发送短信功能">5.发送短信功能</h2>
+<p>短信微服务已经准备好，我们就可以继续编写用户中心接口了。</p>
+<h3 id="51接口说明">5.1.接口说明</h3>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527238127932.png">
+            <img class="mx-auto" alt="1527238127932" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527238127932.png" />
+        </a>
+    </p>
+<p>1527238127932</p>
+<p>这里的业务逻辑是这样的：</p>
+<ul>
+<li>1）我们接收页面发送来的手机号码</li>
+<li>2）生成一个随机验证码</li>
+<li>3）将验证码保存在服务端</li>
+<li>4）发送短信，将验证码发送到用户手机</li>
+</ul>
+<p>那么问题来了：验证码保存在哪里呢？</p>
+<p>验证码有一定有效期，一般是5分钟，我们可以利用Redis的过期机制来保存。</p>
+<h3 id="53controller">5.3.controller</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 发送手机验证码
+</span><span style="color:#998;font-style:italic"> * @param phone
+</span><span style="color:#998;font-style:italic"> * @return
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/code&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">sendCode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;phone&#34;</span><span style="color:#000;font-weight:bold">)</span> String phone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sendCode</span><span style="color:#000;font-weight:bold">(</span>phone<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">NO_CONTENT</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="54service">5.4.service</h3>
+<p>这里的逻辑会稍微复杂：</p>
+<ul>
+<li>生成随机验证码</li>
+<li>将验证码保存到Redis中，用来在注册的时候验证</li>
+<li>发送验证码到<code>leyou-sms-service</code>服务，发送短信</li>
+</ul>
+<p>因此，我们需要引入Redis和AMQP：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-amqp<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<p>添加RabbitMQ和Redis配置：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">redis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">192.168.56.101</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">rabbitmq</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">192.168.56.101</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span>leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">virtual-host</span>:<span style="color:#bbb"> </span>/leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">template</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">retry</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">enabled</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">initial-interval</span>:<span style="color:#bbb"> </span>10000ms<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">max-interval</span>:<span style="color:#bbb"> </span>210000ms<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">multiplier</span>:<span style="color:#bbb"> </span><span style="color:#099">2</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">publisher-confirms</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></code></pre></div><p>YAML</p>
+<p>另外还要用到工具类，生成6位随机码，这个我们封装到了<code>leyou-common</code>中，因此需要引入依赖：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.common<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>${leyou.latest.version}<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<p>生成随机码的工具：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 生成指定位数的随机数字
+</span><span style="color:#998;font-style:italic"> * @param len 随机数的位数
+</span><span style="color:#998;font-style:italic"> * @return 生成的随机数
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> String <span style="color:#900;font-weight:bold">generateCode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> len<span style="color:#000;font-weight:bold">){</span>
+    len <span style="color:#000;font-weight:bold">=</span> Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">min</span><span style="color:#000;font-weight:bold">(</span>len<span style="color:#000;font-weight:bold">,</span> 8<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#458;font-weight:bold">int</span> min <span style="color:#000;font-weight:bold">=</span> Double<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valueOf</span><span style="color:#000;font-weight:bold">(</span>Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">pow</span><span style="color:#000;font-weight:bold">(</span>10<span style="color:#000;font-weight:bold">,</span> len <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">)).</span><span style="color:#008080">intValue</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#458;font-weight:bold">int</span> num <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Random<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">nextInt</span><span style="color:#000;font-weight:bold">(</span>
+        Double<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valueOf</span><span style="color:#000;font-weight:bold">(</span>Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">pow</span><span style="color:#000;font-weight:bold">(</span>10<span style="color:#000;font-weight:bold">,</span> len <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">)).</span><span style="color:#008080">intValue</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">+</span> min<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">return</span> String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valueOf</span><span style="color:#000;font-weight:bold">(</span>num<span style="color:#000;font-weight:bold">).</span><span style="color:#008080">substring</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">,</span>len<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>Service代码：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+<span style="color:#000;font-weight:bold">private</span> StringRedisTemplate redisTemplate<span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+<span style="color:#000;font-weight:bold">private</span> AmqpTemplate amqpTemplate<span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String KEY_PREFIX <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;user:code:phone:&#34;</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>UserService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendCode</span><span style="color:#000;font-weight:bold">(</span>String phone<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 生成验证码
+</span><span style="color:#998;font-style:italic"></span>    String code <span style="color:#000;font-weight:bold">=</span> NumberUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">generateCode</span><span style="color:#000;font-weight:bold">(</span>6<span style="color:#000;font-weight:bold">);</span>
+    Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> msg <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    msg<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;code&#34;</span><span style="color:#000;font-weight:bold">,</span> code<span style="color:#000;font-weight:bold">);</span>
+    msg<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;phone&#34;</span><span style="color:#000;font-weight:bold">,</span> phone<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 发送验证码
+</span><span style="color:#998;font-style:italic"></span>    amqpTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">convertAndSend</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;leyou.sms.exchange&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;sms.verify.code&#34;</span><span style="color:#000;font-weight:bold">,</span> msg<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 保存验证码
+</span><span style="color:#998;font-style:italic"></span>    String key <span style="color:#000;font-weight:bold">=</span> KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> phone<span style="color:#000;font-weight:bold">;</span>
+    redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">opsForValue</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">set</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">,</span> code<span style="color:#000;font-weight:bold">,</span> 5<span style="color:#000;font-weight:bold">,</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MINUTES</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>注意：要设置短信验证码在Redis的缓存时间为5分钟</p>
+<h3 id="55测试">5.5.测试</h3>
+<p>通过PostMan发送请求试试：</p>
+<p>查看Redis中的数据：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527240610713.png">
+            <img class="mx-auto" alt="1527240610713" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527240610713.png" />
+        </a>
+    </p>
+<p>1527240610713</p>
+<h2 id="6注册功能">6.注册功能</h2>
+<h3 id="61接口说明">6.1.接口说明</h3>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527240855176.png">
+            <img class="mx-auto" alt="1527240855176" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527240855176.png" />
+        </a>
+    </p>
+<p>1527240855176</p>
+<h3 id="62controller">6.2.controller</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 注册
+</span><span style="color:#998;font-style:italic"> * @param user
+</span><span style="color:#998;font-style:italic"> * @param code
+</span><span style="color:#998;font-style:italic"> * @return
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/register&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">register</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Valid</span> User user<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;code&#34;</span><span style="color:#000;font-weight:bold">)</span> String code<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Boolean flag <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">register</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">,</span> code<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>flag <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span> <span style="color:#000;font-weight:bold">||</span> <span style="color:#000;font-weight:bold">!</span>flag<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">INVALID_VERIFY_PARAM_CODE</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CREATED</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="63service">6.3.service</h3>
+<p>基本逻辑：</p>
+<ul>
+<li>1）校验短信验证码</li>
+<li>2）生成盐</li>
+<li>3）对密码加密</li>
+<li>4）写入数据库</li>
+<li>5）删除Redis中的验证码</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> Boolean <span style="color:#900;font-weight:bold">register</span><span style="color:#000;font-weight:bold">(</span>User user<span style="color:#000;font-weight:bold">,</span> String code<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 校验验证码
+</span><span style="color:#998;font-style:italic"></span>    String codeFromCache <span style="color:#000;font-weight:bold">=</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">opsForValue</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPhone</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>codeFromCache <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span> <span style="color:#000;font-weight:bold">||</span> <span style="color:#000;font-weight:bold">!</span>codeFromCache<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>code<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ERROR_VERIFY_CODE</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">);</span>
+    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCreated</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> Date<span style="color:#000;font-weight:bold">());</span>
+    String salt <span style="color:#000;font-weight:bold">=</span> UUIDUtil<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">dealUUID</span><span style="color:#000;font-weight:bold">();</span>
+    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSalt</span><span style="color:#000;font-weight:bold">(</span>salt<span style="color:#000;font-weight:bold">);</span>
+    String password <span style="color:#000;font-weight:bold">=</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPassword</span><span style="color:#000;font-weight:bold">();</span>
+    String encryptPw <span style="color:#000;font-weight:bold">=</span> EncryptDecryptData<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">encrypt</span><span style="color:#000;font-weight:bold">(</span>password<span style="color:#000;font-weight:bold">,</span> salt<span style="color:#000;font-weight:bold">);</span>
+    user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPassword</span><span style="color:#000;font-weight:bold">(</span>encryptPw<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#458;font-weight:bold">boolean</span> bool <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertSelective</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">==</span> 1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 如果注册成功,删除redis中的code
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>bool<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>KEY_PREFIX <span style="color:#000;font-weight:bold">+</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPhone</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">info</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;删除缓存验证码失败，code：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> code<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">return</span> bool<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="65服务端数据校验">6.5.服务端数据校验</h3>
+<p>刚才虽然实现了注册，但是服务端并没有进行数据校验，而前端的校验是很容易被有心人绕过的。所以我们必须在后台添加数据校验功能：</p>
+<p>我们这里会使用Hibernate-Validator框架完成数据校验：</p>
+<p>而SpringBoot的web启动器中已经集成了相关依赖：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527244265451.png">
+            <img class="mx-auto" alt="1527244265451" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527244265451.png" />
+        </a>
+    </p>
+<p>1527244265451</p>
+<h4 id="651什么是hibernate-validator">6.5.1.什么是Hibernate Validator</h4>
+<p>Hibernate Validator是Hibernate提供的一个开源框架，使用注解方式非常方便的实现服务端的数据校验。</p>
+<p>官网：http://hibernate.org/validator/</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527244393041.png">
+            <img class="mx-auto" alt="1527244393041" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527244393041.png" />
+        </a>
+    </p>
+<p>1527244393041</p>
+<p><strong>hibernate Validator</strong> 是 Bean Validation 的参考实现 。</p>
+<p>Hibernate Validator 提供了 JSR 303 规范中所有内置 constraint（约束） 的实现，除此之外还有一些附加的 constraint。</p>
+<p>在日常开发中，Hibernate Validator经常用来验证bean的字段，基于注解，方便快捷高效。</p>
+<h4 id="652bean校验的注解">6.5.2.Bean校验的注解</h4>
+<p>常用注解如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Constraint</strong></th>
+<th><strong>详细信息</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>@Valid</strong></td>
+<td>被注释的元素是一个对象，需要检查此对象的所有字段值</td>
+</tr>
+<tr>
+<td><strong>@Null</strong></td>
+<td>被注释的元素必须为 null</td>
+</tr>
+<tr>
+<td><strong>@NotNull</strong></td>
+<td>被注释的元素必须不为 null</td>
+</tr>
+<tr>
+<td><strong>@AssertTrue</strong></td>
+<td>被注释的元素必须为 true</td>
+</tr>
+<tr>
+<td><strong>@AssertFalse</strong></td>
+<td>被注释的元素必须为 false</td>
+</tr>
+<tr>
+<td><strong>@Min(value)</strong></td>
+<td>被注释的元素必须是一个数字，其值必须大于等于指定的最小值</td>
+</tr>
+<tr>
+<td><strong>@Max(value)</strong></td>
+<td>被注释的元素必须是一个数字，其值必须小于等于指定的最大值</td>
+</tr>
+<tr>
+<td><strong>@DecimalMin(value)</strong></td>
+<td>被注释的元素必须是一个数字，其值必须大于等于指定的最小值</td>
+</tr>
+<tr>
+<td><strong>@DecimalMax(value)</strong></td>
+<td>被注释的元素必须是一个数字，其值必须小于等于指定的最大值</td>
+</tr>
+<tr>
+<td><strong>@Size(max, min)</strong></td>
+<td>被注释的元素的大小必须在指定的范围内</td>
+</tr>
+<tr>
+<td><strong>@Digits (integer, fraction)</strong></td>
+<td>被注释的元素必须是一个数字，其值必须在可接受的范围内</td>
+</tr>
+<tr>
+<td><strong>@Past</strong></td>
+<td>被注释的元素必须是一个过去的日期</td>
+</tr>
+<tr>
+<td><strong>@Future</strong></td>
+<td>被注释的元素必须是一个将来的日期</td>
+</tr>
+<tr>
+<td><strong>@Pattern(value)</strong></td>
+<td>被注释的元素必须符合指定的正则表达式</td>
+</tr>
+<tr>
+<td><strong>@Email</strong></td>
+<td>被注释的元素必须是电子邮箱地址</td>
+</tr>
+<tr>
+<td><strong>@Length</strong></td>
+<td>被注释的字符串的大小必须在指定的范围内</td>
+</tr>
+<tr>
+<td><strong>@NotEmpty</strong></td>
+<td>被注释的字符串的必须非空</td>
+</tr>
+<tr>
+<td><strong>@Range</strong></td>
+<td>被注释的元素必须在合适的范围内</td>
+</tr>
+<tr>
+<td><strong>@NotBlank</strong></td>
+<td>被注释的字符串的必须非空</td>
+</tr>
+<tr>
+<td><strong>@URL(protocol=,host=, port=,regexp=, flags=)</strong></td>
+<td>被注释的字符串必须是一个有效的url</td>
+</tr>
+<tr>
+<td><strong>@CreditCardNumber</strong></td>
+<td>被注释的字符串必须通过Luhn校验算法，银行卡，信用卡等号码一般都用Luhn计算合法性</td>
+</tr>
+</tbody>
+</table>
+<h4 id="653给user添加校验">6.5.3.给User添加校验</h4>
+<p>我们在<code>ly-user-interface</code>中添加Hibernate-Validator依赖：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.hibernate.validator<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>hibernate-validator<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<p>我们在User对象的部分属性上添加注解：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_user&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">User</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Length</span><span style="color:#000;font-weight:bold">(</span>min <span style="color:#000;font-weight:bold">=</span> 4<span style="color:#000;font-weight:bold">,</span> max <span style="color:#000;font-weight:bold">=</span> 30<span style="color:#000;font-weight:bold">,</span> message <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;用户名只能在4~30位之间&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String username<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 用户名
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Length</span><span style="color:#000;font-weight:bold">(</span>min <span style="color:#000;font-weight:bold">=</span> 4<span style="color:#000;font-weight:bold">,</span> max <span style="color:#000;font-weight:bold">=</span> 30<span style="color:#000;font-weight:bold">,</span> message <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;用户名只能在4~30位之间&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String password<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 密码
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@Pattern</span><span style="color:#000;font-weight:bold">(</span>regexp <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;^1[35678]\\d{9}$&#34;</span><span style="color:#000;font-weight:bold">,</span> message <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;手机号格式不正确&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> String phone<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 电话
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> Date created<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 创建时间
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#000;font-weight:bold">private</span> String salt<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 密码的盐值
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="654在controller上进行控制">6.5.4.在controller上进行控制</h4>
+<p>在controller中只需要给User添加 @Valid注解即可。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247334410.png">
+            <img class="mx-auto" alt="1527247334410" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247334410.png" />
+        </a>
+    </p>
+<p>1527247334410</p>
+<h4 id="655测试">6.5.5.测试</h4>
+<p>我们故意填错：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247422251.png">
+            <img class="mx-auto" alt="1527247422251" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247422251.png" />
+        </a>
+    </p>
+<p>1527247422251</p>
+<p>然后SpringMVC会自动返回错误信息：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247492172.png">
+            <img class="mx-auto" alt="1527247492172" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/user/1527247492172.png" />
+        </a>
+    </p>
+<p>1527247492172</p>
+<h2 id="7根据用户名和密码查询用户">7.根据用户名和密码查询用户</h2>
+<h3 id="71接口说明">7.1.接口说明</h3>
+<h4 id="功能说明">功能说明</h4>
+<p>查询功能，根据参数中的用户名和密码查询指定用户</p>
+<h4 id="接口路径">接口路径</h4>
+<pre><code class="language-fallback" data-lang="fallback">GET /query
+</code></pre><h4 id="参数说明">参数说明：</h4>
+<p>form表单格式</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>是否必须</th>
+<th>数据类型</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>username</td>
+<td>用户名，格式为4~30位字母、数字、下划线</td>
+<td>是</td>
+<td>String</td>
+<td>无</td>
+</tr>
+<tr>
+<td>password</td>
+<td>用户密码，格式为4~30位字母、数字、下划线</td>
+<td>是</td>
+<td>String</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<h4 id="返回结果">返回结果：</h4>
+<p>用户的json格式数据</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+    <span style="color:#000080">&#34;id&#34;</span>: <span style="color:#099">6572312</span>,
+    <span style="color:#000080">&#34;username&#34;</span>:<span style="color:#d14">&#34;test&#34;</span>,
+    <span style="color:#000080">&#34;phone&#34;</span>:<span style="color:#d14">&#34;13688886666&#34;</span>,
+    <span style="color:#000080">&#34;created&#34;</span>: <span style="color:#099">1342432424</span>
+}
+</code></pre></div><p>JSON</p>
+<p>状态码：</p>
+<ul>
+<li>200：注册成功</li>
+<li>400：用户名或密码错误</li>
+<li>500：服务器内部异常，注册失败</li>
+</ul>
+<h3 id="72controller">7.2.controller</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 根据用户名和密码查询用户
+</span><span style="color:#998;font-style:italic"> * @param username
+</span><span style="color:#998;font-style:italic"> * @param password
+</span><span style="color:#998;font-style:italic"> * @return
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/query&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>User<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">queryUserByUsernameAndPassword</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">)</span> String username<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@RequestParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;password&#34;</span><span style="color:#000;font-weight:bold">)</span> String password<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    User user <span style="color:#000;font-weight:bold">=</span> userService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">queryUserByUsernameAndPassword</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">,</span> password<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>user <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">INVALID_NAME_PWD</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">body</span><span style="color:#000;font-weight:bold">(</span>user<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="73service">7.3.service</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> User <span style="color:#900;font-weight:bold">queryUserByUsernameAndPassword</span><span style="color:#000;font-weight:bold">(</span>String username<span style="color:#000;font-weight:bold">,</span> String password<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    User record <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> User<span style="color:#000;font-weight:bold">();</span>
+    record<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setUsername</span><span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">);</span>
+    User user <span style="color:#000;font-weight:bold">=</span> userMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectOne</span><span style="color:#000;font-weight:bold">(</span>record<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 校验用户名
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>user <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    String salt <span style="color:#000;font-weight:bold">=</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSalt</span><span style="color:#000;font-weight:bold">();</span>
+    String pwd <span style="color:#000;font-weight:bold">=</span> user<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPassword</span><span style="color:#000;font-weight:bold">();</span>
+    String decryptPw <span style="color:#000;font-weight:bold">=</span> EncryptDecryptData<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">decrypt</span><span style="color:#000;font-weight:bold">(</span>pwd<span style="color:#000;font-weight:bold">,</span> salt<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 校验密码
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>decryptPw<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>password<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">return</span> user<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>要注意，查询时也要对密码进行加密后判断是否一致。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/register-step.html">https://chanservy.github.io/2021/04/09/register-step.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/mq-data-together.html">RabbitMQ及数据同步</a></li>
+        
+        <li><a href="/2021/04/09/goods-details-page-static.html">商品详情及静态化</a></li>
+        
+        <li><a href="/2021/04/09/search-service.html">项目中的搜索服务</a></li>
+        
+        <li><a href="/2021/04/09/dianshangxiangmufenxi.html">电商项目中商品的分析和数据库设计</a></li>
+        
+        <li><a href="/2021/04/09/load-fastDFS-with-nginx-on-centos.html">Centos下安装FastDFS并添加Nginx模块</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+                <li><a href='/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1'>异步发送短信</a></li>
+                
+                <li><a href='/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81'>短信限流</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

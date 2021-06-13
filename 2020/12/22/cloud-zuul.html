@@ -1,0 +1,1496 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Cloud之Zuul网关(H版) | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Cloud之Zuul网关(H版) - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-22T16:27:46&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-22T16:27:46&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Cloud之Zuul网关(H版).">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/cloud-zuul.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一什么是网关">一、什么是网关</a></li>
+    <li><a href="#二zuul网关">二、Zuul网关</a>
+      <ul>
+        <li><a href="#1zuul路由案例">1、Zuul路由案例</a></li>
+        <li><a href="#2自定义路由规则">2、自定义路由规则</a></li>
+        <li><a href="#3zuul自定义过滤器">3、Zuul自定义过滤器</a></li>
+        <li><a href="#4-在-zuul上配置熔断器">4、 在 Zuul上配置熔断器</a></li>
+        <li><a href="#5包装异常页面">5、包装异常页面</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Cloud之Zuul网关(H版)</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月22日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Cloud'>Spring Cloud</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：Spring Cloud之Zuul网关(H版)。</p>
+<h2 id="一什么是网关">一、什么是网关</h2>
+<p>API Gateway，是系统的唯一对外的入口，介于客户端和服务器端之间的中间层，处理非业务功能 提供路由请求、鉴权、监控、缓存、限流等功能。</p>
+<ul>
+<li>统一接入
+<ol>
+<li>智能路由</li>
+<li>AB测试、灰度测试</li>
+<li>负载均衡、容灾处理</li>
+<li>日志埋点（类似Nginx日志）</li>
+</ol>
+</li>
+<li>流量监控
+<ol>
+<li>限流处理</li>
+<li>服务降级</li>
+</ol>
+</li>
+<li>安全防护
+<ol>
+<li>鉴权处理</li>
+<li>监控</li>
+<li>机器网络隔离</li>
+</ol>
+</li>
+</ul>
+<p>主流的网关：</p>
+<ul>
+<li>Zuul：是Netflix开源的微服务网关，和Eureka,Ribbon,Hystrix等组件配合使用，Zuul 2.0比1.0的性能提高很多 。</li>
+<li>kong: 由Mashape公司开源的，基于Nginx的API gateway 。</li>
+<li>nginx+lua：是一个高性能的HTTP和反向代理服务器,lua是脚本语言，让Nginx执行Lua脚本，并且高并发、非阻塞的处理各种请求 。</li>
+</ul>
+<p>下面我们主要来说Zuul。</p>
+<h2 id="二zuul网关">二、Zuul网关</h2>
+<p>Zuul 是分布式 Spring Cloud 项目的流量入口，理论上所有进入到微服务系统的请求都要经过 zuul 来过滤和路由。Zuul 作为路由网关组件，在微服务结构中有着重要的作用。</p>
+<ul>
+<li>Zuul 、 Ribbon 以及 Eureka 相结合，可以实现智能路由和负载均衡的功能， Zuul 能够将请求流量按照某种策略分发到集群状态的多个服务实例。</li>
+<li>网关将所有服务的 API 接口统一聚合，并统一对外暴露，外界系统调用 API 接口时，都是由网关对外暴露的 API 接口，外界系统不需要知道微服务系统中各服务间相互调用的复杂性。微服务系统也保护了其内部微服务单元的 API 接口，防止其被外界直接调用，导致服务的敏感信息对外暴露。</li>
+<li>网关服务可以做用户身份验证和权限认证，防止非法请求操作 API 接口，对服务器起到保护作用。</li>
+<li>网关可以实现监控功能，实时日志输出，对请求进行记录。</li>
+<li>网关可以实现流量监控，在高流量的情况下，对服务进行降级。</li>
+<li>API 接口从内部服务分离出来，方便做测试。</li>
+</ul>
+<h3 id="1zuul路由案例">1、Zuul路由案例</h3>
+<p>在 cloud 父工程的基础上建立 module 子模块，命名为 CSY-zuul ，开始完善zuul子模块。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;parent&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>cloud<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>ink.csy<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/parent&gt;</span>
+<span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+<span style="color:#000080">&lt;packaging&gt;</span>jar<span style="color:#000080">&lt;/packaging&gt;</span>
+<span style="color:#000080">&lt;artifactId&gt;</span>CSY-zuul<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+<span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-zuul<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;build&gt;</span>
+    <span style="color:#000080">&lt;plugins&gt;</span>
+        <span style="color:#000080">&lt;plugin&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/plugin&gt;</span>
+    <span style="color:#000080">&lt;/plugins&gt;</span>
+<span style="color:#000080">&lt;/build&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableEurekaClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableZuulProxy</span>
+<span style="color:#998;font-style:italic">//需要啥别的注解根据项目需求再添加
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ZuulApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>ZuulApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><pre><code class="language-properties" data-lang="properties">server.port=20006
+
+spring.application.name=CSY-zuul
+
+eureka.client.service-url.defaultZone=http://localhost:20000/eureka/
+</code></pre><p>说明：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">报错信息:
+There was an unexpected error <span style="color:#000;font-weight:bold">(</span><span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span>Gateway Timeout, <span style="color:#008080">status</span><span style="color:#000;font-weight:bold">=</span>504<span style="color:#000;font-weight:bold">)</span>.
+com.netflix.zuul.exception.ZuulException: Hystrix Readed <span style="color:#0086b3">time</span> out
+</code></pre></div><p>原因：就是代理网关处理的慢，没加载上，多刷几次，后期优化，不影响页面。优化方式可以在properties或者yml配置文件中添加ribbon和hystrix和zuul的超时时间。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">ribbon</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">ReadTimeout</span>:<span style="color:#bbb"> </span><span style="color:#099">7000</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#超时时间</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">ConnectTimeout</span>:<span style="color:#bbb"> </span><span style="color:#099">2000</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#连接时间</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">MaxAutoRetries</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#同一台实例最大重试次数,不包括首次调用</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">MaxAutoRetriesNextServer</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#重试负载均衡其他的实例最大重试次数,不包括首次调用</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">OkToRetryOnAllOperations</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">false</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic">#是否所有操作都重试</span><span style="color:#bbb">
+</span><span style="color:#bbb">  
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic">#解决hystrix+feign超时设置</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">feign</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">hystrix</span>:<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#开启feign支持hystrix (注意:一定要开启，旧版本默认支持，新版本默认关闭)</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">enabled</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">hystrix</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">command</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">default</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">execution</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">        </span><span style="color:#000080">isolation</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">          </span><span style="color:#000080">thread</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">            </span><span style="color:#000080">timeoutInMilliseconds</span>:<span style="color:#bbb"> </span><span style="color:#099">7000</span><span style="color:#bbb">
+</span></code></pre></div><p>测试：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/1.png">
+            <img class="mx-auto" alt="zuul分发到feign微服务" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/1.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/2.png">
+            <img class="mx-auto" alt="zuul分发到ribbon微服务" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/2.png" />
+        </a>
+    </p>
+<p>可以看到服务都已经注册到eureka上了，我们不用配置任何路由规则就可以直接通过注册的服务名称来路由。</p>
+<h3 id="2自定义路由规则">2、自定义路由规则</h3>
+<p>添加内容到刚刚的配置文件properties</p>
+<pre><code class="language-properties" data-lang="properties">server.port=20006
+
+spring.application.name=CSY-zuul
+
+eureka.client.service-url.defaultZone=http://localhost:20000/eureka/
+
+# 使用路径的方式匹配路由规则:
+
+# 参数key结构:   zuul.routes.customName.path=xxx
+# 用于配置路径匹配规则,其中customName自定义,通常使用要调用的服务名称,方便后期管理
+# 可使用的通配符有: * ** ?
+# ? 单个字符
+# * 任意多个字符,不包含多级路径
+# ** 任意多个字符,包含多级路径
+zuul.routes.csy-ribbon.path=/ribbon/**
+
+# 参数key结构:   zuul.routes.customName.url=xxx
+# url用于配置符合path的请求路径路由到的服务地址
+# zuul.routes.aaa.url=http://localhost:8080/
+
+# key结构:   zuul.routes.customName.service-id=xxx
+# service-id用于配置符合path的请求路径路由到的服务名称
+zuul.routes.csy-ribbon.service-id=CSY-ribbon
+
+# 上面两行配置可以进行简化
+# zuul.routes.CSY-ribbon=/ribbon/**
+# 路径出现冲突时,使用yml配置,因为yml强调顺序,properties则不然
+# zuul.routes.CSY-ribbon=/ribbon/**
+# zuul.routes.CSY-ribbon-hello=/ribbon/hello/**
+
+# 配置敏感请求头过滤
+# 针对某个服务传输指定的headers信息,默认是过滤掉Cookie,Set-Cookie,Authorization这三个信息的
+# 这里置空就是不要过滤掉这三个,解决http请求头为空的问题
+#zuul.routes.csy-ribbon.sensitive-headers=
+
+# zuul本地跳转
+#zuul.routes.csy-zuul.path=/local/**
+#zuul.routes.csy-zuul.url=forward:/local
+
+# zuul跳转到指定地址
+#zuul.routes.blog.path=/blog/**
+#zuul.routes.blog.url=https://www.csy.ink/
+
+# 访问网关路径的前缀（在映射路径的前面，一般用于区别开发的版本）
+#zuul.prefix=/api
+
+#management.endpoints.web.exposure.include=*
+</code></pre><p>重新启动Zuul微服务，测试：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/3.png">
+            <img class="mx-auto" alt="配置后测试" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/3.png" />
+        </a>
+    </p>
+<h3 id="3zuul自定义过滤器">3、Zuul自定义过滤器</h3>
+<p>Zuul 是通过 Servlet 来实现的，Zuul 通过自定义的 ZuulServlet （类似于 Spring MVC 的 DispatcherServlet）来对请求进行控制。Zuul 的核心是一系列过滤器。</p>
+<p>Zuul 大部分功能都是通过过滤器来实现的，Zuul 定义了 4 种标准的过滤器类型，这些过滤器的类型对应于请求的典型生命周期。</p>
+<ol>
+<li>pre：这种过滤器在请求被路由之前调用。可利用这种过滤器实现身份验证、在集群中选择请求的微服务，记录调试信息等。</li>
+<li>routing：这种过滤器将请求路由到微服务。这种过滤器用于构建发送给微服务的请求，并使用 apache httpclient 或 netflix ribbon 请求微服务。</li>
+<li>post：这种过滤器在路由到微服务以后执行。这种过滤器可用来为响应添加标准的 http header、收集统计信息和指标、将响应从微服务发送给客户端等。</li>
+<li>error：在其他阶段发送错误时执行该过滤器。</li>
+</ol>
+<p>执行流程：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/4.png">
+            <img class="mx-auto" alt="过滤器执行流程" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/4.png" />
+        </a>
+    </p>
+<p><strong>从代码（ZuulServlet）中看各个过滤器执行的顺序</strong></p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/6.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/6.png" />
+        </a>
+    </p>
+<p><strong>zuul中默认实现的filter ：</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">顺序</th>
+<th style="text-align:left">过滤器</th>
+<th style="text-align:left">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">pre</td>
+<td style="text-align:left">-3</td>
+<td style="text-align:left">ServletDetectionFilter</td>
+<td style="text-align:left">标记处理Servlet的类型</td>
+</tr>
+<tr>
+<td style="text-align:left">pre</td>
+<td style="text-align:left">-2</td>
+<td style="text-align:left">Servlet30WrapperFilter</td>
+<td style="text-align:left">包装HttpServletRequest请求</td>
+</tr>
+<tr>
+<td style="text-align:left">pre</td>
+<td style="text-align:left">-1</td>
+<td style="text-align:left">FormBodyWrapperFilter</td>
+<td style="text-align:left">包装请求体</td>
+</tr>
+<tr>
+<td style="text-align:left">route</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">DebugFilter</td>
+<td style="text-align:left">标记调试标志</td>
+</tr>
+<tr>
+<td style="text-align:left">route</td>
+<td style="text-align:left">5</td>
+<td style="text-align:left">PreDecorationFilter</td>
+<td style="text-align:left">处理请求上下文供后续使用</td>
+</tr>
+<tr>
+<td style="text-align:left">route</td>
+<td style="text-align:left">10</td>
+<td style="text-align:left">RibbonRoutingFilter</td>
+<td style="text-align:left">serviceId请求转发</td>
+</tr>
+<tr>
+<td style="text-align:left">route</td>
+<td style="text-align:left">100</td>
+<td style="text-align:left">SimpleHostRoutingFilter</td>
+<td style="text-align:left">url请求转发</td>
+</tr>
+<tr>
+<td style="text-align:left">route</td>
+<td style="text-align:left">500</td>
+<td style="text-align:left">SendForwardFilter</td>
+<td style="text-align:left">forward请求转发</td>
+</tr>
+<tr>
+<td style="text-align:left">post</td>
+<td style="text-align:left">0</td>
+<td style="text-align:left">SendErrorFilter</td>
+<td style="text-align:left">处理有错误的请求响应</td>
+</tr>
+<tr>
+<td style="text-align:left">post</td>
+<td style="text-align:left">1000</td>
+<td style="text-align:left">SendResponseFilter</td>
+<td style="text-align:left">处理正常的请求响应</td>
+</tr>
+</tbody>
+</table>
+<p><strong>加餐：URL和URI的理解：</strong></p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/5.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/5.png" />
+        </a>
+    </p>
+<p>Zuul 采取了动态读取、编译和运行这些过滤器。过滤器之间不能直接相互通信，而是通过 RequestContext 对象来共享数据，每个请求都会创建一个 RequestContext 对象。Zuul 过滤器的4个关键特性：</p>
+<ul>
+<li>Type（类型）：决定了过滤器在请求的哪个阶段起作用，例如 Pre、Post等。</li>
+<li>Execution Order（执行顺序）：Order 的值越小，越先执行。</li>
+<li>Criteria（标准）：Filter 执行所需的条件。</li>
+<li>Action（行动）：如果符合执行条件，则执行 Action （一般为逻辑代码）。</li>
+</ul>
+<p>自定义过滤器要继承<code>ZuulFilter</code>，重写里面的方法。有四个重要的方法：</p>
+<ol>
+<li><code>shouldFilter</code>：返回一个<code>Boolean</code>值，判断该过滤器是否需要执行。返回 true 执行，为 false 时就不会走 run() 里面的业务逻辑， 默认为 false ，不开启的，需要改为 true 。实际上我们一般可以通过读取配置文件的属性或者从缓存中来决定这个地方是否启用。可以直接 <code>return RequestContext.getCurrentContext().sendZuulResponse();</code>。另外，控制过滤器生效不生效，实际上可以在里面写一串逻辑来控制。</li>
+<li><code>run</code>：过滤器的具体业务逻辑， 返回值一般返回 null 即可 。</li>
+<li><code>filterType</code>：返回字符串，包含4种，上面说过。 表示过滤器的类型，即在哪个阶段拦截，可以使用 FilterConstants 中的常量。</li>
+<li><code>filterOrder</code>：通过返回的 int 值来定义过滤器的执行顺序，数字越小优先级越高。
+<ul>
+<li>pre 类型建议在 FilterConstants.PRE_DECORATION_FILTER_ORDER 之前执行</li>
+<li>post 类型建议在 FilterConstants.SEND_RESPONSE_FILTER_ORDER 之前执行</li>
+</ul>
+</li>
+</ol>
+<p>最后，在过滤器中，如果当前请求不合法，可以抛出异常或设置 <code>RequestContext.getCurrentContext().setSendZuulResponse(false);</code> 来阻止 route 类型的过滤器执行。</p>
+<p>Type 写法：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRE_TYPE</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#998;font-style:italic">//或
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;pre&#34;</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>FilterConstants：在<code>package org.springframework.cloud.netflix.zuul.filters.support</code>，spring为我们定义好了一些字符串常量。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">FilterConstants</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String IS_DISPATCHER_SERVLET_REQUEST_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;isDispatcherServletRequest&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String FORWARD_TO_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;forward.to&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String PROXY_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;proxy&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String REQUEST_ENTITY_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;requestEntity&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String REQUEST_URI_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;requestURI&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String RETRYABLE_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;retryable&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String ROUTING_DEBUG_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;routingDebug&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String SERVICE_ID_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;serviceId&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String LOAD_BALANCER_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;loadBalancerKey&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> DEBUG_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> FORM_BODY_WRAPPER_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> PRE_DECORATION_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 5<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> RIBBON_ROUTING_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 10<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SEND_ERROR_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SEND_FORWARD_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 500<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SEND_RESPONSE_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 1000<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SIMPLE_HOST_ROUTING_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> 100<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SERVLET_30_WRAPPER_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>2<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> SERVLET_DETECTION_FILTER_ORDER <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>3<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String ERROR_TYPE <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;error&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String POST_TYPE <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;post&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String PRE_TYPE <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;pre&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String ROUTE_TYPE <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;route&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String FORWARD_LOCATION_PREFIX <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;forward:&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> HTTP_PORT <span style="color:#000;font-weight:bold">=</span> 80<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> HTTPS_PORT <span style="color:#000;font-weight:bold">=</span> 443<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String HTTP_SCHEME <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;http&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String HTTPS_SCHEME <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;https&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String SERVICE_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Zuul-Service&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String SERVICE_ID_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Zuul-ServiceId&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_FORWARDED_FOR_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Forwarded-For&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_FORWARDED_HOST_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Forwarded-Host&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_FORWARDED_PREFIX_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Forwarded-Prefix&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_FORWARDED_PORT_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Forwarded-Port&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_FORWARDED_PROTO_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Forwarded-Proto&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String X_ZUUL_DEBUG_HEADER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;X-Zuul-Debug-Header&#34;</span><span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#900;font-weight:bold">FilterConstants</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> AssertionError<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Must not instantiate constant utility class&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>自定义的过滤器要加<code>@Component</code>。</p>
+<h4 id="31-进行权限判断">3.1 进行权限判断</h4>
+<p>**编写 pre 过滤器，进行权限判断。**只要能从 request 中 获取到 token 的参数的值，那么认为通过，否则不通过。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">TokenAuthenticationFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>  
+  
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String TOKEN_PARAMETER <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;token&#34;</span><span style="color:#000;font-weight:bold">;</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#998;font-style:italic">// pre 类型的过滤器  
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRE_TYPE</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#998;font-style:italic">// token 检验应该放在第一位来进行校验，因此需要放在最前面(需要限流的话，它放在限流之后)  
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SERVLET_DETECTION_FILTER_ORDER</span> <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#998;font-style:italic">// 过滤器是否应该执行， true:表示应该执行  false:表示跳过这个过滤器执行  
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        RequestContext requestContext <span style="color:#000;font-weight:bold">=</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">();</span>  
+        <span style="color:#998;font-style:italic">// 获取到 request  
+</span><span style="color:#998;font-style:italic"></span>        HttpServletRequest request <span style="color:#000;font-weight:bold">=</span> requestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequest</span><span style="color:#000;font-weight:bold">();</span>  
+        <span style="color:#998;font-style:italic">// 判断请求参数中是否存在  token  参数  
+</span><span style="color:#998;font-style:italic"></span>        String token <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getParameter</span><span style="color:#000;font-weight:bold">(</span>TOKEN_PARAMETER<span style="color:#000;font-weight:bold">);</span>  
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isBlank</span><span style="color:#000;font-weight:bold">(</span>token<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>  
+            <span style="color:#998;font-style:italic">// 不进行路由 ===&gt; 即 route 类型的过滤器不执行  
+</span><span style="color:#998;font-style:italic"></span>            requestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSendZuulResponse</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>  
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> ZuulRuntimeException<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ZuulException<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;:&#34;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getClass</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getSimpleName</span><span style="color:#000;font-weight:bold">(),</span> HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">UNAUTHORIZED</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">value</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#d14">&#34;token参数不可为空&#34;</span><span style="color:#000;font-weight:bold">));</span>  
+        <span style="color:#000;font-weight:bold">}</span>  
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><blockquote>
+<p>注意：</p>
+<ol>
+<li>RequestContext 为一个 ConcurrentHashMap, 并且里面的值是从 ThreadLocal 中获取的</li>
+<li>可以从RequestContext中获取到 request 和 response 等等</li>
+<li>requestContext.setSendZuulResponse(false) 会导致 route 类型的过滤器不进行执行。</li>
+<li>如果不想自己写 error 类型的过滤器，那么默认由 SendErrorFilter 进行处理异常，如果我们想返回一个 401 的状态码给前台，出错的地方可以跑出一个 ZuulRuntimeException.</li>
+<li>自己写的 过滤器 需要被 Spring 容器管理即可</li>
+</ol>
+</blockquote>
+<h4 id="32-增加一个额外的响应头">3.2 增加一个额外的响应头</h4>
+<p><strong>编写一个 post 类型的过滤器，增加一个额外的响应头。</strong> 添加一个 new-header 的响应头 。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>  
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AddNewHeaderFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">POST_TYPE</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SEND_RESPONSE_FILTER_ORDER</span> <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+  
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>  
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>  
+        RequestContext requestContext <span style="color:#000;font-weight:bold">=</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">();</span>  
+        HttpServletResponse response <span style="color:#000;font-weight:bold">=</span> requestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getResponse</span><span style="color:#000;font-weight:bold">();</span>  
+        response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addHeader</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;new-header&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;new-header&#34;</span><span style="color:#000;font-weight:bold">);</span>  
+  
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>  
+    <span style="color:#000;font-weight:bold">}</span>  
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h4 id="33-限流操作">3.3 限流操作</h4>
+<p>限流做在请求 filter 最靠前的地方，比鉴权 pre 先执行，不然流量都进去了，这里需要一个算法：<code>令牌桶算法</code>，这个算法很多地方已经实现了，拿来用即可，意思是以一定速率将令牌放入桶中，桶中的令牌满了，就不会再放进去了，外部的请求进入，请求将获得桶中的令牌，得令牌者可通行，没有令牌请求将被拒绝。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 限流
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RateLimiterFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">//create 每秒放入100个令牌
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> RateLimiter RATE_LIMITER <span style="color:#000;font-weight:bold">=</span> RateLimiter<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">create</span><span style="color:#000;font-weight:bold">(</span>100<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * filter类型
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRE_TYPE</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * filter执行顺序，值越小优先级越高
+</span><span style="color:#998;font-style:italic">     * 官方推荐使用x-1方式优先排序
+</span><span style="color:#998;font-style:italic">     * 选择最高优先级SERVLET_DETECTION_FILTER_ORDER，并-1
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SERVLET_DETECTION_FILTER_ORDER</span> <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * filter 开启关闭
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 实现filter逻辑
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     * @throws ZuulException
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> ZuulException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//判断--获取通行令牌--&gt;如果没有令牌不等于之前的没有权限401，可以抛出自定义异常或者其他处理
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>RATE_LIMITER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">tryAcquire</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> RateLimiterException<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        
+        <span style="color:#998;font-style:italic">//RequestContext requestContext = RequestContext.getCurrentContext();
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//System.out.println(&#34;获取令牌&#34;);
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//boolean tryAcquire = RATE_LIMITER.tryAcquire();
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 如果获取不到就直接停止
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//if(!tryAcquire){
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//requestContext.setSendZuulResponse(false);
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//requestContext.setResponseStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//}
+</span><span style="color:#998;font-style:italic"></span>        
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>自定义异常：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RateLimiterException</span> <span style="color:#000;font-weight:bold">extends</span> RuntimeException <span style="color:#000;font-weight:bold">{</span>
+    
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>接下来的2个案例是我之前做的项目，涉及到 Zuul 的过滤器的场景，我总结到这里，并截取部分代码。</p>
+<h4 id="34-动态改变路由规则">3.4 动态改变路由规则</h4>
+<p>如果项目需要暴露 API 给其他系统进行对接，为了方便第三方系统对接和不暴露后台服务，就不把具体的服务名暴露到地址上来。这里我们知道，如果 yml 中不声明路由配置的话，zuul 是默认可以通过网关的 ip 和端口加各个微服务名，再加上各个微服务中 controller 中的映射地址来访问的，这点在本篇博客前面也说过。</p>
+<p>那么我们为了不将微服务名称暴露出来，进行如下设计：</p>
+<p>首先，分别访问各个微服务中的接口地址，并分别在地址中截取 URI ，将 URI 作为键，键对应的微服务名作为值，存入 Redis 。然后我们暴露给客户的是网关的 ip 和端口，并且在后面拼接刚刚存入到 Redis 中的 URI。然后在网关中拦截请求，通过 request 得到 URI ，然后在 Zuul 服务中通过 Feign 来调用 Redis 服务，从而查询到 URI 对应的各自的微服务名，然后在 Zuul 网关的 run 方法中写逻辑动态改变路由规则。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">//允许跨域
+</span><span style="color:#998;font-style:italic"></span><span style="color:#3c5d5d;font-weight:bold">@CrossOrigin</span><span style="color:#000;font-weight:bold">(</span>allowCredentials <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">,</span>origins <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RoutingFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">//feign包中的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> CacheService cacheService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRE_TYPE</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> 1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">sendZuulResponse</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> ZuulException <span style="color:#000;font-weight:bold">{</span>
+        RequestContext context <span style="color:#000;font-weight:bold">=</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">();</span>
+        HttpServletRequest request <span style="color:#000;font-weight:bold">=</span> context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequest</span><span style="color:#000;font-weight:bold">();</span>
+        String requestURI <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequestURI</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#998;font-style:italic">//通过 Feign 来调用 Redis 服务，从而查询到 URI 对应的各自的微服务名
+</span><span style="color:#998;font-style:italic"></span>        String modelName <span style="color:#000;font-weight:bold">=</span> cacheService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCache</span><span style="color:#000;font-weight:bold">(</span>requestURI<span style="color:#000;font-weight:bold">);</span>
+
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;uri--------------&gt;&#34;</span><span style="color:#000;font-weight:bold">+</span>requestURI<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;modelName--------------&gt;&#34;</span><span style="color:#000;font-weight:bold">+</span>modelName<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//开始转发请求
+</span><span style="color:#998;font-style:italic"></span>            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SERVICE_ID_KEY</span><span style="color:#000;font-weight:bold">,</span> modelName<span style="color:#000;font-weight:bold">);</span>
+            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">REQUEST_URI_KEY</span><span style="color:#000;font-weight:bold">,</span> requestURI<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// context.set(&#34;name&#34;,&#34;zhangsan&#34;); //可以拼接get的请求参数
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setResponseStatusCode</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SC_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+
+            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getResponse</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSendZuulResponse</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setResponseBody</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;{\&#34;code\&#34;:\&#34;1\&#34;,\&#34;msg\&#34;:\&#34;你进入了未知次元\&#34;}&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>yml：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">zuul</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">routes</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">findaddress</span>:<span style="color:#bbb">  </span><span style="color:#998;font-style:italic">#随便</span><span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span>/**<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">sensitive-headers</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">ignored-headers</span>:<span style="color:#bbb"> </span>Access-Control-Allow-Origin,H-APP-Id,Token,APPToken<span style="color:#bbb">
+</span></code></pre></div><h4 id="35-用户登录判断">3.5 用户登录判断</h4>
+<p>说这个之前，先说说 Session 吧！</p>
+<h5 id="351-session简单介绍">3.5.1 Session简单介绍</h5>
+<p>在WEB开发中，服务器可以为每个用户浏览器创建一个会话对象（session对象），注意：一个浏览器独占一个session对象(默认情况下)。因此，在需要保存用户数据时，服务器程序可以把用户数据写到用户浏览器独占的session中，当用户使用浏览器访问其它程序时，其它程序可以从用户的session中取出该用户的数据，为用户服务。</p>
+<h5 id="352-session和cookie的主要区别">3.5.2 Session和Cookie的主要区别</h5>
+<ul>
+<li>Cookie是把用户的数据写给用户的浏览器。</li>
+<li>Session技术把用户的数据写到用户独占的session中。</li>
+<li>Session对象由服务器创建，开发人员可以调用request对象的getSession方法得到session对象。</li>
+</ul>
+<h5 id="353-session实现原理">3.5.3 session实现原理</h5>
+<p>服务器创建session出来后，会把session的id号，以cookie的形式回写给客户机，这样，只要客户机的浏览器不关，再去访问服务器时，都会带着session的id号去，服务器发现客户机浏览器带session id过来了，就会使用内存中与之对应的session为之服务。</p>
+<p>第一次访问时，服务器会创建一个新的sesion，并且把session的Id以cookie的形式发送给客户端浏览器。</p>
+<p>点击刷新按钮，再次请求服务器，此时就可以看到浏览器再请求服务器时，会把存储到cookie中的session的Id一起传递到服务器端了。</p>
+<h5 id="354-requestgetsessiongetid">3.5.4 request.getSession().getId()</h5>
+<p>服务端创建，一个浏览器独占一个session对象(默认情况下)，
+HttpServletRequest中有：</p>
+<ol>
+<li>HttpSession getSession(boolean var1);参数为false则为不自动创建对象，参数为true则为自动创建对象。然后获取得到这个对象</li>
+<li>HttpSession getSession();</li>
+</ol>
+<p>比如在多实例部署的时候，用户第一次登录的时候，我们可以将request.getSession().getId()作为key，然后将用户的信息作为value，存储到redis中，以方便下次请求需要权限验证的接口的时候的验证。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">stringRedisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">opsForValue</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">set</span><span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSession</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">(),</span> gson<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toJson</span><span style="color:#000;font-weight:bold">(</span>authUser<span style="color:#000;font-weight:bold">),</span>30<span style="color:#000;font-weight:bold">,</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MINUTES</span><span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><h5 id="355-requestgetrequestedsessionid">3.5.5 request.getRequestedSessionId()</h5>
+<p>是客户端的，也就是浏览器里面的。比如在用户第一次登录的时候，这里是null，当用户登录了之后，服务端的request.getSession().getId()就会同步到这里。这里就会有了。该值和服务端的request.getSession().getId()是保持一致的。</p>
+<ol>
+<li>未禁用cookies ：request.getRequestedSessionId()方法获取的值是Cookie中的值，即使URL中有jsessionid的值。</li>
+<li>禁用cookies：request.getRequestedSessionId()方法获取的是值就是URL中的jessionid的值，如果没有，则为NULL。</li>
+</ol>
+<h5 id="356-过滤器">3.5.6 过滤器</h5>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableEurekaClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableFeignClients</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableZuulProxy</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GateWayStartApp</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>GateWayStartApp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#000;font-weight:bold">public</span> FilterRegistrationBean <span style="color:#900;font-weight:bold">corsFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+
+        <span style="color:#000;font-weight:bold">final</span> UrlBasedCorsConfigurationSource source <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UrlBasedCorsConfigurationSource<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">final</span> CorsConfiguration config <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CorsConfiguration<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#998;font-style:italic">// 允许cookies跨域
+</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAllowCredentials</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// #允许向该服务器提交请求的URI，*表示全部允许，在SpringMVC中，如果设成*，会自动转成当前请求头中的Origin
+</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedOrigin</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// #允许访问的头信息,*表示全部
+</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedHeader</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 预检请求的缓存时间（秒），即在这个时间段里，对于相同的跨域请求不会再预检了
+</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setMaxAge</span><span style="color:#000;font-weight:bold">(</span>1800L<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 允许提交请求的方法，*表示全部允许
+</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        source<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">registerCorsConfiguration</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/**&#34;</span><span style="color:#000;font-weight:bold">,</span> config<span style="color:#000;font-weight:bold">);</span>
+        FilterRegistrationBean bean <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> FilterRegistrationBean<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> org<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">springframework</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">web</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">filter</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CorsFilter</span><span style="color:#000;font-weight:bold">(</span>source<span style="color:#000;font-weight:bold">));</span>
+        bean<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrder</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> bean<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">zuul</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">routes</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">findaddress</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span>/**<span style="color:#bbb">
+</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">sensitive-headers</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">ignored-headers</span>:<span style="color:#bbb"> </span>Access-Control-Allow-Origin,H-APP-Id,Token,APPToken<span style="color:#bbb">
+</span></code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">Constants</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> URI <span style="color:#000;font-weight:bold">=</span> Arrays<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">asList</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/checkuser&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;/code&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;/logicbycode&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;/logicbypwd&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;/findpwd&#34;</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GateWayConfig</span> <span style="color:#000;font-weight:bold">implements</span> WebMvcConfigurer <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">addCorsMappings</span><span style="color:#000;font-weight:bold">(</span>CorsRegistry registry<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        registry<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/**&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">allowedOrigins</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">allowedMethods</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;GET&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;POST&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;OPTIONS&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;PUT&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowedHeaders</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Content-Type&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;X-Requested-With&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;accept&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;Origin&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;Access-Control-Request-Method&#34;</span><span style="color:#000;font-weight:bold">,</span>
+                        <span style="color:#d14">&#34;Access-Control-Request-Headers&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exposedHeaders</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Access-Control-Allow-Origin&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;Access-Control-Allow-Credentials&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">allowCredentials</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">maxAge</span><span style="color:#000;font-weight:bold">(</span>3600<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SessionFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> CacheService cacheService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">PRE_TYPE</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> 0<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">sendZuulResponse</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> ZuulException <span style="color:#000;font-weight:bold">{</span>
+        RequestContext context <span style="color:#000;font-weight:bold">=</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">();</span>
+        HttpServletRequest request <span style="color:#000;font-weight:bold">=</span> context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequest</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">//        获取uri
+</span><span style="color:#998;font-style:italic"></span>        String requestURI <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequestURI</span><span style="color:#000;font-weight:bold">();</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;session过滤uri------------&gt;&#34;</span><span style="color:#000;font-weight:bold">+</span>requestURI<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">//Constants中定义了一系列与登录相关的接口字符串,&#34;/checkuser&#34;,&#34;/code&#34;,&#34;/logicbycode&#34;,&#34;/logicbypwd&#34;,&#34;/findpwd&#34;,如果uri不是其中的,就要看缓存中是否有session(之前是否登陆过)(在用户微服务的登录逻辑中[/logicbycode&#34;,&#34;/logicbypwd&#34;]登录后会将session放入redis的),有的话可以进入soul正常使用app,没有就返回&#34;当前用户尚未登录&#34;
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>Constants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">URI</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">contains</span><span style="color:#000;font-weight:bold">(</span>requestURI<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;进入session判断&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            String cache <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                cache <span style="color:#000;font-weight:bold">=</span> cacheService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCache</span><span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRequestedSessionId</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+                context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setResponseBody</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;当前用户暂未登录&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>cache <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getResponse</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSendZuulResponse</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+                context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setResponseStatusCode</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SC_BAD_REQUEST</span><span style="color:#000;font-weight:bold">);</span>
+                context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setResponseBody</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;{\&#34;code\&#34;:\&#34;1\&#34;,\&#34;msg\&#34;:\&#34;当前用户尚未登录\&#34;}&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;没有进行session判断&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h3 id="4-在-zuul上配置熔断器">4、 在 Zuul上配置熔断器</h3>
+<p>Zuul 作为 Netflix 组件，可以与 Ribbon、Eureka 和 Hystrix 等组件相结合，实现负载均衡、熔断器的功能。默认情况下 Zuul 和 Ribbon 相结合，实现了负载均衡。实现熔断器功能需要实现 <code>FallbackProvider</code> 接口，实现该接口的两个方法，一个是 <code>getRoute()</code> ，用于指定熔断器功能应用于哪些路由的服务；另一个方法 <code>fallbackResponse()</code> 为进入熔断器功能时执行的逻辑。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyFallBackProvider
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/9/28 18:31
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyFallBackProvider</span> <span style="color:#000;font-weight:bold">implements</span> FallbackProvider <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 设置当前是给哪个服务开启fallback,返回值就是服务的名字,如果是给所有的,返回*
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @return java.lang.String
+</span><span style="color:#998;font-style:italic">     * @Date 2020/9/28 18:32
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getRoute</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#998;font-style:italic">//        return &#34;CSY-ribbon&#34;;
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 当出现问题的时候返回给调用者具体的返回内容
+</span><span style="color:#998;font-style:italic">     * @Param [route, cause]
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.client.ClientHttpResponse
+</span><span style="color:#998;font-style:italic">     * @Date 2020/9/28 18:34
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> ClientHttpResponse <span style="color:#900;font-weight:bold">fallbackResponse</span><span style="color:#000;font-weight:bold">(</span>String route<span style="color:#000;font-weight:bold">,</span> Throwable cause<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;route:&#34;</span><span style="color:#000;font-weight:bold">+</span>route<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;exception:&#34;</span><span style="color:#000;font-weight:bold">+</span>cause<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+
+        <span style="color:#998;font-style:italic">//此处正常情况应该根据服务和异常来分别返回不同的内容
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> ClientHttpResponse<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> HttpStatus <span style="color:#900;font-weight:bold">getStatusCode</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span> HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#998;font-style:italic">//                return HttpStatus.BAD_GATEWAY;
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">getRawStatusCode</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span> HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">value</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">//                return HttpStatus.BAD_GATEWAY.value();
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getStatusText</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span> HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OK</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">//                return HttpStatus.BAD_GATEWAY.toString();
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">close</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+
+            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">             * @Description 响应正文
+</span><span style="color:#998;font-style:italic">             * @Param []
+</span><span style="color:#998;font-style:italic">             * @return java.io.InputStream
+</span><span style="color:#998;font-style:italic">             * @Date 2020/9/28 18:40
+</span><span style="color:#998;font-style:italic">             * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">             */</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> InputStream <span style="color:#900;font-weight:bold">getBody</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> ByteArrayInputStream<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;{\&#34;status\&#34;:500,\&#34;message\&#34;:\&#34;sorry,the system goes to sleep,please try again later!\&#34;}&#34;</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getBytes</span><span style="color:#000;font-weight:bold">());</span>
+<span style="color:#998;font-style:italic">//                return new ByteArrayInputStream(&#34;error,i&#39;m the fallback.&#34;.getBytes());
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> HttpHeaders <span style="color:#900;font-weight:bold">getHeaders</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+                HttpHeaders httpHeaders <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HttpHeaders<span style="color:#000;font-weight:bold">();</span>
+                httpHeaders<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span>MediaType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">APPLICATION_JSON</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">//                httpHeaders.set(&#34;dfghsghbdfhdf&#34;,&#34;hfghfdghdfgh&#34;);
+</span><span style="color:#998;font-style:italic">//                httpHeaders.set(HttpHeaders.CONTENT_TYPE,&#34;text/html;charset=utf-8&#34;);
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">return</span> httpHeaders<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">};</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>如果需要所有的路由服务都加熔断功能，需要在 getRoute() 方法上返回“*”的匹配符：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getRoute</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>启动了服务，但是数据库服务没开，下面我们测试通过网关访问微服务，测试一个需要访问数据库的接口，看 zuul 网关的熔断器是否有效果。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/8.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/8.png" />
+        </a>
+    </p>
+<h3 id="5包装异常页面">5、包装异常页面</h3>
+<p>我们在测试的时候，有时会遇到 Spring Cloud 默认的异常页面，如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/9.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN/images/cloud-07/9.png" />
+        </a>
+    </p>
+<p>图中的例子是500，日常的开发中可能还会遇到比如502、401、403、404等等，这个时候我们可以通过自定义的Error类型的过滤器和自定义的（实现 <code>ErrorController</code> 接口）的 controller 来实现。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ErrorFilter
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/9/28 19:02
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ErrorFilter</span> <span style="color:#000;font-weight:bold">extends</span> ZuulFilter <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">filterType</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> FilterConstants<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ERROR_TYPE</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">filterOrder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">shouldFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">run</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> ZuulException <span style="color:#000;font-weight:bold">{</span>
+
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;======&gt;&#34;</span><span style="color:#000;font-weight:bold">+</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getThrowable</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;=================================================&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">setResponseBody</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;啊啊啊啊啊啊啊啊啊啊啊,程序出错了...&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyErrorController
+</span><span style="color:#998;font-style:italic"> * @Description 需要注意,如果我们直接写一个类 映射了/error地址的话会报错,我们需要实现ErrorController来重新设置错误地址
+</span><span style="color:#998;font-style:italic"> * @Date 2020/9/28 19:05
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyErrorController</span> <span style="color:#000;font-weight:bold">implements</span> ErrorController <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/error&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">error</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> RequestContext<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCurrentContext</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getResponseBody</span><span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//从自定义的ErrorFilter中获取设置的返回内容来进行返回
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getErrorPath</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;/error&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>这样如果再有错就不会出现刚才的页面了，就会返回在 ErrorFilter 中自定义的内容了。</p>
+<blockquote>
+<p>项目地址: <a href="https://gitee.com/erdochan/cloud">https://gitee.com/erdochan/cloud</a> （持续更新中）</p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/cloud-zuul.html">https://chanservy.github.io/2020/12/22/cloud-zuul.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/cloud-hystrixH.html">Spring Cloud之Hystrix(H版)</a></li>
+        
+        <li><a href="/2020/12/22/cloud-feignH.html">Spring Cloud之Feign(H版)</a></li>
+        
+        <li><a href="/2020/12/22/cloud-ribbonH.html">Spring Cloud之Ribbon(H版)</a></li>
+        
+        <li><a href="/2020/12/22/cloud-eurekajiqun.html">Spring Cloud之Eureka集群搭建</a></li>
+        
+        <li><a href="/2020/12/22/cloud-eureka.html">Spring Cloud之服务注册中心</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Cloud'>Spring Cloud</a></li>
+                
+                <li><a href='/tags/Zuul'>Zuul</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

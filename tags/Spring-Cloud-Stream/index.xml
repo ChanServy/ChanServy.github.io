@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Cloud Stream on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Spring-Cloud-Stream/</link>
+    <description>Recent content in Spring Cloud Stream on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 19:20:53 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Spring-Cloud-Stream/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Cloud Stream消息驱动</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-stream.html</link>
+      <pubDate>Tue, 22 Dec 2020 19:20:53 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-stream.html</guid>
+      <description>前言：Spring Cloud Stream消息驱动。 Spring Cloud Stream 1、简介 Spring Cloud Stream 是一个用来为微服务应用构建消息驱动能力的框架。它可以基于 Spring Boot 来创建独立的、可用于生产的 Spring 应用程序。Spring Cloud Stream 为一些供应商的消息中间件产品提供了个性化的自动化配置实现，并引入了发布-订阅、消费组、分区这三个核心概念</description>
+    </item>
+    
+  </channel>
+</rss>

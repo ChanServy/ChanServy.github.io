@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>模板引擎 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/</link>
+    <description>Recent content in 模板引擎 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 16 Apr 2021 15:19:25 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Freemarker研究</title>
+      <link>https://chanservy.github.io/2021/04/16/freemarker.html</link>
+      <pubDate>Fri, 16 Apr 2021 15:19:25 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/16/freemarker.html</guid>
+      <description>1. Freemarker介绍 Freemarker 是一个用 Java 开发的模板引擎，模板引擎即为一种基于模板和要改变的数据，并用来生成输出文本的通用工具。Freemarker 不是面向最终用户的，而是一个 Java 类库，是一款程序员可以嵌入他们所开发的产品的组件。常用的 Java 模板引擎还有：Jsp、Thymeleaf 等。 Fr</description>
+    </item>
+    
+    <item>
+      <title>Thymeleaf语法入门</title>
+      <link>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:30:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</guid>
+      <description>前言：模板引擎——Thymeleaf。 1.Thymeleaf简介 官方网站：https://www.thymeleaf.org/index.html Thymeleaf是用来开发Web和独立环境项目的现代服务器端Java模板引擎。 Thymeleaf的主要目标是为您的开发工作流程带来优</description>
+    </item>
+    
+  </channel>
+</rss>

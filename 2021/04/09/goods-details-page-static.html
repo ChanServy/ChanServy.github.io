@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>商品详情及静态化 | 迩东陈的博客</title>
+    <meta property="og:title" content="商品详情及静态化 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T16:48:50&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T16:48:50&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="商品详情及静态化">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/goods-details-page-static.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1商品详情页服务">1.商品详情页服务</a>
+      <ul>
+        <li><a href="#11创建module">1.1创建module</a></li>
+        <li><a href="#12页面模板">1.2页面模板</a></li>
+      </ul>
+    </li>
+    <li><a href="#2页面跳转">2.页面跳转</a>
+      <ul>
+        <li><a href="#21修改页面跳转路径">2.1修改页面跳转路径</a></li>
+        <li><a href="#22nginx反向代理">2.2nginx反向代理</a></li>
+        <li><a href="#23编写跳转controller">2.3编写跳转controller</a></li>
+      </ul>
+    </li>
+    <li><a href="#3封装模型数据">3.封装模型数据</a>
+      <ul>
+        <li><a href="#31商品微服务提供接口生产者">3.1商品微服务提供接口（生产者）</a></li>
+        <li><a href="#32创建feignclient消费者">3.2创建FeignClient（消费者）</a></li>
+        <li><a href="#33封装数据模型">3.3封装数据模型</a></li>
+      </ul>
+    </li>
+    <li><a href="#4页面静态化">4.页面静态化</a>
+      <ul>
+        <li><a href="#41简介">4.1.简介</a></li>
+        <li><a href="#42thymeleaf实现静态化">4.2.Thymeleaf实现静态化</a></li>
+      </ul>
+    </li>
+    <li><a href="#5nginx代理静态页面">5.nginx代理静态页面</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">商品详情及静态化</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：接大上篇博客，当用户搜索到商品，肯定会点击查看，就会进入商品详情页，接下来我们完成商品详情页的展示。</p>
+<h2 id="1商品详情页服务">1.商品详情页服务</h2>
+<p>商品详情浏览量比较大，并发高，我们会独立开启一个微服务，用来展示商品详情。</p>
+<h3 id="11创建module">1.1创建module</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>leyou<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.parent<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+    <span style="color:#000080">&lt;packaging&gt;</span>jar<span style="color:#000080">&lt;/packaging&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.page<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-page<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+    <span style="color:#000080">&lt;dependencies&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-openfeign<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-thymeleaf<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-item-interface<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableEurekaClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableFeignClients</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>GoodsApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8084</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>ly-goods-page<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">thymeleaf</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">cache</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">false</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">eureka</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">client</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">service-url</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">defaultZone</span>:<span style="color:#bbb"> </span>http://127.0.0.1:10086/eureka<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">instance</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">lease-renewal-interval-in-seconds</span>:<span style="color:#bbb"> </span><span style="color:#099">5</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 每隔5秒发送一次心跳</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">lease-expiration-duration-in-seconds</span>:<span style="color:#bbb"> </span><span style="color:#099">10</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 10秒不发送就过期</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">prefer-ip-address</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ip-address</span>:<span style="color:#bbb"> </span><span style="color:#099">127.0.0.1</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">instance-id</span>:<span style="color:#bbb"> </span>${spring.application.name}.${server.port}<span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<h3 id="12页面模板">1.2页面模板</h3>
+<p>我们从leyou-portal中复制item.html模板到当前项目resource目录下的templates中。</p>
+<h2 id="2页面跳转">2.页面跳转</h2>
+<h3 id="21修改页面跳转路径">2.1修改页面跳转路径</h3>
+<p>首先我们需要修改搜索结果页的商品地址，目前所有商品的地址都是：http://www.leyou.com/item.html</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/1.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/1.png" />
+        </a>
+    </p>
+<p>我们应该跳转到对应的商品的详情页才对。</p>
+<p>那么问题来了：商品详情页是一个SKU？还是多个SKU的集合？</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/2.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/2.png" />
+        </a>
+    </p>
+<p>通过详情页的预览，我们知道它是多个SKU的集合，即SPU。</p>
+<p>所以，页面跳转时，我们应该携带SPU的id信息。</p>
+<p>例如：http://www.leyou.com/item/2314123.html</p>
+<p>这里就采用了路径占位符的方式来传递spu的id，我们打开<code>search.html</code>，修改其中的商品路径：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/3.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/3.png" />
+        </a>
+    </p>
+<p>刷新页面后再看：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/4.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/4.png" />
+        </a>
+    </p>
+<h3 id="22nginx反向代理">2.2nginx反向代理</h3>
+<p>接下来，我们要把这个地址指向我们刚刚创建的服务，其端口为8084</p>
+<p>我们在nginx.conf中添加一段逻辑：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/5.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/5.png" />
+        </a>
+    </p>
+<p>上图是Nginx和服务在同一个服务器上的配置，如果Ng在虚拟机，微服务在本机，那么那块不能写127.0.0.1，要写本机的ip地址。</p>
+<p>把以/item开头的请求，代理到我们的8084端口。</p>
+<h3 id="23编写跳转controller">2.3编写跳转controller</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.lang.String
+</span><span style="color:#998;font-style:italic">     * @Description 跳转到商品详情页
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:03
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/item/{id}.html&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toItemPage</span><span style="color:#000;font-weight:bold">(</span>Model model<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;item&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>测试</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/6.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/6.png" />
+        </a>
+    </p>
+<p>现在看到的依然是静态的数据。我们接下来开始页面的渲染。</p>
+<h2 id="3封装模型数据">3.封装模型数据</h2>
+<p>首先我们一起来分析一下，在这个页面中需要哪些数据</p>
+<p>我们已知的条件是传递来的spu的id，我们需要根据spu的id查询到下面的数据：</p>
+<ul>
+<li>spu信息×</li>
+<li>spu的详情√</li>
+<li>spu下的所有sku√</li>
+<li>品牌√</li>
+<li>商品三级分类√</li>
+<li>商品规格参数、规格参数组√</li>
+</ul>
+<p>虽然根据分类id查询商品规格参数和规格参数组的方法有了，但是这里查询的规格参数是这个商品分类下的所有规格参数，我们要将它们分组，也就是放在规格参数组中查出。所以也需要再写一个方法。</p>
+<h3 id="31商品微服务提供接口生产者">3.1商品微服务提供接口（生产者）</h3>
+<h4 id="311查询spu">3.1.1查询spu</h4>
+<p>以上所需数据中，查询spu的接口目前还没有，我们需要在商品微服务中提供这个接口：</p>
+<blockquote>
+<p>GoodsController</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 根据id查询spu
+</span><span style="color:#998;font-style:italic">     * @Param [id]
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;com.leyou.item.pojo.Spu&gt;
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:19
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/spu/{id}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Spu<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySpuById</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span>Long id<span style="color:#000;font-weight:bold">){</span>
+        Spu spu <span style="color:#000;font-weight:bold">=</span> goodsService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpuById</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>spu <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">notFound</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>spu<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>提供接口声明，方便其他服务通过feign远程调用的时候继承。</p>
+<blockquote>
+<p>GoodsApi</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 根据id查询spu
+</span><span style="color:#998;font-style:italic">     * @Param [id]
+</span><span style="color:#998;font-style:italic">     * @return com.leyou.item.pojo.Spu
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:20
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/spu/{id}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    Spu <span style="color:#900;font-weight:bold">querySpuById</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span>Long id<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>GoodsService</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> Spu <span style="color:#900;font-weight:bold">querySpuById</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Spu spu <span style="color:#000;font-weight:bold">=</span> spuMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> spu<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="312查询规格参数组">3.1.2查询规格参数组</h4>
+<p>我们在页面展示规格时，需要按组展示：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/7.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/7.png" />
+        </a>
+    </p>
+<p>组内有多个参数，为了方便展示。我们提供一个接口，查询规格组，同时在规格组中持有组内的所有参数。</p>
+<blockquote>
+<p>拓展<code>SpecGroup</code>类：</p>
+</blockquote>
+<p>我们在<code>SpecGroup</code>中添加一个<code>SpecParam</code>的集合，保存该组下所有规格参数</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.item.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.annotation.KeySql</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Id</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Table</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Transient</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.List</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SpecGroup
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/23 13:15
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_spec_group&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SpecGroup</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> Long cid<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Transient</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> params<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 该组下的所有规格参数集合
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCid</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> cid<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCid</span><span style="color:#000;font-weight:bold">(</span>Long cid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">cid</span> <span style="color:#000;font-weight:bold">=</span> cid<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">name</span> <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getParams</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> params<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setParams</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> params<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">params</span> <span style="color:#000;font-weight:bold">=</span> params<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>然后提供查询接口：</p>
+<blockquote>
+<p>SpecificationController</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 查询规格参数组，及组内参数
+</span><span style="color:#998;font-style:italic">     * @Param [id]
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;java.util.List&lt;com.leyou.item.pojo.SpecGroup&gt;&gt;
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:28
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/{cid}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;&gt;</span> <span style="color:#900;font-weight:bold">querySpecsInGroupByCid</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;cid&#34;</span><span style="color:#000;font-weight:bold">)</span>Long id<span style="color:#000;font-weight:bold">){</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> specGroups <span style="color:#000;font-weight:bold">=</span> specificationService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpecsInGroupByCid</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>specGroups<span style="color:#000;font-weight:bold">)){</span>
+            <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">NOT_FOUND</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>specGroups<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>SpecificationAPI</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/{cid}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySpecsInGroupByCid</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;cid&#34;</span><span style="color:#000;font-weight:bold">)</span>Long id<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>SpecificationService</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SpecificationServiceImpl
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/20 17:33
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SpecificationServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> SpecificationService <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SpecificationMapper specificationMapper<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SpecGroupMapper specGroupMapper<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SpecParamMapper specParamMapper<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Specification <span style="color:#900;font-weight:bold">queryById</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">specificationMapper</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">findGroupByCid</span><span style="color:#000;font-weight:bold">(</span>Long cid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpecGroup record <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SpecGroup<span style="color:#000;font-weight:bold">();</span>
+        record<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCid</span><span style="color:#000;font-weight:bold">(</span>cid<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> specGroupMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>record<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySpecParams</span><span style="color:#000;font-weight:bold">(</span>Long gid<span style="color:#000;font-weight:bold">,</span> Long cid<span style="color:#000;font-weight:bold">,</span> Boolean searching<span style="color:#000;font-weight:bold">,</span> Boolean generic<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpecParam param <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> SpecParam<span style="color:#000;font-weight:bold">();</span>
+        param<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setGroupId</span><span style="color:#000;font-weight:bold">(</span>gid<span style="color:#000;font-weight:bold">);</span>
+        param<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCid</span><span style="color:#000;font-weight:bold">(</span>cid<span style="color:#000;font-weight:bold">);</span>
+        param<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSearching</span><span style="color:#000;font-weight:bold">(</span>searching<span style="color:#000;font-weight:bold">);</span>
+        param<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setGeneric</span><span style="color:#000;font-weight:bold">(</span>generic<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">specParamMapper</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>param<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySpecsInGroupByCid</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> specGroups <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findGroupByCid</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">//        specGroups.forEach(specGroup -&gt; {
+</span><span style="color:#998;font-style:italic">//            specGroup.setParams(this.querySpecParams(specGroup.getId(), null, null, null));
+</span><span style="color:#998;font-style:italic">//        });
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 上面这样的写法,每次循环都需要调用一次方法查询一次数据库,显然效率会很低
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 提升效率,减少数据库的交互
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// 1.根据cid查询出所有的specParams
+</span><span style="color:#998;font-style:italic"></span>        List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> specParams <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpecParams</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">,</span> id<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 2.创建一个map集合,组id作为key,每组的规格参数集合作为值
+</span><span style="color:#998;font-style:italic"></span>        Map<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">,</span>List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;&gt;</span> specMap <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+        <span style="color:#998;font-style:italic">// 3.遍历每个规格参数
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>SpecParam specParam <span style="color:#000;font-weight:bold">:</span> specParams<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 如果map的所有key中不包含这个规格参数对应的组id
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>specMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">containsKey</span><span style="color:#000;font-weight:bold">(</span>specParam<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getGroupId</span><span style="color:#000;font-weight:bold">())){</span>
+                <span style="color:#998;font-style:italic">// 将这个组id放进map中并新建list用于存放规格参数
+</span><span style="color:#998;font-style:italic"></span>                specMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>specParam<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getGroupId</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;());</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#998;font-style:italic">// 这个规格参数对应的组id在map中存在,将这个规格参数放进list中
+</span><span style="color:#998;font-style:italic"></span>            specMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>specParam<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getGroupId</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>specParam<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#998;font-style:italic">// 将目标list放入group
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>SpecGroup specGroup <span style="color:#000;font-weight:bold">:</span> specGroups<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            specGroup<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setParams</span><span style="color:#000;font-weight:bold">(</span>specMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>specGroup<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">()));</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> specGroups<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>在service中，我们调用之前编写过的方法，查询规格组，和规格参数，然后封装返回。</p>
+<h3 id="32创建feignclient消费者">3.2创建FeignClient（消费者）</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@FeignClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ly-item-service&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">BrandClient</span> <span style="color:#000;font-weight:bold">extends</span> BrandApi <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@FeignClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ly-item-service&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">CategoryClient</span> <span style="color:#000;font-weight:bold">extends</span> CategoryApi <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@FeignClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ly-item-service&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">GoodsClient</span> <span style="color:#000;font-weight:bold">extends</span> GoodsApi <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@FeignClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ly-item-service&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">SpecificationClient</span> <span style="color:#000;font-weight:bold">extends</span> SpecificationApi <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="33封装数据模型">3.3封装数据模型</h3>
+<p>我们创建一个GoodsService，在里面来封装数据模型。</p>
+<p>这里要查询的数据：</p>
+<ul>
+<li>
+<p>SPU</p>
+</li>
+<li>
+<p>SpuDetail</p>
+</li>
+<li>
+<p>SKU集合</p>
+</li>
+<li>
+<p>商品分类</p>
+<ul>
+<li>这里值需要分类的id和name就够了，因此我们查询到以后自己需要封装数据</li>
+</ul>
+</li>
+<li>
+<p>品牌</p>
+</li>
+<li>
+<p>规格组</p>
+<ul>
+<li>查询规格组的时候，把规格组下所有的参数也一并查出，上面提供的接口中已经实现该功能，我们直接调</li>
+</ul>
+</li>
+<li>
+<p>sku的特有规格参数</p>
+<p>有了规格组，为什么这里还要查询？</p>
+<p>因为在SpuDetail中的SpecialSpec中，是以id作为规格参数id作为key，如图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/8.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/8.png" />
+        </a>
+    </p>
+<p>但是，在页面渲染时，还需要知道规格参数的名称。</p>
+<p>我们就需要把id和name(规格参数名)一一对应起来，因此需要额外查询sku的特有规格参数，然后变成一个id:name的键值对格式。也就是一个Map，方便将来根据id到SpuDetail中的SpecialSpec中查找规格参数值。</p>
+<blockquote>
+<p>GoodsService代码</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname GoodsServiceImpl
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/3 16:03
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> GoodsService <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> GoodsClient goodsClient<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> BrandClient brandClient<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> CategoryClient categoryClient<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> SpecificationClient specificationClient<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger logger <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>GoodsServiceImpl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+    
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.util.Map&lt;java.lang.String, java.lang.Object&gt;
+</span><span style="color:#998;font-style:italic">     * @Description 返回页面需要的信息的方法, 这里就不新建对象了, 直接用map了
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 16:43
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">loadModel</span><span style="color:#000;font-weight:bold">(</span>Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 查询spu
+</span><span style="color:#998;font-style:italic"></span>            Spu spu <span style="color:#000;font-weight:bold">=</span> goodsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpuById</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询spu详情
+</span><span style="color:#998;font-style:italic"></span>            SpuDetail spuDetail <span style="color:#000;font-weight:bold">=</span> goodsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpuDetailById</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询sku
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>Sku<span style="color:#000;font-weight:bold">&gt;</span> skuList <span style="color:#000;font-weight:bold">=</span> goodsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findSkuList</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询品牌
+</span><span style="color:#998;font-style:italic"></span>            Brand brand <span style="color:#000;font-weight:bold">=</span> brandClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">queryBrandById</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询分类
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>Category<span style="color:#000;font-weight:bold">&gt;</span> categoryList <span style="color:#000;font-weight:bold">=</span> getCategory<span style="color:#000;font-weight:bold">(</span>spu<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询组内参数
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>SpecGroup<span style="color:#000;font-weight:bold">&gt;</span> specGroups <span style="color:#000;font-weight:bold">=</span> specificationClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpecsInGroupByCid</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 查询所有特有规格参数
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>SpecParam<span style="color:#000;font-weight:bold">&gt;</span> specSpecialParams <span style="color:#000;font-weight:bold">=</span> specificationClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySpecParam</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">,</span> spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCid3</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 处理特有规格参数
+</span><span style="color:#998;font-style:italic"></span>            Map<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> paramsMap <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+            <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>SpecParam specSpecialParam <span style="color:#000;font-weight:bold">:</span> specSpecialParams<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                paramsMap<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span>specSpecialParam<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">(),</span> specSpecialParam<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">}</span>
+            Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;spu&#34;</span><span style="color:#000;font-weight:bold">,</span> spu<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;spuDetail&#34;</span><span style="color:#000;font-weight:bold">,</span> spuDetail<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;skus&#34;</span><span style="color:#000;font-weight:bold">,</span> skuList<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;brand&#34;</span><span style="color:#000;font-weight:bold">,</span> brand<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;categories&#34;</span><span style="color:#000;font-weight:bold">,</span> categoryList<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;groups&#34;</span><span style="color:#000;font-weight:bold">,</span> specGroups<span style="color:#000;font-weight:bold">);</span>
+            map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;params&#34;</span><span style="color:#000;font-weight:bold">,</span> paramsMap<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> map<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;加载商品数据出错,spuId:{}&#34;</span><span style="color:#000;font-weight:bold">,</span> spuId<span style="color:#000;font-weight:bold">,</span> e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.util.List&lt;com.leyou.item.pojo.Category&gt;
+</span><span style="color:#998;font-style:italic">     * @Description 得到三个级别的分类名称和id
+</span><span style="color:#998;font-style:italic">     * @Param [spu]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 16:44
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>Category<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">getCategory</span><span style="color:#000;font-weight:bold">(</span>Spu spu<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            Long cid1 <span style="color:#000;font-weight:bold">=</span> spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCid1</span><span style="color:#000;font-weight:bold">();</span>
+            Long cid2 <span style="color:#000;font-weight:bold">=</span> spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCid2</span><span style="color:#000;font-weight:bold">();</span>
+            Long cid3 <span style="color:#000;font-weight:bold">=</span> spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCid3</span><span style="color:#000;font-weight:bold">();</span>
+            List<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> ids <span style="color:#000;font-weight:bold">=</span> Arrays<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">asList</span><span style="color:#000;font-weight:bold">(</span>cid1<span style="color:#000;font-weight:bold">,</span> cid2<span style="color:#000;font-weight:bold">,</span> cid3<span style="color:#000;font-weight:bold">);</span>
+            List<span style="color:#000;font-weight:bold">&lt;</span>Category<span style="color:#000;font-weight:bold">&gt;</span> categoryList <span style="color:#000;font-weight:bold">=</span> categoryClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">queryCategoryByIds</span><span style="color:#000;font-weight:bold">(</span>ids<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#998;font-style:italic">// 我们只需要分类的id和name就够了,id有了,name没有,所以还需进一步处理
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> cnames <span style="color:#000;font-weight:bold">=</span> categoryList<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">stream</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">map</span><span style="color:#000;font-weight:bold">(</span>category <span style="color:#000;font-weight:bold">-&gt;</span> category<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">()).</span><span style="color:#008080">collect</span><span style="color:#000;font-weight:bold">(</span>Collectors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toList</span><span style="color:#000;font-weight:bold">());</span>
+            Category c1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Category<span style="color:#000;font-weight:bold">();</span>
+            c1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span>cnames<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">));</span>
+            c1<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>cid1<span style="color:#000;font-weight:bold">);</span>
+    
+            Category c2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Category<span style="color:#000;font-weight:bold">();</span>
+            c2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span>cnames<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">));</span>
+            c2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>cid2<span style="color:#000;font-weight:bold">);</span>
+    
+            Category c3 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Category<span style="color:#000;font-weight:bold">();</span>
+            c3<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span>cnames<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>2<span style="color:#000;font-weight:bold">));</span>
+            c3<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>cid3<span style="color:#000;font-weight:bold">);</span>
+    
+            <span style="color:#000;font-weight:bold">return</span> Arrays<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">asList</span><span style="color:#000;font-weight:bold">(</span>c1<span style="color:#000;font-weight:bold">,</span> c2<span style="color:#000;font-weight:bold">,</span> c3<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            logger<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;查询商品分类出错，spuId：{}&#34;</span><span style="color:#000;font-weight:bold">,</span> spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">(),</span> e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+    
+</code></pre></div><p>JAVA</p>
+<p>然后在controller中把数据放入model：</p>
+<blockquote>
+<p>GoodsController</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsController</span> <span style="color:#000;font-weight:bold">{</span>
+    
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> GoodsService goodsService<span style="color:#000;font-weight:bold">;</span>
+    
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.lang.String
+</span><span style="color:#998;font-style:italic">     * @Description 跳转到商品详情页
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:03
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/item/{id}.html&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toItemPage</span><span style="color:#000;font-weight:bold">(</span>Model model<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 加载所需的数据
+</span><span style="color:#998;font-style:italic"></span>        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> loadModel <span style="color:#000;font-weight:bold">=</span> goodsService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loadModel</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 放入模型
+</span><span style="color:#998;font-style:italic"></span>        model<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllAttributes</span><span style="color:#000;font-weight:bold">(</span>loadModel<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;item&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+</li>
+</ul>
+<h2 id="4页面静态化">4.页面静态化</h2>
+<h3 id="41简介">4.1.简介</h3>
+<h4 id="411问题分析">4.1.1.问题分析</h4>
+<p>现在，我们的页面是通过Thymeleaf模板引擎渲染后返回到客户端。在后台需要大量的数据查询，而后渲染得到HTML页面。会对数据库造成压力，并且请求的响应时间过长，并发能力不高。</p>
+<p>大家能想到什么办法来解决这个问题？</p>
+<p>首先我们能想到的就是缓存技术，比如之前学习过的Redis。不过Redis适合数据规模比较小的情况。假如数据量比较大，例如我们的商品详情页。每个页面如果10kb，100万商品，就是10GB空间，对内存占用比较大。此时就给缓存系统带来极大压力，如果缓存崩溃，接下来倒霉的就是数据库了。</p>
+<p>所以缓存并不是万能的，某些场景需要其它技术来解决，比如静态化。</p>
+<h4 id="412什么是静态化">4.1.2.什么是静态化</h4>
+<p>静态化是指把动态生成的HTML页面变为静态内容保存，以后用户的请求到来，直接访问静态页面，不再经过服务的渲染。</p>
+<p>而静态的HTML页面可以部署在nginx中，从而大大提高并发能力，减小tomcat压力。</p>
+<h4 id="413如何实现静态化">4.1.3.如何实现静态化</h4>
+<p>目前，静态化页面都是通过模板引擎来生成，而后保存到nginx服务器来部署。常用的模板引擎比如：</p>
+<ul>
+<li>Freemarker</li>
+<li>Velocity</li>
+<li>Thymeleaf</li>
+</ul>
+<p>我们之前就使用的Thymeleaf，来渲染html返回给用户。Thymeleaf除了可以把渲染结果写入Response，也可以写到本地文件，从而实现静态化。</p>
+<h3 id="42thymeleaf实现静态化">4.2.Thymeleaf实现静态化</h3>
+<h4 id="421概念">4.2.1.概念</h4>
+<p>先说下Thymeleaf中的几个概念：</p>
+<ul>
+<li>Context：运行上下文</li>
+<li>TemplateResolver：模板解析器</li>
+<li>TemplateEngine：模板引擎</li>
+</ul>
+<blockquote>
+<p>Context</p>
+</blockquote>
+<p>上下文： 用来保存模型数据，当模板引擎渲染时，可以从Context上下文中获取数据用于渲染。</p>
+<p>当与SpringBoot结合使用时，我们放入Model的数据就会被处理到Context，作为模板渲染的数据使用。</p>
+<blockquote>
+<p>TemplateResolver</p>
+</blockquote>
+<p>模板解析器：用来读取模板相关的配置，例如：模板存放的位置信息，模板文件名称，模板文件的类型等等。</p>
+<p>当与SpringBoot结合时，TemplateResolver已经由其创建完成，并且各种配置也都有默认值，比如模板存放位置，其默认值就是：templates。比如模板文件类型，其默认值就是html。</p>
+<blockquote>
+<p>TemplateEngine</p>
+</blockquote>
+<p>模板引擎：用来解析模板的引擎，需要使用到上下文、模板解析器。分别从两者中获取模板中需要的数据，模板文件。然后利用内置的语法规则解析，从而输出解析后的文件。来看下模板引擎进行处理的函数：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">templateEngine<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">process</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;模板名&#34;</span><span style="color:#000;font-weight:bold">,</span> context<span style="color:#000;font-weight:bold">,</span> writer<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>三个参数：</p>
+<ul>
+<li>模板名称</li>
+<li>上下文：里面包含模型数据</li>
+<li>writer：输出目的地的流</li>
+</ul>
+<p>在输出时，我们可以指定输出的目的地，如果目的地是Response的流，那就是网络响应。如果目的地是本地文件，那就实现静态化了。</p>
+<p>而在SpringBoot中已经自动配置了模板引擎，因此我们不需要关心这个。现在我们做静态化，就是把输出的目的地改成本地文件即可！</p>
+<h4 id="422具体实现">4.2.2具体实现</h4>
+<blockquote>
+<p>service代码</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.goods.service.impl</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.leyou.common.utils.ThreadUtils</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.leyou.goods.service.GoodsHtmlService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.leyou.goods.service.GoodsService</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.slf4j.Logger</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.slf4j.LoggerFactory</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.beans.factory.annotation.Autowired</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.stereotype.Service</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.thymeleaf.TemplateEngine</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.thymeleaf.context.Context</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.File</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.PrintWriter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Map</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname GoodsHtmlServiceImpl
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/3 16:58
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsHtmlServiceImpl</span> <span style="color:#000;font-weight:bold">implements</span> GoodsHtmlService <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> GoodsService goodsService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> TemplateEngine templateEngine<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> Logger LOGGER <span style="color:#000;font-weight:bold">=</span> LoggerFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLogger</span><span style="color:#000;font-weight:bold">(</span>GoodsHtmlServiceImpl<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description 新建线程处理页面静态化
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 16:59
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">asyncExcute</span><span style="color:#000;font-weight:bold">(</span>Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        ThreadUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">execute</span><span style="color:#000;font-weight:bold">(()</span> <span style="color:#000;font-weight:bold">-&gt;</span> createHtml<span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">));</span>
+        <span style="color:#998;font-style:italic">/*ThreadUtils.execute(new Runnable() {
+</span><span style="color:#998;font-style:italic">            @Override
+</span><span style="color:#998;font-style:italic">            public void run() {
+</span><span style="color:#998;font-style:italic">                createHtml(spuId);
+</span><span style="color:#998;font-style:italic">            }
+</span><span style="color:#998;font-style:italic">        });*/</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description 创建html页面
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 16:59
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">createHtml</span><span style="color:#000;font-weight:bold">(</span>Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        PrintWriter writer <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 获取页面数据
+</span><span style="color:#998;font-style:italic"></span>            Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> spuMap <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">goodsService</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loadModel</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">// 创建thymeleaf上下文对象
+</span><span style="color:#998;font-style:italic"></span>            Context context <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Context<span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#998;font-style:italic">// 把数据放入上下文对象
+</span><span style="color:#998;font-style:italic"></span>            context<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setVariables</span><span style="color:#000;font-weight:bold">(</span>spuMap<span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">// 创建输出流
+</span><span style="color:#998;font-style:italic"></span>            File file <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> File<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;E:\\software\\Nginx\\nginx-1.14.0\\html\\item&#34;</span> <span style="color:#000;font-weight:bold">+</span> spuId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;.html&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            writer <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PrintWriter<span style="color:#000;font-weight:bold">(</span>file<span style="color:#000;font-weight:bold">);</span>
+
+            <span style="color:#998;font-style:italic">// 执行页面静态化方法
+</span><span style="color:#998;font-style:italic"></span>            templateEngine<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">process</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;item&#34;</span><span style="color:#000;font-weight:bold">,</span> context<span style="color:#000;font-weight:bold">,</span> writer<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;页面静态化出错：{}，&#34;</span> <span style="color:#000;font-weight:bold">+</span> e<span style="color:#000;font-weight:bold">,</span> spuId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">finally</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>writer <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                writer<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>线程工具类：</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname ThreadUtils
+</span><span style="color:#998;font-style:italic"> * @Description 线程工具类
+</span><span style="color:#998;font-style:italic"> * @Date 2021/3/3 17:02
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ThreadUtils</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> ExecutorService es <span style="color:#000;font-weight:bold">=</span> Executors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">newFixedThreadPool</span><span style="color:#000;font-weight:bold">(</span>10<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">execute</span><span style="color:#000;font-weight:bold">(</span>Runnable runnable<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        es<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">submit</span><span style="color:#000;font-weight:bold">(</span>runnable<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="423什么时候创建静态文件">4.2.3什么时候创建静态文件</h4>
+<p>我们编写好了创建静态文件的service，那么问题来了：什么时候去调用它呢</p>
+<p>想想这样的场景：</p>
+<p>假如大部分的商品都有了静态页面。那么用户的请求都会被nginx拦截下来，根本不会到达我们的<code>ly-goods-page</code>服务。只有那些还没有页面的请求，才可能会到达这里。</p>
+<p>因此，如果请求到达了这里，我们除了返回页面视图外，还应该创建一个静态页面，那么下次就不会再来麻烦我们了。</p>
+<p>所以，我们在GoodsController中添加逻辑，去生成静态html文件：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GoodsController</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> GoodsService goodsService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> GoodsHtmlService goodsHtmlService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return java.lang.String
+</span><span style="color:#998;font-style:italic">     * @Description 跳转到商品详情页
+</span><span style="color:#998;font-style:italic">     * @Param [spuId]
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/3 15:03
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/item/{id}.html&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toItemPage</span><span style="color:#000;font-weight:bold">(</span>Model model<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span> Long spuId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 加载所需的数据
+</span><span style="color:#998;font-style:italic"></span>        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> loadModel <span style="color:#000;font-weight:bold">=</span> goodsService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loadModel</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 放入模型
+</span><span style="color:#998;font-style:italic"></span>        model<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllAttributes</span><span style="color:#000;font-weight:bold">(</span>loadModel<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#998;font-style:italic">// 页面静态化
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">goodsHtmlService</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">asyncExcute</span><span style="color:#000;font-weight:bold">(</span>spuId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;item&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>注意：生成html 的代码不能对用户请求产生影响，所以这里我们使用额外的线程进行异步创建。</p>
+<h4 id="424重启测试">4.2.4重启测试</h4>
+<p>访问一个商品详情，然后查看nginx目录：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/9.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/9.png" />
+        </a>
+    </p>
+<p>图中的情形是ng在本机，和微服务在一台服务器的情况。如果Ng在虚拟机，微服务在本机，那么就得手动将这个<code>.html</code>文件copy到虚拟机的Ng的相应目录下测试，或者将微服务打包发布到虚拟机上（这样的话service中的路径要改），和Ng在统一服务器。</p>
+<h2 id="5nginx代理静态页面">5.nginx代理静态页面</h2>
+<p>接下来，我们修改nginx，让它对商品请求进行监听，指向本地静态页面，如果本地没找到，才进行反向代理：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-nginx" data-lang="nginx"><span style="color:#000;font-weight:bold">server</span> {
+    <span style="color:#000;font-weight:bold">listen</span>       <span style="color:#099">80</span>;
+    <span style="color:#000;font-weight:bold">server_name</span>  <span style="color:#d14">www.leyou.com</span>;
+
+    <span style="color:#000;font-weight:bold">proxy_set_header</span> <span style="color:#d14">X-Forwarded-Host</span> <span style="color:#008080">$host</span>;
+    <span style="color:#000;font-weight:bold">proxy_set_header</span> <span style="color:#d14">X-Forwarded-Server</span> <span style="color:#008080">$host</span>;
+    <span style="color:#000;font-weight:bold">proxy_set_header</span> <span style="color:#d14">X-Forwarded-For</span> <span style="color:#008080">$proxy_add_x_forwarded_for</span>;
+
+    <span style="color:#000;font-weight:bold">location</span> <span style="color:#d14">/item</span> {
+        <span style="color:#998;font-style:italic"># 先找本地
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">root</span> <span style="color:#d14">html</span>;
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#d14">(!-f</span> <span style="color:#008080">$request_filename</span><span style="color:#d14">)</span> { <span style="color:#998;font-style:italic">#请求的文件不存在，就反向代理
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">proxy_pass</span> <span style="color:#d14">http://127.0.0.1:8084</span>; <span style="color:#998;font-style:italic">#ng和微服务在同一服务器部署
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">#proxy_pass http://192.168.1.103:8084; #ng在虚拟机,微服务在本机192.168.1.103
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">break</span>;
+        }
+    }
+
+    <span style="color:#000;font-weight:bold">location</span> <span style="color:#d14">/</span> {
+        <span style="color:#000;font-weight:bold">proxy_pass</span> <span style="color:#d14">http://127.0.0.1:9002</span>;
+        <span style="color:#000;font-weight:bold">proxy_connect_timeout</span> <span style="color:#099">600</span>;
+        <span style="color:#000;font-weight:bold">proxy_read_timeout</span> <span style="color:#099">600</span>;
+    }
+}
+</code></pre></div><p>NGINX</p>
+<p>重启测试：</p>
+<p>发现请求速度得到了极大提升：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/10.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/goods/10.png" />
+        </a>
+    </p>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/goods-details-page-static.html">https://chanservy.github.io/2021/04/09/goods-details-page-static.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/search-service.html">项目中的搜索服务</a></li>
+        
+        <li><a href="/2021/04/09/dianshangxiangmufenxi.html">电商项目中商品的分析和数据库设计</a></li>
+        
+        <li><a href="/2021/04/09/load-fastDFS-with-nginx-on-centos.html">Centos下安装FastDFS并添加Nginx模块</a></li>
+        
+        <li><a href="/2021/04/08/blog-of-kuayuwenti.html">跨域问题</a></li>
+        
+        <li><a href="/2020/02/05/upload-image.html">微服务项目中的图片上传</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+                <li><a href='/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96'>页面静态化</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

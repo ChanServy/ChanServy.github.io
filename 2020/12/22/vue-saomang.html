@@ -1,0 +1,1659 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Vue扫盲 | 迩东陈的博客</title>
+    <meta property="og:title" content="Vue扫盲 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-01-06T11:06:19&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-01-06T11:06:19&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Vue扫盲.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/vue-saomang.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一起步">一、起步</a></li>
+    <li><a href="#二vue初体验">二、Vue初体验</a></li>
+    <li><a href="#三条件指令">三、条件指令</a></li>
+    <li><a href="#四循环指令">四、循环指令</a></li>
+    <li><a href="#五处理用户输入">五、处理用户输入</a></li>
+    <li><a href="#六组件">六、组件</a></li>
+    <li><a href="#七实例">七、实例</a></li>
+    <li><a href="#八模板语法">八、模板语法</a></li>
+    <li><a href="#九计算属性">九、计算属性</a></li>
+    <li><a href="#十侦听器">十、侦听器</a></li>
+    <li><a href="#十一class-绑定">十一、Class 绑定</a></li>
+    <li><a href="#十二style-绑定">十二、Style 绑定</a></li>
+    <li><a href="#十三vue-条件渲染">十三、Vue 条件渲染</a></li>
+    <li><a href="#十四vue-列表渲染">十四、Vue 列表渲染</a>
+      <ul>
+        <li><a href="#检测变化的注意事项httpscnvuejsorgv2guidereactivityhtml检测变化的注意事项"><a href="https://cn.vuejs.org/v2/guide/reactivity.html#%E6%A3%80%E6%B5%8B%E5%8F%98%E5%8C%96%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">检测变化的注意事项</a></a></li>
+      </ul>
+    </li>
+    <li><a href="#十五vue-事件处理">十五、Vue 事件处理</a></li>
+    <li><a href="#十六vue-表单输入绑定">十六、Vue 表单输入绑定</a>
+      <ul>
+        <li><a href="#九九乘法表横纵拓展">九九乘法表横纵拓展</a></li>
+      </ul>
+    </li>
+    <li><a href="#十七vue-组件基础">十七、Vue 组件基础</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Vue扫盲</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年1月6日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Vue'>Vue</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：Vue是一套用于构建用户界面的渐进式框架。与其它大型框架不同的是，Vue被设计为可以自底向上逐层应用。Vue的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。另一方面，当与现代化的工具链以及各种支持类库结合使用时，Vue也完全能够为复杂的单页应用提供驱动。</p>
+<h1 id="vue扫盲">Vue扫盲</h1>
+<h2 id="一起步">一、起步</h2>
+<p>创建一个html，然后通过如下方式引入 Vue：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#998;font-style:italic">&lt;!-- 开发环境版本，包含了有帮助的命令行警告 --&gt;</span>
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+</code></pre></div><p>或者</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#998;font-style:italic">&lt;!-- 生产环境版本，优化了尺寸和速度 --&gt;</span>
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+
+</code></pre></div><p>或者</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#998;font-style:italic">&lt;!-- 先下载好静态资源放到工程目录中，再引入 --&gt;</span>
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;/js/vue/vue.min.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+</code></pre></div><p>创建</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+	&lt;<span style="color:#000080">p</span>&gt;{{ msg }}&lt;/<span style="color:#000080">p</span>&gt;<span style="color:#998;font-style:italic">&lt;!-- {{}}插值表达式--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 在被Vue接管的区域中使用Vue的系统指令呈现数据,这些指令就相当于是MVVM中的View这个角色 --&gt;</span>
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text/javascript&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">// 实例化Vue对象 
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// vm :叫做MVVM中的 View Model
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+		el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>, <span style="color:#998;font-style:italic">//表示当前vue对象接管id为app的div区域
+</span><span style="color:#998;font-style:italic"></span>		data<span style="color:#000;font-weight:bold">:</span>{
+			msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;Hello Vue!&#39;</span> <span style="color:#998;font-style:italic">// 相当于是MVVM中的Model这个角色
+</span><span style="color:#998;font-style:italic"></span>		}
+	})
+&lt;/<span style="color:#000080">script</span>&gt;
+
+</code></pre></div><p>以上就成功创建了第一个 Vue 应用！Vue 将数据和 DOM 之间建立了关联，所有东西都是<strong>响应式的</strong>。打开控制台修改 msg 的值，你将看到上例相应地更新。</p>
+<p><code>代码编写步骤：</code></p>
+<ol>
+<li>定义html，引入vue.js</li>
+<li>定义app div，此区域作为vue的接管区域</li>
+<li>定义vue实例，接管app区域。</li>
+<li>定义model（数据对象）</li>
+<li>VM完成在app中展示数据</li>
+</ol>
+<h2 id="二vue初体验">二、Vue初体验</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--不加 v-bind: title中的是个字符串 加了之后title中的是个变量 通过vm中的model传过来--&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span> <span style="color:#008080">v-bind:title</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hhh&#34;</span>&gt;
+    {{msg}}
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello vue!&#39;</span>,
+            hhh<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chan...&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="三条件指令">三、条件指令</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;flag&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;<span style="color:#998;font-style:italic">&lt;!--不显示时是元素移除--&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-show</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;flag&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;<span style="color:#998;font-style:italic">&lt;!--不显示时是用css的方式将元素隐藏--&gt;</span>
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            flag<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chan&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="四循环指令">四、循环指令</h2>
+<p>九九乘法表</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">table</span> <span style="color:#008080">border</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;1&#34;</span>&gt;
+        &lt;<span style="color:#000080">tr</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;i in num&#34;</span>&gt;
+            <span style="color:#998;font-style:italic">&lt;!--i、j写在{{}}外面就是个普通的字符串,写在{{}}里面就当成变量来渲染--&gt;</span>
+            &lt;<span style="color:#000080">td</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;j in i&#34;</span>&gt;{{j}}*{{i}}={{j*i}}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    &lt;/<span style="color:#000080">table</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            num<span style="color:#000;font-weight:bold">:</span><span style="color:#099">9</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="五处理用户输入">五、处理用户输入</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">button</span> <span style="color:#008080">v-on:click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;reverseMsg&#34;</span>&gt;反转消息&lt;/<span style="color:#000080">button</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello chan!&#39;</span>
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            reverseMsg<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span>(){
+                <span style="color:#998;font-style:italic">// alert(&#39;hello csy!&#39;);
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">//VM中要访问自己数据模型中的对象时,前面要加this!
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#998;font-style:italic">//反转消息
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">this</span>.msg<span style="color:#000;font-weight:bold">=</span><span style="color:#000;font-weight:bold">this</span>.msg.split(<span style="color:#d14">&#39;&#39;</span>).reverse().join(<span style="color:#d14">&#39;&#39;</span>);
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- v-model 在input中输入的值就会自动的绑定到msg变量上去,进而实现上面的div中的值的变化--&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;msg&#34;</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hi chan...&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="六组件">六、组件</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--这里的chan标签就是我们下面自定义的组件 name就是组件中定义的props中的参数 hello就是VM中data中的参数值--&gt;</span>
+    &lt;<span style="color:#000080">chan</span> <span style="color:#008080">v-bind:name</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hello&#34;</span>&gt;&lt;/<span style="color:#000080">chan</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--浏览器输出: hello chan...! --&gt;</span>
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#998;font-style:italic">/* 组件  第一个参数是组件的自定义的名字 第二个就是组件的内容 template表示这个组件它对应的标签是什么 */</span>
+    <span style="color:#998;font-style:italic">/* 相当于我自定义一个标签叫chan chan的值内容就是这个h1标签的内容 */</span>
+    Vue.component(<span style="color:#d14">&#39;chan&#39;</span>,{
+        props<span style="color:#000;font-weight:bold">:</span>[<span style="color:#d14">&#39;name&#39;</span>],
+        <span style="color:#998;font-style:italic">/*这里的name 就是上面的props中的参数*/</span>
+        template<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&lt;h1&gt;hello {{name}}!&lt;/h1&gt;&#39;</span>
+    })
+
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chan!!!&#39;</span>,
+            hello<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chan...&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="七实例">七、实例</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> data <span style="color:#000;font-weight:bold">=</span> {
+        msg<span style="color:#000;font-weight:bold">:</span><span style="color:#099">1</span>,
+        b<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">null</span>
+    };
+
+    <span style="color:#998;font-style:italic">/*如果前面加了Object.freeze()这个方法 那么下面的msg的值变化的时候 视图不会随着变化*/</span>
+    <span style="color:#998;font-style:italic">// Object.freeze(
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">//     data
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// );
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        <span style="color:#998;font-style:italic">// data:{
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//     msg:&#39;hello chen!&#39;
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// }
+</span><span style="color:#998;font-style:italic"></span>        data<span style="color:#000;font-weight:bold">:</span>data
+    });
+
+    <span style="color:#998;font-style:italic">/*双向绑定的*/</span>
+    console.log(data.msg <span style="color:#000;font-weight:bold">==</span> vm.msg);<span style="color:#998;font-style:italic">//true
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#998;font-style:italic">/*这里更改msg的值 视图会随着发生变化*/</span>
+    data.msg<span style="color:#000;font-weight:bold">=</span><span style="color:#099">99</span>;
+    console.log(vm.msg);
+    vm.msg<span style="color:#000;font-weight:bold">=</span><span style="color:#099">100</span>;
+    console.log(data.msg);
+
+    console.log(<span style="color:#d14">&#34;--------------------------------&#34;</span>);
+    console.log(vm.$el<span style="color:#000;font-weight:bold">==</span><span style="color:#0086b3">document</span>.getElementById(<span style="color:#d14">&#34;app&#34;</span>));<span style="color:#998;font-style:italic">//true
+</span><span style="color:#998;font-style:italic"></span>    console.log(vm.$data<span style="color:#000;font-weight:bold">==</span>data);<span style="color:#998;font-style:italic">//true
+</span><span style="color:#998;font-style:italic"></span>&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="八模板语法">八、模板语法</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{a}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{num}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">button</span> <span style="color:#008080">v-bind:disabled</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;!enableButton&#34;</span> <span style="color:#008080">v-on:click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;num++&#34;</span>&gt;按钮&lt;/<span style="color:#000080">button</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-html</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;a&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{num&gt;102?&#39;good&#39;:num}}&lt;/<span style="color:#000080">div</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--不加 v-bind: href中的是个字符串 写成实际网址才可以 加了之后href中的是个变量 通过vm中的model传过来--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- v-bind:可以简写成:  v-on:可以简写成@ --&gt;</span>
+    &lt;<span style="color:#000080">a</span> <span style="color:#008080">v-bind:href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;link&#34;</span>&gt;迩东陈&lt;/<span style="color:#000080">a</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            a<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&lt;h1&gt;hello chen!&lt;/h1&gt;&#39;</span>,
+            enableButton<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            b<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">null</span>,
+            num<span style="color:#000;font-weight:bold">:</span><span style="color:#099">99</span>,
+            link<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;https://blog.csy.ink/&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="九计算属性">九、计算属性</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--    &lt;div&gt;{{reverseMsg()}}&lt;/div&gt;--&gt;</span>
+    &lt;<span style="color:#000080">div</span>&gt;{{reverseMsg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{copyMsg}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hi chan!&#39;</span>,
+            copyMsg<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">null</span>
+        },
+        <span style="color:#998;font-style:italic">/* 方法属性 不会缓存 每次调用方法都要执行一遍 即使msg不变的情况下 也要重新执行 */</span>
+        <span style="color:#998;font-style:italic">// methods:{
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//     reverseMsg(){
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//         return this.msg.split(&#39;&#39;).reverse().join(&#39;&#39;);
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//     }
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// },
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">/* 计算属性 会缓存 msg不变的时候直接从缓存中拿值 msg变了的话 会重新执行 效率更高 */</span>
+        computed<span style="color:#000;font-weight:bold">:</span>{
+            <span style="color:#998;font-style:italic">/* 两种写法等价 */</span>
+            <span style="color:#998;font-style:italic">/* 正常写法 这个reverseMsg方法可以当成一个普通的变量来使用 {{reverseMsg}} */</span>
+            reverseMsg<span style="color:#000;font-weight:bold">:</span>{
+                get(){
+                    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span>.msg.split(<span style="color:#d14">&#39;&#39;</span>).reverse().join(<span style="color:#d14">&#39;&#39;</span>);
+                },
+                <span style="color:#998;font-style:italic">/* set方法 作用:在给reverseMsg赋值的时候 这个方法会被调用 */</span>
+                set(newVal){
+                    <span style="color:#998;font-style:italic">// console.log(&#34;set:&#34;+newVal);
+</span><span style="color:#998;font-style:italic"></span>                    <span style="color:#000;font-weight:bold">this</span>.copyMsg <span style="color:#000;font-weight:bold">=</span> newVal;
+                }
+            }
+            <span style="color:#998;font-style:italic">/* 简写方式 这个reverseMsg方法可以当成一个普通的变量来使用 {{reverseMsg}} */</span>
+            <span style="color:#998;font-style:italic">/* computed计算属性的get方式用得多 一般这样简写的方式就够用了 */</span>
+            <span style="color:#998;font-style:italic">// reverseMsg(){
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//     return this.msg.split(&#39;&#39;).reverse().join(&#39;&#39;);
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">// }
+</span><span style="color:#998;font-style:italic"></span>        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十侦听器">十、侦听器</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{fullName}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span> {
+            <span style="color:#998;font-style:italic">/* 需求:如果用户手动修改了firstName或者lastName的值 那么这个fullName的值要跟着变 */</span>
+            firstName<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;张&#39;</span>,
+            lastName<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;三&#39;</span>,
+            fullName<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;张三&#39;</span>
+        },
+        <span style="color:#998;font-style:italic">/* 这个案例只是为了演示watch侦听器 其实这个需求用computed更合适 watch更适合用于异步操作和耗时操作 */</span>
+        watch<span style="color:#000;font-weight:bold">:</span> {
+            firstName(val) {
+                <span style="color:#000;font-weight:bold">this</span>.fullName <span style="color:#000;font-weight:bold">=</span> val <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39; &#39;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#000;font-weight:bold">this</span>.lastName;
+            },
+            lastName(val) {
+                <span style="color:#000;font-weight:bold">this</span>.fullName <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span>.firstName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39; &#39;</span> <span style="color:#000;font-weight:bold">+</span> val;
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{fullName}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            <span style="color:#998;font-style:italic">/* 需求:如果用户手动修改了firstName或者lastName的值 那么这个fullName的值要跟着变 */</span>
+            firstName<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;张&#39;</span>,
+            lastName<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;三&#39;</span>
+        },
+        computed<span style="color:#000;font-weight:bold">:</span>{
+            fullName(){
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span>.firstName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39; &#39;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#000;font-weight:bold">this</span>.lastName;
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十一class-绑定">十一、Class 绑定</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--    &lt;div class=&#34;mydiv&#34;&gt;{{msg}}&lt;/div&gt;--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- class和style绑定 当model中的flag为true时 会有下面的.mydiv样式 flag为false时没有.mydiv样式 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;{mydiv:flag,mydiv2:hasBorder}&#34;</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;mydiv1&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;classObj&#34;</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;mydiv1&#34;</span>&gt;{{a}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello chen!&#39;</span>,
+            flag<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            hasBorder<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            a<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;aaaaa测试&#34;</span>,
+            <span style="color:#998;font-style:italic">/* v-bind:class=&#34;{mydiv:flag,mydiv2:hasBorder}&#34; 如果{}中属性较多 可以在此定义一个对象 如下 */</span>
+            classObj<span style="color:#000;font-weight:bold">:</span>{
+                <span style="color:#998;font-style:italic">/* 键要和自定义的style块同名 */</span>
+                mydiv<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+                mydiv2<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;<span style="color:#000080">style</span>&gt;
+    .<span style="color:#458;font-weight:bold">mydiv</span>{
+        <span style="color:#000;font-weight:bold">font-weight</span>: <span style="color:#000;font-weight:bold">bold</span>;
+        <span style="color:#000;font-weight:bold">color</span>: <span style="color:#099">#ff0000</span>;
+    }
+
+    .<span style="color:#458;font-weight:bold">mydiv1</span>{
+        <span style="color:#000;font-weight:bold">font-size</span>: <span style="color:#099">20</span><span style="color:#458;font-weight:bold">px</span>;
+    }
+
+    .<span style="color:#458;font-weight:bold">mydiv2</span>{
+        <span style="color:#000;font-weight:bold">border</span>: <span style="color:#099">1</span><span style="color:#458;font-weight:bold">px</span> <span style="color:#000;font-weight:bold">solid</span> <span style="color:#099">#00ffff</span>;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--    &lt;div class=&#34;mydiv&#34;&gt;{{msg}}&lt;/div&gt;--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- class和style绑定 当model中的flag为true时 会有下面的.mydiv样式 flag为false时没有.mydiv样式 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;{mydiv:flag,mydiv2:hasBorder}&#34;</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;mydiv1&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 使用对象或者计算属性的方式 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;classObj&#34;</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;mydiv1&#34;</span>&gt;{{a}}&lt;/<span style="color:#000080">div</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 使用数组的方式 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;[mydivClass,mydiv2Class]&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 数组的方式也可以按照条件决定加不加样式 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;[flag ? mydivClass : &#39;&#39;,mydiv2Class]&#34;</span>&gt;{{a}}&lt;/<span style="color:#000080">div</span>&gt;
+
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello chen!&#39;</span>,
+            flag<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            hasBorder<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">true</span>,
+            a<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#34;aaaaa测试&#34;</span>,
+            <span style="color:#998;font-style:italic">/* v-bind:class=&#34;{mydiv:flag,mydiv2:hasBorder}&#34; 如果{}中属性较多 可以在此定义一个对象 如下 */</span>
+            <span style="color:#998;font-style:italic">// classObj:{
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//     /* 键要和自定义的style块同名 */
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//     mydiv:true,
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">//     mydiv2:true
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">// }
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">/* 数组的形式 */</span>
+            mydivClass<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;mydiv&#39;</span>,
+            mydiv2Class<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;mydiv2&#39;</span>
+        },
+        <span style="color:#998;font-style:italic">/* v-bind:class=&#34;{mydiv:flag,mydiv2:hasBorder}&#34; 如果{}中属性较多 也可以在此定义一个计算属性 如下 */</span>
+        computed<span style="color:#000;font-weight:bold">:</span>{
+            classObj(){
+                <span style="color:#000;font-weight:bold">return</span>{
+                    <span style="color:#998;font-style:italic">/* 键要和自定义的style块同名 */</span>
+                    mydiv<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">this</span>.flag,
+                    mydiv2<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">this</span>.hasBorder
+                }
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;<span style="color:#000080">style</span>&gt;
+    .<span style="color:#458;font-weight:bold">mydiv</span>{
+        <span style="color:#000;font-weight:bold">font-weight</span>: <span style="color:#000;font-weight:bold">bold</span>;
+        <span style="color:#000;font-weight:bold">color</span>: <span style="color:#099">#ff0000</span>;
+    }
+
+    .<span style="color:#458;font-weight:bold">mydiv1</span>{
+        <span style="color:#000;font-weight:bold">font-size</span>: <span style="color:#099">30</span><span style="color:#458;font-weight:bold">px</span>;
+    }
+
+    .<span style="color:#458;font-weight:bold">mydiv2</span>{
+        <span style="color:#000;font-weight:bold">border</span>: <span style="color:#099">1</span><span style="color:#458;font-weight:bold">px</span> <span style="color:#000;font-weight:bold">solid</span> <span style="color:#099">#00ffff</span>;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十二style-绑定">十二、Style 绑定</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 正常写的style 是font-size或者fontSize都行的 这里只能使用驼峰命名法fontSize --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;{color:fontColor,fontSize:fontSize+&#39;px&#39;}&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;styleObj&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;fontSize:30px&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-bind:style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;[styleObj,styleObj2]&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello chen!&#39;</span>,
+            <span style="color:#998;font-style:italic">/* 变量的方式定义 */</span>
+            fontColor<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;red&#39;</span>,
+            fontSize<span style="color:#000;font-weight:bold">:</span><span style="color:#099">30</span>,
+            <span style="color:#998;font-style:italic">/* 对象的方式定义 */</span>
+            styleObj<span style="color:#000;font-weight:bold">:</span>{
+                <span style="color:#998;font-style:italic">/* 这里的键要写成style中的格式 不能按照自定义变量的那种命名 */</span>
+                color<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;red&#39;</span>,
+                fontSize<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;30px&#39;</span>
+            },
+            styleObj2<span style="color:#000;font-weight:bold">:</span>{
+                <span style="color:#998;font-style:italic">/* 这里的键要写成style中的格式 不能按照自定义变量的那种命名 */</span>
+                border<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;1px solid #dedede&#39;</span>
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十三vue-条件渲染">十三、Vue 条件渲染</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-show</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;isShow&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;<span style="color:#998;font-style:italic">&lt;!--为false不显示时是用css的方式将元素隐藏 v-show不支持template--&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;isShow&#34;</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;<span style="color:#998;font-style:italic">&lt;!--为false不显示时是元素移除--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 这里的template不是html的节点是不会渲染的 作用是统一控制下面三个标签是否显示 --&gt;</span>
+    &lt;<span style="color:#000080">template</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;isShow&#34;</span>&gt;
+        &lt;<span style="color:#000080">p</span>&gt;{{msg}}&lt;/<span style="color:#000080">p</span>&gt;
+        &lt;<span style="color:#000080">div</span>&gt;hello chen&lt;/<span style="color:#000080">div</span>&gt;
+        &lt;<span style="color:#000080">span</span>&gt;blog.csy.ink&lt;/<span style="color:#000080">span</span>&gt;
+    &lt;/<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-else</span>&gt;迩东陈&lt;/<span style="color:#000080">div</span>&gt;
+    性别:
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;gender==0&#34;</span>&gt;男&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-else-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;gender==1&#34;</span>&gt;女&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-else</span>&gt;未知&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 在vue里为了提高渲染效率 会对元素进行缓存 我们在用v-if的时候可能会出现一些缓存的情况 --&gt;</span>
+    &lt;<span style="color:#000080">template</span> <span style="color:#008080">v-if</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;loginType==&#39;username&#39;&#34;</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!--切换到else的时候会有vue的缓存 label和input会复用 如果不想被复用 就加一个key 标记为表示不同的元素--&gt;</span>
+        &lt;<span style="color:#000080">label</span>&gt;用户名&lt;/<span style="color:#000080">label</span>&gt;
+        &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">placeholder</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;请输入用户名&#34;</span> <span style="color:#008080">key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;username&#34;</span>&gt;
+    &lt;/<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">template</span> <span style="color:#008080">v-else</span>&gt;
+        &lt;<span style="color:#000080">label</span>&gt;用户名&lt;/<span style="color:#000080">label</span>&gt;
+        &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">placeholder</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;请输入邮箱地址&#34;</span> <span style="color:#008080">key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;email&#34;</span>&gt;
+    &lt;/<span style="color:#000080">template</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span> {
+            isShow<span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">false</span>,
+            msg<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chan&#39;</span>,
+            gender<span style="color:#000;font-weight:bold">:</span><span style="color:#099">2</span>,
+            loginType<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;username&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十四vue-列表渲染">十四、Vue 列表渲染</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--不加 v-bind: title中的是个字符串 加了之后title中的是个变量 通过vm中的model传过来--&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    {{msg}}
+<span style="color:#998;font-style:italic">&lt;!--    遍历数组对象--&gt;</span>
+    &lt;<span style="color:#000080">table</span> <span style="color:#008080">border</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;1&#34;</span>&gt;
+        &lt;<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;下标&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;书名&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;作者&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!-- in或者of都可 不带下标时 --&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!--        &lt;tr v-for=&#34;book in books&#34;&gt;--&gt;</span>
+        <span style="color:#998;font-style:italic">&lt;!-- 附带下标的写法 --&gt;</span>
+        &lt;<span style="color:#000080">tr</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(book,index) in books&#34;</span> <span style="color:#008080">v-bind:key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;index&#34;</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;{{index}}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;{{book.name}}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;<span style="color:#000080">td</span>&gt;{{book.author}}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    &lt;/<span style="color:#000080">table</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--    遍历普通对象Obj--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 只显示对象的属性值 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;s in site&#34;</span>&gt;
+        {{s}}
+    &lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 显示对象的属性名和值和下标 --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(s,property,index) in site&#34;</span>&gt;
+        {{index}}---{{property}}---{{s}}
+    &lt;/<span style="color:#000080">div</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 在这个循环渲染的时候有一个需要注意的就是&#34;key&#34;的问题 因为在循环渲染的时候 vue会认为这些div是同一个div 实际上并不相同 因此为了区分加key --&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 这里的key要保证每个值不同 因此要使用一个变量 这里通过v-bind将key的值绑定为index --&gt;</span>
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(s,property,index) in site&#34;</span> <span style="color:#008080">v-bind:key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;index&#34;</span>&gt;
+        {{index}}---{{property}}---{{s}}
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;hello vue!&#39;</span>,
+            hhh<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chan...&#39;</span>,
+            <span style="color:#998;font-style:italic">/* 可以遍历数组对象 */</span>
+            books<span style="color:#000;font-weight:bold">:</span>[
+                {
+                    name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;三国&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;罗贯中&#39;</span>
+                },{
+                    name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;红楼梦&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;曹雪芹&#39;</span>
+                },{
+                    name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;西游记&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;吴承恩&#39;</span>
+                },{
+                    name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;水浒传&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;施耐庵&#39;</span>
+                }
+            ],
+           <span style="color:#998;font-style:italic">/* 遍历普通对象object */</span>
+            site<span style="color:#000;font-weight:bold">:</span>{
+                url<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;blog.csy.ink&#39;</span>,
+                name<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;迩东陈&#39;</span>,
+                server<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;github page&#39;</span>
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h3 id="检测变化的注意事项httpscnvuejsorgv2guidereactivityhtml检测变化的注意事项"><a href="https://cn.vuejs.org/v2/guide/reactivity.html#%E6%A3%80%E6%B5%8B%E5%8F%98%E5%8C%96%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">检测变化的注意事项</a></h3>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/1.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/1.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/2.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/2.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/3.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/3.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/4.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/4.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/5.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/5.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/6.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/6.png" />
+        </a>
+    </p>
+<h2 id="十五vue-事件处理">十五、Vue 事件处理</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- 事件处理练习 监听事件 --&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{counter}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;button&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;自增&#34;</span> <span style="color:#008080">v-on:click</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;increment(2)&#34;</span>&gt;
+    &lt;<span style="color:#000080">br</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 摁enter会有submit方法的效果 --&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!--    &lt;input type=&#34;text&#34; v-on:keydown.enter=&#34;submit&#34;&gt;--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 摁ctrl+enter会有submit方法的效果 --&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!--    &lt;input type=&#34;text&#34; v-on:keydown.ctrl.enter=&#34;submit&#34;&gt;--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 等价上一个 --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">keydown</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">ctrl</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">enter</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;submit&#34;</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            counter<span style="color:#000;font-weight:bold">:</span><span style="color:#099">0</span>
+        },
+        methods<span style="color:#000;font-weight:bold">:</span>{
+            increment(step){
+                <span style="color:#998;font-style:italic">// this.counter++;
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">this</span>.counter <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span>.counter<span style="color:#000;font-weight:bold">+</span>step;
+            },
+            submit(){
+                console.log(<span style="color:#d14">&#34;submit...&#34;</span>);
+            }
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><h2 id="十六vue-表单输入绑定">十六、Vue 表单输入绑定</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 表单的绑定我们都是用v-model来绑定! --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;msg&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">textarea</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;textarea&#34;</span> <span style="color:#008080">cols</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;30&#34;</span> <span style="color:#008080">rows</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;10&#34;</span>&gt;&lt;/<span style="color:#000080">textarea</span>&gt;
+    &lt;<span style="color:#000080">p</span> <span style="color:#008080">style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;white-space: pre-line;&#34;</span>&gt;{{textarea}}&lt;/<span style="color:#000080">p</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 复选框 绑定单个 --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;checkbox&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;isRead&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{isRead}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 复选框 绑定多个 定义数组 --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;checkbox&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;足球&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;favorites&#34;</span>&gt;足球
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;checkbox&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;篮球&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;favorites&#34;</span>&gt;篮球
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;checkbox&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;羽毛球&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;favorites&#34;</span>&gt;羽毛球
+    &lt;<span style="color:#000080">div</span>&gt;{{favorites}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;
+        &lt;<span style="color:#000080">table</span> <span style="color:#008080">border</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;1&#34;</span>&gt;
+            &lt;<span style="color:#000080">tr</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;运动&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;/<span style="color:#000080">tr</span>&gt;
+            &lt;<span style="color:#000080">tr</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;f in favorites&#34;</span>&gt;
+                &lt;<span style="color:#000080">td</span>&gt;{{f}}&lt;/<span style="color:#000080">td</span>&gt;
+            &lt;/<span style="color:#000080">tr</span>&gt;
+        &lt;/<span style="color:#000080">table</span>&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 单选按钮 --&gt;</span>
+    性别:
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;radio&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;男&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;gender&#34;</span>&gt;男
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;radio&#34;</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;女&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;gender&#34;</span>&gt;女
+    &lt;<span style="color:#000080">div</span>&gt;{{gender}}&lt;/<span style="color:#000080">div</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 下拉框 --&gt;</span>
+    学历:
+    &lt;<span style="color:#000080">select</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;edu&#34;</span>&gt;
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;小学&#34;</span>&gt;小学&lt;/<span style="color:#000080">option</span>&gt;
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;初中&#34;</span>&gt;初中&lt;/<span style="color:#000080">option</span>&gt;
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;高中&#34;</span>&gt;高中&lt;/<span style="color:#000080">option</span>&gt;
+    &lt;/<span style="color:#000080">select</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{edu}}&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 下拉框多选 --&gt;</span>
+    &lt;<span style="color:#000080">select</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;chooseFood&#34;</span> <span style="color:#008080">multiple</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!-- value中是个字符串 --&gt;</span>
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;大米&#34;</span>&gt;大米&lt;/<span style="color:#000080">option</span>&gt;
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;面条&#34;</span>&gt;面条&lt;/<span style="color:#000080">option</span>&gt;
+    &lt;/<span style="color:#000080">select</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!--    {{chooseFood}}--&gt;</span>
+    &lt;<span style="color:#000080">hr</span>&gt;
+    &lt;<span style="color:#000080">select</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;chooseFood&#34;</span> <span style="color:#008080">multiple</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!-- 使用循环的方式写 v-bind:key=&#34;index&#34;前面说过每次循环通过index标记 value=&#34;f&#34;正常写f是个字符串 要加v-bind才会绑定vue循环变量的值 --&gt;</span>
+        &lt;<span style="color:#000080">option</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(f,index) in allFoods&#34;</span> <span style="color:#008080">v-bind:key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;index&#34;</span> <span style="color:#008080">v-bind:value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;f&#34;</span>&gt;{{f}}&lt;/<span style="color:#000080">option</span>&gt;
+    &lt;/<span style="color:#000080">select</span>&gt;
+    {{chooseFood}}
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 使用v-bind实现把值绑定到vue实例的一个动态属性上 并且这个属性的值可以不是字符串 --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;checkbox&#34;</span> <span style="color:#008080">true-value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;yes&#34;</span> <span style="color:#008080">false-value</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;no&#34;</span> <span style="color:#008080">v-model</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;toggle&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 选中的话,toggle为yes 没选中的话toggle为no --&gt;</span>
+    &lt;<span style="color:#000080">div</span>&gt;{{toggle}}&lt;/<span style="color:#000080">div</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- .lazy的效果:输入框输入内容之后下面的div不会立刻显示 点一下其他地方才显示 --&gt;</span>
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;text&#34;</span> <span style="color:#008080">v-model</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">lazy</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;msg&#34;</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;{{msg}}&lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            msg<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>,
+            textarea<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>,
+            isRead<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">false</span>,
+            gender<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>,
+            favorites<span style="color:#000;font-weight:bold">:</span>[
+
+            ],
+            edu<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>,
+            chooseFood<span style="color:#000;font-weight:bold">:</span>[
+
+            ],
+            allFoods<span style="color:#000;font-weight:bold">:</span>[
+                <span style="color:#d14">&#39;大米&#39;</span>,
+                <span style="color:#d14">&#39;面条&#39;</span>,
+                <span style="color:#d14">&#39;玉米饼&#39;</span>
+            ],
+            toggle<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;&#39;</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/7.png">
+            <img class="mx-auto" alt="表单输入绑定" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/7.png" />
+        </a>
+    </p>
+<h3 id="九九乘法表横纵拓展">九九乘法表横纵拓展</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- 如果想自动将用户的输入值转为数值类型 可以给v-model添加number修饰符 --&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- 如果只写成v-model=&#34;num&#34; 那么num会被vue认为是字符串 .number将值转化成数值类型 实现99乘法表的横纵拓展 --&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    &lt;<span style="color:#000080">input</span> <span style="color:#008080">type</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;number&#34;</span> <span style="color:#008080">v-model</span><span style="color:#a61717;background-color:#e3d2d2">.</span><span style="color:#008080">number</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;num&#34;</span>&gt;
+    &lt;<span style="color:#000080">table</span> <span style="color:#008080">border</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;1&#34;</span>&gt;
+        &lt;<span style="color:#000080">tr</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;i in num&#34;</span>&gt;
+            <span style="color:#998;font-style:italic">&lt;!--j写在{{}}外面就是个普通的字符串,写在{{}}里面就当成变量来渲染--&gt;</span>
+            &lt;<span style="color:#000080">td</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;j in i&#34;</span>&gt;{{j}}*{{i}}={{j*i}}&lt;/<span style="color:#000080">td</span>&gt;
+        &lt;/<span style="color:#000080">tr</span>&gt;
+    &lt;/<span style="color:#000080">table</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;#app&#39;</span>,
+        data<span style="color:#000;font-weight:bold">:</span>{
+            num<span style="color:#000;font-weight:bold">:</span><span style="color:#099">9</span>
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/9.png">
+            <img class="mx-auto" alt="6*6" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/9.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/10.png">
+            <img class="mx-auto" alt="9*9" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/10.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/11.png">
+            <img class="mx-auto" alt="15*15" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/11.png" />
+        </a>
+    </p>
+<h2 id="十七vue-组件基础">十七、Vue 组件基础</h2>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;en&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;UTF-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;Title&lt;/<span style="color:#000080">title</span>&gt;
+    &lt;<span style="color:#000080">script</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cdn.jsdelivr.net/npm/vue/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--这里的chan标签就是我们下面自定义的组件 name就是组件中定义的props中的参数 hello就是VM中data中的参数值--&gt;</span>
+    &lt;<span style="color:#000080">chan</span> <span style="color:#008080">v-bind:name</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hi&#34;</span>&gt;&lt;/<span style="color:#000080">chan</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!--浏览器输出: hello chan...! --&gt;</span>
+    &lt;<span style="color:#000080">hr</span>&gt;
+
+    &lt;<span style="color:#000080">chen</span> <span style="color:#008080">title</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;组件一&#34;</span>&gt;&lt;/<span style="color:#000080">chen</span>&gt;
+    &lt;<span style="color:#000080">chen</span> <span style="color:#008080">title</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;组件二&#34;</span>&gt;&lt;/<span style="color:#000080">chen</span>&gt;
+    &lt;<span style="color:#000080">hr</span>&gt;
+
+    <span style="color:#998;font-style:italic">&lt;!--    &lt;blog v-for=&#34;(blog,index) in blogs&#34; v-bind:title=&#34;blog.title&#34; v-bind:date=&#34;blog.date&#34; v-bind:author=&#34;blog.author&#34; v-bind:key=&#34;index&#34;&gt;&lt;/blog&gt;--&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- 简写 --&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- ---使用子组件blog 子组件中有点击事件sayhello 触发了父组件中的hello方法--- --&gt;</span>
+    &lt;<span style="color:#000080">blog</span> <span style="color:#a61717;background-color:#e3d2d2">@</span><span style="color:#008080">sayhello</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hello&#34;</span> <span style="color:#008080">v-for</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;(blog,index) in blogs&#34;</span> <span style="color:#008080">:title</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;blog.title&#34;</span> <span style="color:#008080">:date</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;blog.date&#34;</span> <span style="color:#008080">:author</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;blog.author&#34;</span>
+          <span style="color:#008080">:key</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;index&#34;</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!-- 插槽中的值 表示这个div将会在slot的位置显示 --&gt;</span>
+        &lt;<span style="color:#000080">div</span> <span style="color:#008080">style</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;color: red&#34;</span>&gt;hello 插槽!&lt;/<span style="color:#000080">div</span>&gt;
+    &lt;/<span style="color:#000080">blog</span>&gt;
+
+    &lt;<span style="color:#000080">hr</span>&gt;
+    <span style="color:#998;font-style:italic">&lt;!-- 动态组件 将这个组件标签与自定义的组件chen绑定 在vm的data里面指定dynamicComponent:chen 效果:显示chen组件的内容 --&gt;</span>
+    &lt;<span style="color:#000080">component</span> <span style="color:#008080">v-bind:is</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;dynamicComponent&#34;</span>&gt;&lt;/<span style="color:#000080">component</span>&gt;
+&lt;/<span style="color:#000080">div</span>&gt;
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#998;font-style:italic">/* 组件  第一个参数是组件的自定义的名字 第二个就是组件的内容 template表示这个组件它对应的标签是什么 */</span>
+    <span style="color:#998;font-style:italic">/* 相当于我自定义一个标签叫chan chan的值内容就是这个h1标签的内容 */</span>
+    <span style="color:#998;font-style:italic">/* 一个组件中只能有一个根元素 其他的东西只能在这个根元素里面 */</span>
+    Vue.component(<span style="color:#d14">&#39;chan&#39;</span>, {
+        props<span style="color:#000;font-weight:bold">:</span> [<span style="color:#d14">&#39;name&#39;</span>],
+        <span style="color:#998;font-style:italic">/*这里的name 就是上面的props中的参数*/</span>
+        template<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&lt;h1&gt;hello {{name}}!&lt;/h1&gt;&#39;</span>
+    });
+
+    Vue.component(<span style="color:#d14">&#39;chen&#39;</span>, {
+        <span style="color:#998;font-style:italic">/* 在组件中定义data不能像VM中那样 要写成方法的格式 */</span>
+        data() {
+            <span style="color:#000;font-weight:bold">return</span> {
+                counter<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">0</span>
+            }
+        },
+        props<span style="color:#000;font-weight:bold">:</span> [<span style="color:#d14">&#39;title&#39;</span>],
+        <span style="color:#998;font-style:italic">/* v-on:click里面是一个表达式 如果是多个表达式 就要封装成一个方法 这块写方法名和参数 */</span>
+        <span style="color:#998;font-style:italic">/* 一个组件中只能有一个元素 其他的东西只能在这个元素里面 */</span>
+        template<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&lt;div&gt;&lt;button v-on:click=&#34;counter++&#34;&gt;hello {{counter}}!&lt;/button&gt;&lt;div&gt;{{title}}&lt;/div&gt;&lt;/div&gt;&#39;</span>
+    });
+
+    Vue.component(<span style="color:#d14">&#39;blog&#39;</span>, {
+        props<span style="color:#000;font-weight:bold">:</span> [<span style="color:#d14">&#39;title&#39;</span>, <span style="color:#d14">&#39;date&#39;</span>, <span style="color:#d14">&#39;author&#39;</span>],
+        template<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&lt;div&gt;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#39;&lt;div&gt;{{title}}&lt;/div&gt;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#39;&lt;div&gt;{{date}}---{{author}}&lt;/div&gt;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#998;font-style:italic">/* 给组件添加一个插槽 这个东西代表的值就是我们自定义的组件标签里面的内容 可有多个slot */</span>
+            <span style="color:#d14">&#39;&lt;slot&gt;&lt;/slot&gt;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#998;font-style:italic">/* ---监听子组件的事件: 效果相当于点击子组件里面的一个事件触发了父组件里面的方法 也就是vm中的hello方法--- */</span>
+            <span style="color:#998;font-style:italic">/* ---使用事件抛出一个值 测试抛出title 效果:点击事件触发时,将title参数console.log输出--- */</span>
+            <span style="color:#d14">&#39;&lt;button @click=&#34;$emit(\&#39;sayhello\&#39;,title)&#34;&gt;click&lt;/button&gt;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+            <span style="color:#d14">&#39;&lt;/div&gt;&#39;</span>
+    });
+
+    <span style="color:#000;font-weight:bold">var</span> vm <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Vue({
+        el<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>,
+        methods<span style="color:#000;font-weight:bold">:</span> {
+            <span style="color:#998;font-style:italic">/* ---父组件中的方法--- */</span>
+            hello(val) {
+                console.log(<span style="color:#d14">&#34;hello chen!&#34;</span> <span style="color:#000;font-weight:bold">+</span> val);
+            }
+        },
+        data<span style="color:#000;font-weight:bold">:</span> {
+            <span style="color:#998;font-style:italic">/* 定义动态组件的绑定 */</span>
+            dynamicComponent<span style="color:#000;font-weight:bold">:</span><span style="color:#d14">&#39;chen&#39;</span>,
+            msg<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chan!!!&#39;</span>,
+            hi<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chan...&#39;</span>,
+            blogs<span style="color:#000;font-weight:bold">:</span> [
+                {
+                    title<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;标题1&#39;</span>,
+                    date<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;2021-1-13&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chen&#39;</span>
+                }, {
+                    title<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;标题2&#39;</span>,
+                    date<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;2021-1-11&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;迩东陈&#39;</span>
+                }, {
+                    title<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;标题3&#39;</span>,
+                    date<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;2021-1-12&#39;</span>,
+                    author<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chan&#39;</span>
+                }
+            ]
+        }
+    })
+&lt;/<span style="color:#000080">script</span>&gt;
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/8.png">
+            <img class="mx-auto" alt="组件基础" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/vue/8.png" />
+        </a>
+    </p>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/vue-saomang.html">https://chanservy.github.io/2020/12/22/vue-saomang.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/25/lianluzhuizong.html">链路追踪</a></li>
+        
+        <li><a href="/2020/12/22/cloud-stream.html">Spring Cloud Stream消息驱动</a></li>
+        
+        <li><a href="/2020/12/22/cloud-bus.html">Spring Cloud Bus消息总线</a></li>
+        
+        <li><a href="/2020/12/22/cloud-config.html">Spring Cloud Config配置中心</a></li>
+        
+        <li><a href="/2020/12/22/cloud-gateway.html">Spring Cloud Gateway网关</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Vue'>Vue</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

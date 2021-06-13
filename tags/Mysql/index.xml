@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Mysql on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Mysql/</link>
+    <description>Recent content in Mysql on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 21 May 2021 12:13:54 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Mysql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>数据库事务有哪些隔离级别?</title>
+      <link>https://chanservy.github.io/2021/05/16/mysql-interview.html</link>
+      <pubDate>Fri, 21 May 2021 12:13:54 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/mysql-interview.html</guid>
+      <description>&lt;p&gt;面试题：事务的几个特点是什么？数据库事务有哪些隔离级别？MySQL的默认隔离级别是？可重复读的原理？MVCC机制？&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

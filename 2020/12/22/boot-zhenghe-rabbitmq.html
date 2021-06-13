@@ -1,0 +1,1288 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Boot整合RabbitMQ | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Boot整合RabbitMQ - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-21T16:54:04&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-21T16:54:04&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Boot整合RabbitMQ.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一消息概述">一、消息概述</a>
+      <ul>
+        <li><a href="#1-消息队列的优势">1. 消息队列的优势</a></li>
+        <li><a href="#2-点对点式">2. 点对点式</a></li>
+        <li><a href="#3-发布订阅式">3. 发布订阅式</a></li>
+      </ul>
+    </li>
+    <li><a href="#二rabbitmq简介">二、RabbitMQ简介</a>
+      <ul>
+        <li><a href="#核心概念">核心概念</a></li>
+      </ul>
+    </li>
+    <li><a href="#三rabbitmq运行机制">三、RabbitMQ运行机制</a>
+      <ul>
+        <li><a href="#exchange-类型">Exchange 类型</a></li>
+      </ul>
+    </li>
+    <li><a href="#四spring-boot整合rabbitmq">四、Spring Boot整合RabbitMQ</a></li>
+    <li><a href="#五几种消费姿势">五、几种消费姿势</a>
+      <ul>
+        <li><a href="#0-mock-数据">0. mock 数据</a></li>
+        <li><a href="#1-case1-exchange-queue-已存在">1. case1: exchange, queue 已存在</a></li>
+        <li><a href="#2-case2-queue-不存在">2. case2: queue 不存在</a></li>
+        <li><a href="#3-case3-ack">3. case3: ack</a></li>
+        <li><a href="#4-case4-manual-ack">4. case4: manual ack</a></li>
+        <li><a href="#5-case5-并发消费">5. case5: 并发消费</a></li>
+        <li><a href="#6-测试">6. 测试</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Boot整合RabbitMQ</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月21日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97'>消息队列</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：在大多数的应用中都可以通过消息服务的中间件来提升系统的异步通信、扩展解耦的能力。这篇是有关于Spring Boot与消息队列的整合，本文主要以RabbitMQ为案例来介绍。</p>
+<h1 id="spring-boot整合rabbitmq">Spring Boot整合RabbitMQ</h1>
+<h2 id="一消息概述">一、消息概述</h2>
+<p>消息服务中的两个重要的概念：<code>消息代理</code>（message broker）和<code>目的地</code>（destination）。当消息发送者发送消息以后，将由消息代理接管，消息代理保证消息传递到指定目的地。消息队列主要有两种形式的目的地：</p>
+<ol>
+<li>队列（queue）：点对点消息通信（point-to-point）</li>
+<li>主题（topic）：发布（publish）/订阅（subscribe）消息通信</li>
+</ol>
+<h3 id="1-消息队列的优势">1. 消息队列的优势</h3>
+<h4 id="1异步处理">（1）异步处理</h4>
+<p>我们在处理业务的逻辑中，会遇到用户注册的模块。有一些需求可能是在用户注册之后给用户发送短信和邮件。这个时候我们的最初的程序设计假设是这样的：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%871.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%871.png" />
+        </a>
+    </p>
+<p>这个时候我们会发现，用户注册的时候的响应速度会非常的慢，因为我们要经过所有的流程之后，才会给用户响应注册成功的提示。这样会大大的降低用户的体验度的，因此可能有人会这样的设计：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%872.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%872.png" />
+        </a>
+    </p>
+<p>这样的设计无非就是使发送邮件的业务和发送短信的业务并发执行，这样确实会让响应的速度更加快，但是依然不是最完美的，由此我们引入消息队列的概念：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%873.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%873.png" />
+        </a>
+    </p>
+<p>事实上，对于发送短信和邮件并不是必须即时的事情，我们可以像图中的设计一样，注册之后，我们将信息写入数据库之后，再写入消息队列，这个过程是很快的，然后直接给客户响应，之后我们再让发送注册邮件的服务和发送注册短信的服务异步的去消息队列中读取消息，然后在发送给客户。</p>
+<h4 id="2应用解耦">（2）应用解耦</h4>
+<p>我们订单服务中调用库存服务的时候，这样就属于两个微服务之间有一定的耦合性：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%874.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%874.png" />
+        </a>
+    </p>
+<p>那么我们在分布式的系统中肯定要尽量的遵循“高内聚，低耦合”的原则的，因此消息队列也可以用于降低耦合性：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%875.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%875.png" />
+        </a>
+    </p>
+<p>应用解耦的应用场景就是一个电商项目，按照功能拆分，分为订单系统和库存系统，使用消息中间件的监听机制，当订单系统的信息有变更的时候，库存系统就会接收到通知并做出相应的库存变化。</p>
+<h4 id="3流量削峰">（3）流量削峰</h4>
+<p>流量削峰的应用场景就是，比如像淘宝，天猫等大型的电商网站，到了节假日一定会弄一些秒杀活动，比如秒杀的商品只有一万个，但是有几百万人访问，那么，同时进来请求的话，由于访问量过大容易造成系统宕机，卡死的情况。因此，我们引入了消息中间件，在消息服务器中开通10000个队列，先来的请求占住队列中的位置等待响应，相当于占座，在10000条请求之后来的请求，不会进行任何对数据的操作，直接响应给用户秒杀失败，然后处理消息服务器中的队列中的请求，会降低系统的压力。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%876.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%876.png" />
+        </a>
+    </p>
+<h3 id="2-点对点式">2. 点对点式</h3>
+<p>消息发送者发送消息，消息代理将其放入一个队列中，消息接收者从队列中获取消息内容，消息读取后被移出队列，消息只有唯一的发送者和接收到消息者，但并不是说只能有一个接收者。</p>
+<h3 id="3-发布订阅式">3. 发布订阅式</h3>
+<p>发送者（发布者）发送消息到主题，多个接收者（订阅者）监听（订阅）这个主题，那么就会在消息到达时同时收到消息。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200612201507.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200612201507.png" />
+        </a>
+    </p>
+<h2 id="二rabbitmq简介">二、RabbitMQ简介</h2>
+<p>RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开源实现。</p>
+<h3 id="核心概念">核心概念</h3>
+<h4 id="1-message">1. Message</h4>
+<p>消息，消息是不具名的，它由消息头和消息体组成。消息体是不透明的，而消息头则由一系列的可选属性组成，这些属性包括routing-key（路由键）、priority（相对于其他消息的优先权）、delivery-mode（指出该消息可能需要持久性存储）等。</p>
+<h4 id="2-publisher">2. Publisher</h4>
+<p>消息的生产者，也是一个向交换器发布消息的客户端应用程序。</p>
+<h4 id="3-exchange">3. Exchange</h4>
+<p>交换器，用来接收生产者发送的消息并将这些消息路由给服务器中的队列。Exchange有4种类型：direct(默认)，fanout，topic，和headers，不同类型的Exchange转发消息的策略有所区别。</p>
+<h4 id="4-queue">4. Queue</h4>
+<p>消息队列，用来保存消息直到发送给消费者。它是消息的容器，也是消息的终点。一个消息可投入一个或多个队列。消息一直在队列里面，等待消费者连接到这个队列将其取走，这个消息就不复存在。</p>
+<h4 id="5-binding">5. Binding</h4>
+<p>绑定，用于消息队列和交换器之间的关联。一个绑定就是基于路由键将交换器和消息队列连接起来的路由规则，所以可以将交换器理解成一个由绑定构成的路由表。
+Exchange 和Queue的绑定可以是多对多的关系。</p>
+<h4 id="6-connection">6. Connection</h4>
+<p>网络连接，比如一个TCP连接。</p>
+<h4 id="7-channel">7. Channel</h4>
+<p>信道，多路复用连接中的一条独立的双向数据流通道。信道是建立在真实的TCP连接内的虚拟连接，AMQP 命令都是通过信道发出去的，不管是发布消息、订阅队列还是接收消息，这些动作都是通过信道完成。因为对于操作系统来说建立和销毁 TCP 都是非常昂贵的开销，所以引入了信道的概念，以复用一条 TCP 连接。</p>
+<h4 id="8-consumer">8. Consumer</h4>
+<p>消息的消费者，表示一个从消息队列中取得消息的客户端应用程序。</p>
+<h4 id="9-virtual-host">9. Virtual Host</h4>
+<p>虚拟主机，表示一批交换器、消息队列和相关对象。虚拟主机是共享相同的身份认证和加密环境的独立服务器域。每个 vhost 本质上就是一个 mini 版的 RabbitMQ 服务器，拥有自己的队列、交换器、绑定和权限机制。vhost 是 AMQP 概念的基础，必须在连接时指定，RabbitMQ 默认的 vhost 是 / 。</p>
+<h4 id="10-broker">10. Broker</h4>
+<p>表示消息队列服务器实体。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%877.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%877.png" />
+        </a>
+    </p>
+<h2 id="三rabbitmq运行机制">三、RabbitMQ运行机制</h2>
+<p>AMQP 中的消息路由AMQP 中消息的路由过程和 Java 开发者熟悉的 JMS 存在一些差别，AMQP 中增加了 Exchange 和 Binding 的角色。生产者把消息发布到 Exchange 上，消息最终到达队列并被消费者接收，而 Binding 决定交换器的消息应该发送到那个队列。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%878.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%878.png" />
+        </a>
+    </p>
+<h3 id="exchange-类型">Exchange 类型</h3>
+<p>Exchange分发消息时根据类型的不同分发策略有区别，目前共四种类型：direct、fanout、topic、headers 。headers 匹配 AMQP 消息的 header 而不是路由键， headers 交换器和 direct 交换器完全一致，但性能差很多，目前几乎用不到了，所以直接看另外三种类型：</p>
+<h4 id="1-direct-exchange">1. Direct Exchange</h4>
+<p>消息中的路由键（routing key）如果和 Binding 中的 binding key 一致， 交换器就将消息发到对应的队列中。如果一个队列绑定到交换机要求路由键为“dog”，则只转发 routing key 标记为“dog”的消息，不会转发“dog.puppy”，也不会转发“dog.guard”等等。它是完全匹配、单播的模式。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%879.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%879.png" />
+        </a>
+    </p>
+<h4 id="2-fanout-exchange">2. Fanout Exchange</h4>
+<p>每个发到 fanout 类型交换器的消息都会分到所有绑定的队列上去。fanout 交换器不处理路由键，只是简单的将队列绑定到交换器上，每个发送到交换器的消息都会被转发到与该交换器绑定的所有队列上。很像子网广播，每台子网内的主机都获得了一份复制的消息。fanout 类型转发消息是最快的。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%8710.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%8710.png" />
+        </a>
+    </p>
+<h4 id="3-topic-exchange">3. Topic Exchange</h4>
+<p>topic 交换器通过模式匹配分配消息的路由键属性，将路由键和某个模式进行匹配，此时队列需要绑定到一个模式上。它将路由键和绑定键的字符串切分成单词，这些单词之间用点隔开。它同样也会识别两个通配符：符号“#”和符号“*”。#匹配0个或多个单词， *匹配一个单词。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%8711.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/%E5%9B%BE%E7%89%8711.png" />
+        </a>
+    </p>
+<h2 id="四spring-boot整合rabbitmq">四、Spring Boot整合RabbitMQ</h2>
+<ol>
+<li>
+<p>引入 spring-boot-starter-amqp</p>
+</li>
+<li>
+<p>application.yml配置</p>
+</li>
+<li>
+<p>测试RabbitMQ</p>
+<ul>
+<li>AmqpAdmin：管理组件（部分源码）</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">deleteQueue</span><span style="color:#000;font-weight:bold">(</span>String queueName<span style="color:#000;font-weight:bold">);</span>
+   
+<span style="color:#998;font-style:italic">// Note that nowait option is not readily exposed in Rabbit Java API but is for Rabbit .NET API.
+</span><span style="color:#998;font-style:italic"></span>   
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * Delete a queue.
+</span><span style="color:#998;font-style:italic">  * @param queueName the name of the queue.
+</span><span style="color:#998;font-style:italic">  * @param unused true if the queue should be deleted only if not in use.
+</span><span style="color:#998;font-style:italic">  * @param empty true if the queue should be deleted only if empty.
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">deleteQueue</span><span style="color:#000;font-weight:bold">(</span>String queueName<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> unused<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> empty<span style="color:#000;font-weight:bold">);</span>
+   
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * Purges the contents of the given queue.
+</span><span style="color:#998;font-style:italic">  * @param queueName the name of the queue.
+</span><span style="color:#998;font-style:italic">  * @param noWait true to not await completion of the purge.
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">purgeQueue</span><span style="color:#000;font-weight:bold">(</span>String queueName<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">boolean</span> noWait<span style="color:#000;font-weight:bold">);</span>
+   
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * Purges the contents of the given queue.
+</span><span style="color:#998;font-style:italic">  * @param queueName the name of the queue.
+</span><span style="color:#998;font-style:italic">  * @return the number of messages purged.
+</span><span style="color:#998;font-style:italic">  * @since 2.1
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">purgeQueue</span><span style="color:#000;font-weight:bold">(</span>String queueName<span style="color:#000;font-weight:bold">);</span>
+   
+<span style="color:#998;font-style:italic">// Binding operations
+</span><span style="color:#998;font-style:italic"></span>   
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * Declare a binding of a queue to an exchange.
+</span><span style="color:#998;font-style:italic">  * @param binding a description of the binding to declare.
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">declareBinding</span><span style="color:#000;font-weight:bold">(</span>Binding binding<span style="color:#000;font-weight:bold">);</span>
+   
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">  * Remove a binding of a queue to an exchange. Note unbindQueue/removeBinding was not introduced until 0.9 of the
+</span><span style="color:#998;font-style:italic">  * specification.
+</span><span style="color:#998;font-style:italic">  * @param binding a description of the binding to remove.
+</span><span style="color:#998;font-style:italic">  */</span>
+<span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">removeBinding</span><span style="color:#000;font-weight:bold">(</span>Binding binding<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">...</span>
+</code></pre></div><ul>
+<li>RabbitTemplate：消息发送处理组件（部分源码）</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+ <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">convertAndSend</span><span style="color:#000;font-weight:bold">(</span>String exchange<span style="color:#000;font-weight:bold">,</span> String routingKey<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">final</span> Object object<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AmqpException <span style="color:#000;font-weight:bold">{</span>
+     convertAndSend<span style="color:#000;font-weight:bold">(</span>exchange<span style="color:#000;font-weight:bold">,</span> routingKey<span style="color:#000;font-weight:bold">,</span> object<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">(</span>CorrelationData<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">);</span>
+ <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">....</span>
+ <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+ <span style="color:#3c5d5d;font-weight:bold">@Nullable</span>
+ <span style="color:#000;font-weight:bold">public</span> Object <span style="color:#900;font-weight:bold">receiveAndConvert</span><span style="color:#000;font-weight:bold">(</span>String queueName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AmqpException <span style="color:#000;font-weight:bold">{</span>
+     <span style="color:#000;font-weight:bold">return</span> receiveAndConvert<span style="color:#000;font-weight:bold">(</span>queueName<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">receiveTimeout</span><span style="color:#000;font-weight:bold">);</span>
+ <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div></li>
+</ol>
+<p>首先，和一般的一样，创建一个普通的Maven项目，并且引入依赖：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;parent&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-parent<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>2.1.8.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/parent&gt;</span>
+
+<span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-amqp<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;build&gt;</span>
+    <span style="color:#000080">&lt;plugins&gt;</span>
+        <span style="color:#000080">&lt;plugin&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/plugin&gt;</span>
+    <span style="color:#000080">&lt;/plugins&gt;</span>
+<span style="color:#000080">&lt;/build&gt;</span>
+</code></pre></div><p>创建启动类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * 自动配置
+</span><span style="color:#998;font-style:italic"> * 1、RabbitAutoConfiguration
+</span><span style="color:#998;font-style:italic"> * 2、有自动配置了连接工厂ConnectionFactory；
+</span><span style="color:#998;font-style:italic"> * 3、RabbitProperties 封装了 RabbitMQ的配置
+</span><span style="color:#998;font-style:italic"> * 4、 RabbitTemplate ：给RabbitMQ发送和接受消息；
+</span><span style="color:#998;font-style:italic"> * 5、 AmqpAdmin： RabbitMQ系统管理功能组件;
+</span><span style="color:#998;font-style:italic"> *     AmqpAdmin：创建和删除 Queue，Exchange，Binding
+</span><span style="color:#998;font-style:italic"> * 6、@EnableRabbit +  @RabbitListener 监听消息队列的内容
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableRabbit</span> <span style="color:#998;font-style:italic">//开启基于注解的RabbitMQ模式
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AmqpApplication</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>AmqpApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#998;font-style:italic">#springboot整合rabbitMQ</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic">#host:rabbitMQ服务器的地址 (部署系统的ip地址)</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic">#rabbitMQ服务器的用户名 默认为guest</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic">#rabbitMQ服务器的密码 默认为guest</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic">#rabbitMQ服务器的虚拟主机 默认为/ 虚拟主机可以有多个</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">rabbitmq</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#099">121.36.15.48</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>guest<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span>guest<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">virtual-host</span>:<span style="color:#bbb"> </span>/<span style="color:#bbb">
+</span></code></pre></div><p>自定义消息转换规则：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 将消息数据自动转化成json发送回去 需要添加一个配置类
+</span><span style="color:#998;font-style:italic"> * @author ChanServy
+</span><span style="color:#998;font-style:italic"> * @date 2019/7/5 11:30
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyAMQPConfig</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#000;font-weight:bold">public</span> MessageConverter <span style="color:#900;font-weight:bold">messageConverter</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> Jackson2JsonMessageConverter<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><p>创建对象类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.mq.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @author ChanServy
+</span><span style="color:#998;font-style:italic"> * @date 2019/7/5 11:44
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Book</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> String bookName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String author<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">Book</span><span style="color:#000;font-weight:bold">(</span>String bookName<span style="color:#000;font-weight:bold">,</span> String author<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">bookName</span> <span style="color:#000;font-weight:bold">=</span> bookName<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">author</span> <span style="color:#000;font-weight:bold">=</span> author<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">Book</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getBookName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> bookName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getAuthor</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> author<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setBookName</span><span style="color:#000;font-weight:bold">(</span>String bookName<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">bookName</span> <span style="color:#000;font-weight:bold">=</span> bookName<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setAuthor</span><span style="color:#000;font-weight:bold">(</span>String author<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">author</span> <span style="color:#000;font-weight:bold">=</span> author<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Book{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;bookName=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> bookName <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, author=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> author <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+</code></pre></div><p>一些Rabbit的基本操作：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SimpleDealTest
+</span><span style="color:#998;font-style:italic"> * @Description TODO 测试发送消息到消息队列
+</span><span style="color:#998;font-style:italic"> * @Date 2020/6/13 16:38
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootTest</span>
+<span style="color:#3c5d5d;font-weight:bold">@RunWith</span><span style="color:#000;font-weight:bold">(</span>SpringRunner<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SimpleDealTest</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">//依赖注入RabbitTemplate
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    RabbitTemplate rabbitTemplate<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    AmqpAdmin amqpAdmin<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description TODO direct：单播方式发送数据 ：与路由键key一一对应
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 16:43
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendDirectMsg</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Object<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;1&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;hello，在吗？&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;2&#34;</span><span style="color:#000;font-weight:bold">,</span> Arrays<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">asList</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Chan&#34;</span><span style="color:#000;font-weight:bold">,</span> 111<span style="color:#000;font-weight:bold">));</span>
+        rabbitTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">convertAndSend</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan.direct&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;message&#34;</span><span style="color:#000;font-weight:bold">,</span> map<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description TODO fanout：广播方式发送数据 ：与路由键key无关
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 16:45
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendFanoutMsg</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        rabbitTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">convertAndSend</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan.fanout&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">new</span> Book<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO Topic:按指定路由键Key规则方式发送数据
+</span><span style="color:#998;font-style:italic">     * @Param [] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 16:48
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">sendTopicMsg</span><span style="color:#000;font-weight:bold">(){</span>
+        rabbitTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">convertAndSend</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan.topic&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;fnjbh.one&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">new</span> Book<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    
+    <span style="color:#998;font-style:italic">//上述的例子是在Rabbit手动创建的交换机、队列，最后将他们之间按照路由键绑定的
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">//----------------------------------------------------
+</span><span style="color:#998;font-style:italic"></span>	<span style="color:#998;font-style:italic">//下面是通过程序来创建的
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 创建Exchange的测试方法
+</span><span style="color:#998;font-style:italic">     * @Param [] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 17:06
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">declareExchange</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        amqpAdmin<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">declareExchange</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> DirectExchange<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;交换机名&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 创建Queue
+</span><span style="color:#998;font-style:italic">     * @Param [] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 17:08
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">declareQueue</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        amqpAdmin<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">declareQueue</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> Queue<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;测试队列.queue&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">));</span> <span style="color:#998;font-style:italic">//true代表是否持久化
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 创建Binding将指定的交换机和队列绑定
+</span><span style="color:#998;font-style:italic">     * @Param [] 
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 17:12
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">exchangeBindQueue</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        amqpAdmin<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">declareBinding</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> Binding<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;测试队列.queue&#34;</span><span style="color:#000;font-weight:bold">,</span> Binding<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">DestinationType</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">QUEUE</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;交换机名&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;路由键名&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 消费消息,消费之后队列中就没这条消息了
+</span><span style="color:#998;font-style:italic">     * @Param []
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 18:43
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Test</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">receiveDirectMsg</span><span style="color:#000;font-weight:bold">(){</span>
+        Object o <span style="color:#000;font-weight:bold">=</span> rabbitTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">receiveAndConvert</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan.message&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>o<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getClass</span><span style="color:#000;font-weight:bold">());</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>o<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>监听消息@EnableRabbit + @RabbitListener</p>
+<p>我们实际的开发中，常常有如下需求，下单通过消息队列之后库存要随之改变，也就是触发监听机制。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/12.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/12.png" />
+        </a>
+    </p>
+<p>这里说一下，程序里面写方法监听订单的消息队列，一有新的订单进入队列就触发监听事件，立刻减少刚生成的订单中的相应的商品的库存。这个场景其实很好理解，在我做测试的时候，向队列中写消息，怎么都写不进去，每次测试看Rabbit的客户端的队列里都没消息，是因为我的这个队列一直被监听着，其实不是写不进去消息，而是消息刚被写进去的时候就被程序监听到然后消费掉了，然而Rabbit的客户端默认的刷新频率是5秒，因此在Rabbit的相应的队列中看不到消息。这种监听机制，正好可以实现上述的业务场景。</p>
+<p>业务代码：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname OrderService
+</span><span style="color:#998;font-style:italic"> * @Description TODO 测试消费消息
+</span><span style="color:#998;font-style:italic"> * @Date 2020/6/13 17:48
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Service</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderService</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Description TODO 监听方式一：直接将对象序列化输出 消费消息,消费之后队列中就没这条消息了
+</span><span style="color:#998;font-style:italic">     * @Param [book]
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 17:17
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>queues <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#d14">&#34;chan.mail&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;chan.order&#34;</span><span style="color:#000;font-weight:bold">})</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">receive</span><span style="color:#000;font-weight:bold">(</span>Book book<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>  <span style="color:#998;font-style:italic">//这里的Book就是一个普通的bean，触发监听事件打印出其对象信息
+</span><span style="color:#998;font-style:italic"></span>        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;监听到的信息：&#34;</span> <span style="color:#000;font-weight:bold">+</span> book<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description TODO 监听方式二：特殊需求需要消息头等信息 消费消息,消费之后队列中就没这条消息了
+</span><span style="color:#998;font-style:italic">     * @Param [message]
+</span><span style="color:#998;font-style:italic">     * @return void
+</span><span style="color:#998;font-style:italic">     * @Date 2020/6/13 17:23
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>queues <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;chan.message&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#998;font-style:italic">//这个是队列名中带的message,和下面的参数中的message没关系
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">receiveMessage</span><span style="color:#000;font-weight:bold">(</span>Message message<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span> <span style="color:#998;font-style:italic">//注意这里的Message是org.springframework.amqp.core.Message
+</span><span style="color:#998;font-style:italic"></span>        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getBody</span><span style="color:#000;font-weight:bold">());</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>message<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessageProperties</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>上述的操作代码实测均有效。</p>
+<p><code>@RabbitListener 和 @RabbitHandler 搭配使用</code></p>
+<ul>
+<li>@RabbitListener 可以标注在类上面，需配合 @RabbitHandler 注解一起使用。</li>
+<li>@RabbitListener 标注在类上面表示当有收到消息的时候，就交给 @RabbitHandler 的方法处理，具体使用哪个方法处理，根据 MessageConverter 转换后的参数类型。</li>
+</ul>
+<h2 id="五几种消费姿势">五、几种消费姿势</h2>
+<h3 id="0-mock-数据">0. mock 数据</h3>
+<p>消费消费，没有数据，怎么消费呢？所以我们第一步，先创建一个消息生产者，可以往 exchange 写数据，供后续的消费者测试使用</p>
+<p>下面主要以 topic 模式来进行说明</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">PublishRest</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> RabbitTemplate rabbitTemplate<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span>path <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;publish&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">publish</span><span style="color:#000;font-weight:bold">(</span>String exchange<span style="color:#000;font-weight:bold">,</span> String routing<span style="color:#000;font-weight:bold">,</span> String data<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        rabbitTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">convertAndSend</span><span style="color:#000;font-weight:bold">(</span>exchange<span style="color:#000;font-weight:bold">,</span> routing<span style="color:#000;font-weight:bold">,</span> data<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>提供一个简单 rest 接口，可以指定往哪个 exchange 推送数据，并制定路由键。</p>
+<h3 id="1-case1-exchange-queue-已存在">1. case1: exchange, queue 已存在</h3>
+<p>对于消费者而言其实是不需要管理 exchange 的创建/销毁的，它是由发送者定义的；一般来讲，消费者更关注的是自己的 queue，包括定义 queue 并与 exchange 绑定，而这一套过程是可以直接通过 rabbitmq 的控制台操作的哦，上面的提到了。</p>
+<p>所以实际开发过程中，exchange 和 queue 以及对应的绑定关系已经存在的可能性是很高的，并不需要再代码中额外处理；</p>
+<p>在这种场景下，消费数据，可以说非常非常简单了，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 当队列已经存在时，直接指定队列名的方式消费
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * @param data
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>queues <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.a&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">consumerExistsQueue</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;consumerExistsQueue: &#34;</span> <span style="color:#000;font-weight:bold">+</span> data<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>直接指定注解中的<code>queues</code>参数即可，参数值为对列名(queueName)</p>
+<h3 id="2-case2-queue-不存在">2. case2: queue 不存在</h3>
+<p>当 queue 的 autoDelete 属性为 false 时，上面的使用场景还是比较合适了；但是，当这个属性为 true 时，没有消费者队列就会自动删除了，这个时候再用上面的方式，可能会得到下面的异常</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/01.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/01.jpg" />
+        </a>
+    </p>
+<p>通常这种场景下，是需要我们来主动创建 Queue，并建立与 Exchange 的绑定关系，下面给出<code>@RabbitListener</code>的推荐使用的方式</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 队列不存在时，需要创建一个队列，并且与exchange绑定
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>bindings <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@QueueBinding</span><span style="color:#000;font-weight:bold">(</span>
+        value <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Queue</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.n1&#34;</span><span style="color:#000;font-weight:bold">,</span> durable <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;false&#34;</span><span style="color:#000;font-weight:bold">,</span> autoDelete <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+        exchange <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Exchange</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.e&#34;</span><span style="color:#000;font-weight:bold">,</span> type <span style="color:#000;font-weight:bold">=</span> ExchangeTypes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">TOPIC</span><span style="color:#000;font-weight:bold">),</span>
+        key <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;r&#34;</span><span style="color:#000;font-weight:bold">))</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">consumerNoQueue</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;consumerNoQueue: &#34;</span> <span style="color:#000;font-weight:bold">+</span> data<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>一个注解，内部声明了队列，并建立绑定关系，就是这么神奇！！！</p>
+<p>注意<code>@QueueBinding</code>注解的三个属性：</p>
+<ul>
+<li>value: @Queue 注解，用于声明队列，value 为 queueName, durable 表示队列是否持久化, autoDelete 表示没有消费者之后队列是否自动删除</li>
+<li>exchange: @Exchange 注解，用于声明 exchange， type 指定消息投递策略，我们这里用的 topic 方式</li>
+<li>key: 在 topic 方式下，这个就是我们熟知的 routingKey</li>
+</ul>
+<p>以上，就是在队列不存在时的使用的方式，看起来也不复杂</p>
+<h3 id="3-case3-ack">3. case3: ack</h3>
+<p>在前面 rabbitmq 的核心知识点学习过程中，会知道为了保证数据的一致性，有一个消息确认机制；</p>
+<p>我们这里的 ack 主要是针对消费端而言，当我们希望更改默认 ack 方式(noack, auto, manual)，可以如下处理</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 需要手动ack，但是不ack时
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * @param data
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>bindings <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@QueueBinding</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Queue</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.n2&#34;</span><span style="color:#000;font-weight:bold">,</span> durable <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;false&#34;</span><span style="color:#000;font-weight:bold">,</span> autoDelete <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+        exchange <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Exchange</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.e&#34;</span><span style="color:#000;font-weight:bold">,</span> type <span style="color:#000;font-weight:bold">=</span> ExchangeTypes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">TOPIC</span><span style="color:#000;font-weight:bold">),</span> key <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;r&#34;</span><span style="color:#000;font-weight:bold">),</span> ackMode <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;MANUAL&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">consumerNoAck</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 要求手动ack，这里不ack，会怎样?
+</span><span style="color:#998;font-style:italic"></span>    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;consumerNoAck: &#34;</span> <span style="color:#000;font-weight:bold">+</span> data<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>上面的实现也比较简单，设置<code>ackMode=MANUAL</code>，手动 ack</p>
+<p>但是，请注意我们的实现中，没有任何一个地方体现了手动 ack，这就相当于一致都没有 ack，在后面的测试中，可以看出这种不 ack 时，会发现数据一直在<code>unacked</code>这一栏，当 Unacked 数量超过限制的时候，就不会再消费新的数据了</p>
+<h3 id="4-case4-manual-ack">4. case4: manual ack</h3>
+<p>上面虽然选择 ack 方式，但是还缺一步 ack 的逻辑，接下来我们看一下如何补齐</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * 手动ack
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * @param data
+</span><span style="color:#998;font-style:italic"> * @param deliveryTag
+</span><span style="color:#998;font-style:italic"> * @param channel
+</span><span style="color:#998;font-style:italic"> * @throws IOException
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>bindings <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@QueueBinding</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Queue</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.n3&#34;</span><span style="color:#000;font-weight:bold">,</span> durable <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;false&#34;</span><span style="color:#000;font-weight:bold">,</span> autoDelete <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+        exchange <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Exchange</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.e&#34;</span><span style="color:#000;font-weight:bold">,</span> type <span style="color:#000;font-weight:bold">=</span> ExchangeTypes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">TOPIC</span><span style="color:#000;font-weight:bold">),</span> key <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;r&#34;</span><span style="color:#000;font-weight:bold">),</span> ackMode <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;MANUAL&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">consumerDoAck</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Header</span><span style="color:#000;font-weight:bold">(</span>AmqpHeaders<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">DELIVERY_TAG</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#458;font-weight:bold">long</span> deliveryTag<span style="color:#000;font-weight:bold">,</span> Channel channel<span style="color:#000;font-weight:bold">)</span>
+        <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;consumerDoAck: &#34;</span> <span style="color:#000;font-weight:bold">+</span> data<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>data<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">contains</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;success&#34;</span><span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// RabbitMQ的ack机制中，第二个参数返回true，表示需要将这条消息投递给其他的消费者重新消费
+</span><span style="color:#998;font-style:italic"></span>        channel<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">basicAck</span><span style="color:#000;font-weight:bold">(</span>deliveryTag<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 第三个参数true，表示这个消息会重新进入队列
+</span><span style="color:#998;font-style:italic"></span>        channel<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">basicNack</span><span style="color:#000;font-weight:bold">(</span>deliveryTag<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>请注意，方法多了两个参数</p>
+<ul>
+<li><code>deliveryTag</code>: 相当于消息的唯一标识，用于 mq 辨别是哪个消息被 ack/nak 了</li>
+<li><code>channel</code>: mq 和 consumer 之间的管道，通过它来 ack/nak</li>
+</ul>
+<p>当我们正确消费时，通过调用 <code>basicAck</code> 方法即可</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">// RabbitMQ的ack机制中，第二个参数返回true，表示需要将这条消息投递给其他的消费者重新消费
+</span><span style="color:#998;font-style:italic"></span>channel<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">basicAck</span><span style="color:#000;font-weight:bold">(</span>deliveryTag<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>当我们消费失败，需要将消息重新塞入队列，等待重新消费时，可以使用 <code>basicNack</code></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">// 第三个参数true，表示这个消息会重新进入队列
+</span><span style="color:#998;font-style:italic"></span>channel<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">basicNack</span><span style="color:#000;font-weight:bold">(</span>deliveryTag<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><h3 id="5-case5-并发消费">5. case5: 并发消费</h3>
+<p>当消息很多，一个消费者吭哧吭哧的消费太慢，但是我的机器性能又杠杠的，这个时候我就希望并行消费，相当于同时有多个消费者来处理数据</p>
+<p>要支持并行消费，如下设置即可</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RabbitListener</span><span style="color:#000;font-weight:bold">(</span>bindings <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@QueueBinding</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Queue</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.n4&#34;</span><span style="color:#000;font-weight:bold">,</span> durable <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;false&#34;</span><span style="color:#000;font-weight:bold">,</span> autoDelete <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;true&#34;</span><span style="color:#000;font-weight:bold">),</span>
+        exchange <span style="color:#000;font-weight:bold">=</span> <span style="color:#3c5d5d;font-weight:bold">@Exchange</span><span style="color:#000;font-weight:bold">(</span>value <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;topic.e&#34;</span><span style="color:#000;font-weight:bold">,</span> type <span style="color:#000;font-weight:bold">=</span> ExchangeTypes<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">TOPIC</span><span style="color:#000;font-weight:bold">),</span> key <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;r&#34;</span><span style="color:#000;font-weight:bold">),</span> concurrency <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;4&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">multiConsumer</span><span style="color:#000;font-weight:bold">(</span>String data<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;multiConsumer: &#34;</span> <span style="color:#000;font-weight:bold">+</span> data<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/02.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/02.jpg" />
+        </a>
+    </p>
+<p>请注意注解中的<code>concurrency = &quot;4&quot;</code>属性，表示固定 4 个消费者；</p>
+<p>除了上面这种赋值方式之外，还有一种 <code>m-n</code> 的格式，表示 m 个并行消费者，最多可以有 n 个</p>
+<h3 id="6-测试">6. 测试</h3>
+<p>通过前面预留的消息发送接口，我们在浏览器中请求: <code>http://localhost:8080/publish?exchange=topic.e&amp;routing=r&amp;data=wahaha</code></p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/03.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/03.jpg" />
+        </a>
+    </p>
+<p>然后看一下输出，五个消费者都接收到了，特别是主动 nak 的那个消费者，一直在接收到消息；</p>
+<p>（因为一直打印日志，所以重启一下应用，开始下一个测试）</p>
+<p>然后再发送一条成功的消息，验证下手动确认 ack，是否还会出现上面的情况，请求命令: <code>http://localhost:8080/publish?exchange=topic.e&amp;routing=r&amp;data=successMsg</code></p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/04.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/04.jpg" />
+        </a>
+    </p>
+<p>然后再关注一下，没有 ack 的那个队列，一直有一个 unack 的消息</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/e57cefe3/05.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/e57cefe3/05.jpg" />
+        </a>
+    </p>
+<blockquote>
+<p>参考： <a href="https://www.cnblogs.com/yihuihui/p/12600797.html">https://www.cnblogs.com/yihuihui/p/12600797.html</a></p>
+</blockquote>
+<blockquote>
+<p>案例地址： <a href="https://gitee.com/erdochan/amqp">https://gitee.com/erdochan/amqp</a></p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html">https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/21/two-method-of-dingshirenwu.html">定时任务的两种实现方式</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-shiro.html">Spring Boot整合Shiro</a></li>
+        
+        <li><a href="/2020/12/22/boot-rebushu.html">Spring Boot的热部署</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-springcache.html">Spring Boot整合Spring Cache操作Redis</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-mybaties.html">Spring Boot整合Mybatis案例</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Boot'>Spring Boot</a></li>
+                
+                <li><a href='/tags/RabbitMQ'>RabbitMQ</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>订单业务 | 迩东陈的博客</title>
+    <meta property="og:title" content="订单业务 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T17:59:46&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T17:59:46&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="订单业务">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/order-service.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-创建订单微服务">1 创建订单微服务</a>
+      <ul>
+        <li><a href="#11-分析">1.1 分析</a></li>
+        <li><a href="#12-服务搭建">1.2 服务搭建</a></li>
+      </ul>
+    </li>
+    <li><a href="#2-订单结算页">2 订单结算页</a>
+      <ul>
+        <li><a href="#21-数据结构">2.1 数据结构</a></li>
+        <li><a href="#22-实体类">2.2 实体类</a></li>
+        <li><a href="#22-提交订单">2.2 提交订单</a></li>
+        <li><a href="#23点击提交订单跳转到订单支付页面">2.3点击提交订单跳转到订单支付页面</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">订单业务</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：记一次项目中实现订单业务的流程。</p>
+<h2 id="1-创建订单微服务">1 创建订单微服务</h2>
+<h3 id="11-分析">1.1 分析</h3>
+<p>当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/1.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/1.png" />
+        </a>
+     会跳转到订单结算页，并不是直接去付款： 
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/2.png">
+            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/2.png" />
+        </a>
+     因此此处页面需要渲染的内容主要包含3部分：</p>
+<ul>
+<li>收货人信息</li>
+<li>支付方式</li>
+<li>商品信息</li>
+</ul>
+<p>这部分渲染已经在前端实现了</p>
+<h3 id="12-服务搭建">1.2 服务搭建</h3>
+<p>依赖</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#999;font-weight:bold;font-style:italic">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#000080">&lt;project</span> <span style="color:#008080">xmlns=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0&#34;</span>
+         <span style="color:#008080">xmlns:xsi=</span><span style="color:#d14">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span>
+         <span style="color:#008080">xsi:schemaLocation=</span><span style="color:#d14">&#34;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&#34;</span><span style="color:#000080">&gt;</span>
+    <span style="color:#000080">&lt;parent&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>leyou<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.parent<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/parent&gt;</span>
+    <span style="color:#000080">&lt;modelVersion&gt;</span>4.0.0<span style="color:#000080">&lt;/modelVersion&gt;</span>
+
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-order<span style="color:#000080">&lt;/artifactId&gt;</span>
+
+    <span style="color:#000080">&lt;dependencies&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-netflix-eureka-client<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mapper-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>mysql<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.service<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-item-interface<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.common<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.auth<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>ly-auth-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.cloud<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-cloud-starter-openfeign<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.github.pagehelper<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>pagehelper-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+        <span style="color:#000080">&lt;dependency&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>com.github.wxpay<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>wxpay-sdk<span style="color:#000080">&lt;/artifactId&gt;</span>
+            <span style="color:#000080">&lt;version&gt;</span>0.0.3<span style="color:#000080">&lt;/version&gt;</span>
+        <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;/project&gt;</span>
+</code></pre></div><p>XML</p>
+<p>配置文件</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8089</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>ly-order-service<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">datasource</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span>jdbc:mysql://localhost:3306/leyou<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>root<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123456</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">driver-class-name</span>:<span style="color:#bbb"> </span>com.mysql.jdbc.Driver<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">jackson</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">default-property-inclusion</span>:<span style="color:#bbb"> </span>non_null<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">eureka</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">client</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">service-url</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">defaultZone</span>:<span style="color:#bbb"> </span>http://127.0.0.1:10086/eureka<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">registry-fetch-interval-seconds</span>:<span style="color:#bbb"> </span><span style="color:#099">10</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">instance</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">prefer-ip-address</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ip-address</span>:<span style="color:#bbb"> </span><span style="color:#099">127.0.0.1</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">mybatis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">type-aliases-package</span>:<span style="color:#bbb"> </span>com.leyou.order.pojo<span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">ly</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">jwt</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">pubKeyPath</span>:<span style="color:#bbb"> </span>E:\\tmp\\rsa\\rsa.pub<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 公钥地址</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">cookieName</span>:<span style="color:#bbb"> </span>LY_TOKEN<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">worker</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">workerId</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">datacenterId</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<p>启动类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableEurekaClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableFeignClients</span>
+<span style="color:#3c5d5d;font-weight:bold">@MapperScan</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;com.leyou.order.mapper&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>OrderApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>网关配置路由</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">zuul</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">prefix</span>:<span style="color:#bbb"> </span>/api<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 添加路由前缀</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">retryable</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">routes</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-item-service</span>:<span style="color:#bbb"> </span>/item/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将商品微服务映射到/item/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-search-service</span>:<span style="color:#bbb"> </span>/search/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将搜索微服务映射到/search/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-user-service</span>:<span style="color:#bbb"> </span>/user/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将用户微服务映射到/user/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-auth-service</span>:<span style="color:#bbb"> </span>/auth/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将授权中心微服务映射到/auth/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-cart-service</span>:<span style="color:#bbb"> </span>/cart/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将购物车微服务映射到/auth/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">ly-order-service</span>:<span style="color:#bbb"> </span>/order/**<span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 将订单微服务映射到/order/**</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">upload-service</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span>/upload/**<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">serviceId</span>:<span style="color:#bbb"> </span>upload-service<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">strip-prefix: false #通过网关路由时 path中的upload和controller中的upload重复了 http://api.leyou.com/api/upload/upload/image 但是前端的接口是</span>:<span style="color:#bbb"> </span>http://api.leyou.com/api/upload/image 这样设置可以将upload前缀去掉<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">host</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">connect-timeout-millis</span>:<span style="color:#bbb"> </span><span style="color:#099">3000</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">socket-timeout-millis</span>:<span style="color:#bbb"> </span><span style="color:#099">10000</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">add-host-header</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb"> </span><span style="color:#998;font-style:italic"># 携带请求本身的head头信息</span><span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">sensitive-headers</span>:<span style="color:#bbb">  </span><span style="color:#998;font-style:italic"># 配置禁止使用的头信息, 这里设置为null, 否则set-cookie无效</span><span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<p>其他配置</p>
+<p>订单微服务和购物车微服务有共同特征，都需要解析token，进行鉴权，知道当前登陆的用户是谁，所以应该把购物车微服务中的<code>JwtProperties</code>，<code>UserInterceptor</code>，<code>MvcConfig</code>在订单微服务中准备一份。</p>
+<p>注：以上的代码其实也可以抽取到<code>ly-common</code>中，减少代码重复，但是不用担心拦截器会无条件生效，只有配置了<code>MvcConfig</code>拦截器才会生效 。</p>
+<h2 id="2-订单结算页">2 订单结算页</h2>
+<h3 id="21-数据结构">2.1 数据结构</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>tb_order<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;订单id&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>total_pay<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;总金额，单位为分&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>actual_pay<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;实付金额。单位:分。如:20007，表示:200元7分&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>promotion_ids<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">255</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>payment_type<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">tinyint</span>(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">unsigned</span> <span style="color:#000;font-weight:bold">zerofill</span> <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;支付类型，1、在线支付，2、货到付款&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>post_fee<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;邮费。单位:分。如:20007，表示:200元7分&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>create_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;订单创建时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>shipping_name<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;物流名称&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>shipping_code<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;物流单号&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>user_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;用户id&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>buyer_message<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">100</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;买家留言&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>buyer_nick<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;买家昵称&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>buyer_rate<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">tinyint</span>(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;买家是否已经评价,0未评价，1已评价&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_state<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">100</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;收获地址（省）&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_city<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">255</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;收获地址（市）&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_district<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">255</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;收获地址（区/县）&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_address<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">255</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;收获地址（街道、住址等详细地址）&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_mobile<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">12</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;收货人手机&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver_zip<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">15</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;收货人邮编&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>receiver<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">50</span>) <span style="color:#000;font-weight:bold">collate</span> utf8_bin <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;收货人&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>invoice_type<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;0&#39;</span> COMMENT <span style="color:#d14">&#39;发票类型(0无发票1普通发票，2电子发票，3增值税发票)&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>source_type<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;2&#39;</span> COMMENT <span style="color:#d14">&#39;订单来源：1:app端，2：pc端，3：M端，4：微信端，5：手机qq端&#39;</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span>  (<span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span>),
+  <span style="color:#000;font-weight:bold">KEY</span> <span style="color:#000;font-weight:bold">`</span>create_time<span style="color:#000;font-weight:bold">`</span> (<span style="color:#000;font-weight:bold">`</span>create_time<span style="color:#000;font-weight:bold">`</span>),
+  <span style="color:#000;font-weight:bold">KEY</span> <span style="color:#000;font-weight:bold">`</span>buyer_nick<span style="color:#000;font-weight:bold">`</span> (<span style="color:#000;font-weight:bold">`</span>buyer_nick<span style="color:#000;font-weight:bold">`</span>)
+) <span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">CHARSET</span><span style="color:#000;font-weight:bold">=</span>utf8 <span style="color:#000;font-weight:bold">COLLATE</span><span style="color:#000;font-weight:bold">=</span>utf8_bin;
+</code></pre></div><p>MYSQL</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>tb_order_detail<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> <span style="color:#000;font-weight:bold">auto_increment</span> COMMENT <span style="color:#d14">&#39;订单详情id &#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;订单id&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>sku_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;sku商品id&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>num<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">11</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;购买数量&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>title<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">200</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;商品标题&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>own_spec<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">1000</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;商品动态属性键值集&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>price<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;价格,单位：分&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>image<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">varchar</span>(<span style="color:#099">200</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#d14">&#39;&#39;</span> COMMENT <span style="color:#d14">&#39;商品图片&#39;</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span>  (<span style="color:#000;font-weight:bold">`</span>id<span style="color:#000;font-weight:bold">`</span>),
+  <span style="color:#000;font-weight:bold">KEY</span> <span style="color:#000;font-weight:bold">`</span>key_order_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#000;font-weight:bold">USING</span> <span style="color:#900;font-weight:bold">BTREE</span> (<span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span>)
+) <span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB <span style="color:#000;font-weight:bold">AUTO_INCREMENT</span><span style="color:#000;font-weight:bold">=</span><span style="color:#099">24</span> <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">CHARSET</span><span style="color:#000;font-weight:bold">=</span>utf8 COMMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;订单详情表&#39;</span>;
+</code></pre></div><p>MYSQL</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">CREATE</span> <span style="color:#000;font-weight:bold">TABLE</span> <span style="color:#000;font-weight:bold">`</span>tb_order_status<span style="color:#000;font-weight:bold">`</span> (
+  <span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">bigint</span>(<span style="color:#099">20</span>) <span style="color:#000;font-weight:bold">NOT</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;订单id&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>status<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">int</span>(<span style="color:#099">1</span>) <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;状态：1、未付款 2、已付款,未发货 3、已发货,未确认 4、交易成功 5、交易关闭 6、已评价&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>create_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;订单创建时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>payment_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;付款时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>consign_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;发货时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>end_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;交易完成时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>close_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;交易关闭时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">`</span>comment_time<span style="color:#000;font-weight:bold">`</span> <span style="color:#458;font-weight:bold">datetime</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#008080">NULL</span> COMMENT <span style="color:#d14">&#39;评价时间&#39;</span>,
+  <span style="color:#000;font-weight:bold">PRIMARY</span> <span style="color:#000;font-weight:bold">KEY</span>  (<span style="color:#000;font-weight:bold">`</span>order_id<span style="color:#000;font-weight:bold">`</span>),
+  <span style="color:#000;font-weight:bold">KEY</span> <span style="color:#000;font-weight:bold">`</span>status<span style="color:#000;font-weight:bold">`</span> <span style="color:#000;font-weight:bold">USING</span> <span style="color:#900;font-weight:bold">BTREE</span> (<span style="color:#000;font-weight:bold">`</span>status<span style="color:#000;font-weight:bold">`</span>)
+) <span style="color:#000;font-weight:bold">ENGINE</span><span style="color:#000;font-weight:bold">=</span>InnoDB <span style="color:#000;font-weight:bold">DEFAULT</span> <span style="color:#000;font-weight:bold">CHARSET</span><span style="color:#000;font-weight:bold">=</span>utf8 COMMENT<span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#39;订单状态表&#39;</span>;
+</code></pre></div><p>MYSQL</p>
+<blockquote>
+<p>分布式id</p>
+</blockquote>
+<ul>
+<li>订单数据的量级是非常大的，所以需要数据库分表、分库，此时的分表指的是水平分表，就是每张表字段是一样的，所以传统的主键自增长就不适用了，需要采用一个全局唯一的ID
+<ul>
+<li>redis的主键自增长策略，可以实现全局唯一ID，但是生成速度有限</li>
+<li>雪花算法</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>redis的主键自增长策略</p>
+</blockquote>
+<p>使用redis的RedisAtomicLong可以生成分布式自增的ID值。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">RedisSequence</span> <span style="color:#000;font-weight:bold">{</span>
+ 
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    <span style="color:#000;font-weight:bold">private</span> RedisTemplate<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> Serializable<span style="color:#000;font-weight:bold">&gt;</span> redisTemplate<span style="color:#000;font-weight:bold">;</span>
+ 
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">generate</span><span style="color:#000;font-weight:bold">(</span>String key<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        RedisAtomicLong redisAtomicLong <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> RedisAtomicLong<span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">,</span> redisTemplate<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getConnectionFactory</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">return</span> redisAtomicLong<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">incrementAndGet</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>雪花算法</p>
+</blockquote>
+<p>订单id的特殊性：订单数据非常庞大，将来一定会做分库分表。那么这种情况下， 要保证id的唯一，就不能靠数据库自增，而是自己来实现算法，生成唯一id。</p>
+<p>这里的订单id是通过一个工具类生成的： 放在ly-common中</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.common.utils</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.lang.management.ManagementFactory</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.net.InetAddress</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.net.NetworkInterface</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * &lt;p&gt;名称：IdWorker.java&lt;/p&gt;
+</span><span style="color:#998;font-style:italic"> * &lt;p&gt;描述：分布式自增长ID&lt;/p&gt;
+</span><span style="color:#998;font-style:italic"> * &lt;pre&gt;
+</span><span style="color:#998;font-style:italic"> *     Twitter的 Snowflake　JAVA实现方案
+</span><span style="color:#998;font-style:italic"> * &lt;/pre&gt;
+</span><span style="color:#998;font-style:italic"> * 核心代码为其IdWorker这个类实现，其原理结构如下，我分别用一个0表示一位，用—分割开部分的作用：
+</span><span style="color:#998;font-style:italic"> * 1||0---0000000000 0000000000 0000000000 0000000000 0 --- 00000 ---00000 ---000000000000
+</span><span style="color:#998;font-style:italic"> * 在上面的字符串中，第一位为未使用（实际上也可作为long的符号位），接下来的41位为毫秒级时间，
+</span><span style="color:#998;font-style:italic"> * 然后5位datacenter标识位，5位机器ID（并不算标识符，实际是为线程标识），
+</span><span style="color:#998;font-style:italic"> * 然后12位该毫秒内的当前毫秒内的计数，加起来刚好64位，为一个Long型。
+</span><span style="color:#998;font-style:italic"> * 这样的好处是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞（由datacenter和机器ID作区分），
+</span><span style="color:#998;font-style:italic"> * 并且效率较高，经测试，snowflake每秒能够产生26万ID左右，完全满足需要。
+</span><span style="color:#998;font-style:italic"> * &lt;p&gt;
+</span><span style="color:#998;font-style:italic"> * 64位ID (42(毫秒)+5(机器ID)+5(业务编码)+12(重复累加))
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * @author Polim
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">IdWorker</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 时间起始标记点，作为基准，一般取系统的最近时间（一旦确定不能变动）
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> twepoch <span style="color:#000;font-weight:bold">=</span> 1288834974657L<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 机器标识位数
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> workerIdBits <span style="color:#000;font-weight:bold">=</span> 5L<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 数据中心标识位数
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> datacenterIdBits <span style="color:#000;font-weight:bold">=</span> 5L<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 机器ID最大值
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> maxWorkerId <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1L <span style="color:#000;font-weight:bold">^</span> <span style="color:#000;font-weight:bold">(-</span>1L <span style="color:#000;font-weight:bold">&lt;&lt;</span> workerIdBits<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 数据中心ID最大值
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> maxDatacenterId <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1L <span style="color:#000;font-weight:bold">^</span> <span style="color:#000;font-weight:bold">(-</span>1L <span style="color:#000;font-weight:bold">&lt;&lt;</span> datacenterIdBits<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 毫秒内自增位
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> sequenceBits <span style="color:#000;font-weight:bold">=</span> 12L<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 机器ID偏左移12位
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> workerIdShift <span style="color:#000;font-weight:bold">=</span> sequenceBits<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 数据中心ID左移17位
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> datacenterIdShift <span style="color:#000;font-weight:bold">=</span> sequenceBits <span style="color:#000;font-weight:bold">+</span> workerIdBits<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 时间毫秒左移22位
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> timestampLeftShift <span style="color:#000;font-weight:bold">=</span> sequenceBits <span style="color:#000;font-weight:bold">+</span> workerIdBits <span style="color:#000;font-weight:bold">+</span> datacenterIdBits<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> sequenceMask <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1L <span style="color:#000;font-weight:bold">^</span> <span style="color:#000;font-weight:bold">(-</span>1L <span style="color:#000;font-weight:bold">&lt;&lt;</span> sequenceBits<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">/* 上次生产id时间戳 */</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> lastTimestamp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1L<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 0，并发控制
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">long</span> sequence <span style="color:#000;font-weight:bold">=</span> 0L<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">long</span> workerId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#998;font-style:italic">// 数据标识id部分
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">long</span> datacenterId<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">IdWorker</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">datacenterId</span> <span style="color:#000;font-weight:bold">=</span> getDatacenterId<span style="color:#000;font-weight:bold">(</span>maxDatacenterId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">workerId</span> <span style="color:#000;font-weight:bold">=</span> getMaxWorkerId<span style="color:#000;font-weight:bold">(</span>datacenterId<span style="color:#000;font-weight:bold">,</span> maxWorkerId<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @param workerId
+</span><span style="color:#998;font-style:italic">     *            工作机器ID
+</span><span style="color:#998;font-style:italic">     * @param datacenterId
+</span><span style="color:#998;font-style:italic">     *            序列号
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">IdWorker</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span> workerId<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">long</span> datacenterId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>workerId <span style="color:#000;font-weight:bold">&gt;</span> maxWorkerId <span style="color:#000;font-weight:bold">||</span> workerId <span style="color:#000;font-weight:bold">&lt;</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> IllegalArgumentException<span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">format</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;worker Id can&#39;t be greater than %d or less than 0&#34;</span><span style="color:#000;font-weight:bold">,</span> maxWorkerId<span style="color:#000;font-weight:bold">));</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>datacenterId <span style="color:#000;font-weight:bold">&gt;</span> maxDatacenterId <span style="color:#000;font-weight:bold">||</span> datacenterId <span style="color:#000;font-weight:bold">&lt;</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> IllegalArgumentException<span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">format</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;datacenter Id can&#39;t be greater than %d or less than 0&#34;</span><span style="color:#000;font-weight:bold">,</span> maxDatacenterId<span style="color:#000;font-weight:bold">));</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">workerId</span> <span style="color:#000;font-weight:bold">=</span> workerId<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">datacenterId</span> <span style="color:#000;font-weight:bold">=</span> datacenterId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 获取下一个ID
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">synchronized</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">nextId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">long</span> timestamp <span style="color:#000;font-weight:bold">=</span> timeGen<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>timestamp <span style="color:#000;font-weight:bold">&lt;</span> lastTimestamp<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> RuntimeException<span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">format</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Clock moved backwards.  Refusing to generate id for %d milliseconds&#34;</span><span style="color:#000;font-weight:bold">,</span> lastTimestamp <span style="color:#000;font-weight:bold">-</span> timestamp<span style="color:#000;font-weight:bold">));</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>lastTimestamp <span style="color:#000;font-weight:bold">==</span> timestamp<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 当前毫秒内，则+1
+</span><span style="color:#998;font-style:italic"></span>            sequence <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">(</span>sequence <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">&amp;</span> sequenceMask<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>sequence <span style="color:#000;font-weight:bold">==</span> 0<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">// 当前毫秒内计数满了，则等待下一秒
+</span><span style="color:#998;font-style:italic"></span>                timestamp <span style="color:#000;font-weight:bold">=</span> tilNextMillis<span style="color:#000;font-weight:bold">(</span>lastTimestamp<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+            sequence <span style="color:#000;font-weight:bold">=</span> 0L<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        lastTimestamp <span style="color:#000;font-weight:bold">=</span> timestamp<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#998;font-style:italic">// ID偏移组合生成最终的ID，并返回ID
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">long</span> nextId <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">((</span>timestamp <span style="color:#000;font-weight:bold">-</span> twepoch<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">&lt;&lt;</span> timestampLeftShift<span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">|</span> <span style="color:#000;font-weight:bold">(</span>datacenterId <span style="color:#000;font-weight:bold">&lt;&lt;</span> datacenterIdShift<span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">|</span> <span style="color:#000;font-weight:bold">(</span>workerId <span style="color:#000;font-weight:bold">&lt;&lt;</span> workerIdShift<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">|</span> sequence<span style="color:#000;font-weight:bold">;</span>
+
+        <span style="color:#000;font-weight:bold">return</span> nextId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">tilNextMillis</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">long</span> lastTimestamp<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">long</span> timestamp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">timeGen</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(</span>timestamp <span style="color:#000;font-weight:bold">&lt;=</span> lastTimestamp<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            timestamp <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">timeGen</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> timestamp<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">timeGen</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">currentTimeMillis</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * &lt;p&gt;
+</span><span style="color:#998;font-style:italic">     * 获取 maxWorkerId
+</span><span style="color:#998;font-style:italic">     * &lt;/p&gt;
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">getMaxWorkerId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span> datacenterId<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">long</span> maxWorkerId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        StringBuffer mpid <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> StringBuffer<span style="color:#000;font-weight:bold">();</span>
+        mpid<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">append</span><span style="color:#000;font-weight:bold">(</span>datacenterId<span style="color:#000;font-weight:bold">);</span>
+        String name <span style="color:#000;font-weight:bold">=</span> ManagementFactory<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getRuntimeMXBean</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>name<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+         <span style="color:#998;font-style:italic">/*
+</span><span style="color:#998;font-style:italic">          * GET jvmPid
+</span><span style="color:#998;font-style:italic">          */</span>
+            mpid<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">append</span><span style="color:#000;font-weight:bold">(</span>name<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">split</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;@&#34;</span><span style="color:#000;font-weight:bold">)[</span>0<span style="color:#000;font-weight:bold">]);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+      <span style="color:#998;font-style:italic">/*
+</span><span style="color:#998;font-style:italic">       * MAC + PID 的 hashcode 获取16个低位
+</span><span style="color:#998;font-style:italic">       */</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">(</span>mpid<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toString</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">hashCode</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&amp;</span> 0xffff<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">%</span> <span style="color:#000;font-weight:bold">(</span>maxWorkerId <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * &lt;p&gt;
+</span><span style="color:#998;font-style:italic">     * 数据标识id部分
+</span><span style="color:#998;font-style:italic">     * &lt;/p&gt;
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">getDatacenterId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span> maxDatacenterId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">long</span> id <span style="color:#000;font-weight:bold">=</span> 0L<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            InetAddress ip <span style="color:#000;font-weight:bold">=</span> InetAddress<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLocalHost</span><span style="color:#000;font-weight:bold">();</span>
+            NetworkInterface network <span style="color:#000;font-weight:bold">=</span> NetworkInterface<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getByInetAddress</span><span style="color:#000;font-weight:bold">(</span>ip<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>network <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                id <span style="color:#000;font-weight:bold">=</span> 1L<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#458;font-weight:bold">byte</span><span style="color:#000;font-weight:bold">[]</span> mac <span style="color:#000;font-weight:bold">=</span> network<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getHardwareAddress</span><span style="color:#000;font-weight:bold">();</span>
+                id <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">((</span>0x000000FF <span style="color:#000;font-weight:bold">&amp;</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span><span style="color:#000;font-weight:bold">)</span> mac<span style="color:#000;font-weight:bold">[</span>mac<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">length</span> <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">])</span>
+                        <span style="color:#000;font-weight:bold">|</span> <span style="color:#000;font-weight:bold">(</span>0x0000FF00 <span style="color:#000;font-weight:bold">&amp;</span> <span style="color:#000;font-weight:bold">(((</span><span style="color:#458;font-weight:bold">long</span><span style="color:#000;font-weight:bold">)</span> mac<span style="color:#000;font-weight:bold">[</span>mac<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">length</span> <span style="color:#000;font-weight:bold">-</span> 2<span style="color:#000;font-weight:bold">])</span> <span style="color:#000;font-weight:bold">&lt;&lt;</span> 8<span style="color:#000;font-weight:bold">)))</span> <span style="color:#000;font-weight:bold">&gt;&gt;</span> 6<span style="color:#000;font-weight:bold">;</span>
+                id <span style="color:#000;font-weight:bold">=</span> id <span style="color:#000;font-weight:bold">%</span> <span style="color:#000;font-weight:bold">(</span>maxDatacenterId <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34; getDatacenterId: &#34;</span> <span style="color:#000;font-weight:bold">+</span> e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMessage</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>工具类所采用的生成id算法，是由Twitter公司开源的snowflake（雪花）算法。</p>
+<p>雪花算法会生成一个64位的二进制数据，为一个Long型。(转换成字符串后长度最多19) ，其基本结构：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/3.png">
+            <img class="mx-auto" alt="3" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/3.png" />
+        </a>
+    </p>
+<p>3</p>
+<p>第一位：为未使用</p>
+<p>第二部分：41位为毫秒级时间(41位的长度可以使用69年)</p>
+<p>第三部分：5位datacenterId和5位workerId(10位的长度最多支持部署1024个节点）</p>
+<p>第四部分：最后12位是毫秒内的计数（12位的计数顺序号支持每个节点每毫秒产生4096个ID序号）</p>
+<p>snowflake生成的ID整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞（由datacenter和workerId作区分），并且效率较高。经测试snowflake每秒能够产生26万个ID。</p>
+<h3 id="22-实体类">2.2 实体类</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_order&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Order</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#000;font-weight:bold">private</span> Long orderId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long totalPay<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 总金额
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long actualPay<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 实付金额
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer paymentType<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 支付类型，1、在线支付，2、货到付款
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> String promotionIds<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 参与促销活动的id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long postFee <span style="color:#000;font-weight:bold">=</span> 0L<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 邮费
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date createTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 创建时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String shippingName<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 物流名称
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String shippingCode<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 物流单号
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long userId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 用户id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String buyerMessage<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 买家留言
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String buyerNick<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 买家昵称
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Boolean buyerRate<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 买家是否已经评价
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> String receiver<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 收货人全名
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverMobile<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 移动电话
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverState<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 省份
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverCity<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 城市
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverDistrict<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 区/县
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverAddress<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 收货地址，如：xx路xx号
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String receiverZip<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 邮政编码,如：310001
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">private</span> Integer invoiceType <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 发票类型，0无发票，1普通发票，2电子发票，3增值税发票
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer sourceType <span style="color:#000;font-weight:bold">=</span> 1<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 订单来源 1:app端，2：pc端，3：M端，4：微信端，5：手机qq端
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#3c5d5d;font-weight:bold">@Transient</span>
+    <span style="color:#000;font-weight:bold">private</span> OrderStatus orderStatus<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Transient</span>
+    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>OrderDetail<span style="color:#000;font-weight:bold">&gt;</span> orderDetails<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_order_detail&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderDetail</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> Long orderId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 订单id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long skuId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer num<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品购买数量
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String title<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品标题
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long price<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品单价
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String ownSpec<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 商品规格数据
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String image<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 图片
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_order_status&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderStatus</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#000;font-weight:bold">private</span> Long orderId<span style="color:#000;font-weight:bold">;</span>
+    
+    <span style="color:#000;font-weight:bold">private</span> Integer status<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Date createTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 创建时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date paymentTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 付款时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date consignTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 发货时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date endTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 交易结束时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date closeTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 交易关闭时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date commentTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 评价时间
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="22-提交订单">2.2 提交订单</h3>
+<p>当我们在订单详情页确认好地址商品等信息无误后，点击右下角的提交订单：</p>
+<h4 id="221-接口分析">2.2.1 接口分析</h4>
+<ul>
+<li>
+<p>请求方式：post</p>
+</li>
+<li>
+<p>请求路径：order</p>
+</li>
+<li>
+<p>返回结果： 订单ID，因为创建订单之后下一步就是要付款，付款需要知道为哪个订单进行付款，所以我们返回当前订单的ID</p>
+</li>
+<li>
+<p>请求参数</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/5.png">
+            <img class="mx-auto" alt="5" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/5.png" />
+        </a>
+    </p>
+<p>5</p>
+<p>可以看到请求参数结构比较复杂，付款状态和地址我们传的都是Long类型的，但是购物车信息却是一个json，因此将这些信息封装成一个DTO（data transfer object）类：（dto和vo差不多，区别是：dto是将前端给后端传的参数封装成对象；vo是后端将前端需要展示的参数封装到对象。【个人理解】）</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@AllArgsConstructor</span>
+<span style="color:#3c5d5d;font-weight:bold">@NoArgsConstructor</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderDTO</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@NotNull</span>
+    <span style="color:#000;font-weight:bold">private</span> Long addressId<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 收获人地址id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer paymentType<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 付款类型
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> carts<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 订单详情,carts又是一个集合  包含了商品信息，所以又定义一个cartDTO
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#3c5d5d;font-weight:bold">@NoArgsConstructor</span>
+<span style="color:#3c5d5d;font-weight:bold">@AllArgsConstructor</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">CartDTO</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> Long skuId<span style="color:#000;font-weight:bold">;</span>  <span style="color:#998;font-style:italic">// 商品skuId
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Integer num<span style="color:#000;font-weight:bold">;</span> <span style="color:#998;font-style:italic">// 购买数量
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>之前订单详情页上我们发现商品的价格标题参数等信息都有但是为什么这里我们只传递ID这一个参数呢？这是因为安全问题，因为我们的URL是对外暴露的，防止有人利用insomnia，postman等工具修改价格，之后再进行订单的提交，造成损失。</p>
+</li>
+</ul>
+<h4 id="222-mapper">2.2.2 mapper</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">OrderMapper</span> <span style="color:#000;font-weight:bold">extends</span> MyBaseMapper<span style="color:#000;font-weight:bold">&lt;</span>Order<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">OrderDetailMapper</span> <span style="color:#000;font-weight:bold">extends</span> MyBaseMapper<span style="color:#000;font-weight:bold">&lt;</span>OrderDetail<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">OrderStatusMapper</span> <span style="color:#000;font-weight:bold">extends</span> MyBaseMapper<span style="color:#000;font-weight:bold">&lt;</span>OrderStatus<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="223-controller">2.2.3 controller</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#3c5d5d;font-weight:bold">@RequestMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/order&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">OrderController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Autowired</span>
+    OrderService orderService<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">createOrder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestBody</span> OrderDTO orderDTO<span style="color:#000;font-weight:bold">){</span>
+        Long orderId <span style="color:#000;font-weight:bold">=</span> orderService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createOrder</span><span style="color:#000;font-weight:bold">(</span>orderDTO<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>orderId<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="224-service">2.2.4 service</h4>
+<p>前面说了雪花算法的原理以及工具类，下面我们将雪花算法应用到项目中：</p>
+<blockquote>
+<p>配置</p>
+</blockquote>
+<p>为了保证不重复，我们给每个部署的节点都配置机器id：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">ly</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">worker</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">workerId</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">datacenterId</span>:<span style="color:#bbb"> </span><span style="color:#099">1</span><span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<p>加载属性：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Component</span>
+<span style="color:#3c5d5d;font-weight:bold">@ConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>prefix <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;ly.worker&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">IdWorkerProperties</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">long</span> workerId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 当前机器id
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">long</span> dataCenterId<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 序列号
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">getWorkerId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> workerId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setWorkerId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span> workerId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">workerId</span> <span style="color:#000;font-weight:bold">=</span> workerId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">long</span> <span style="color:#900;font-weight:bold">getDataCenterId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> dataCenterId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setDataCenterId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">long</span> dataCenterId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">dataCenterId</span> <span style="color:#000;font-weight:bold">=</span> dataCenterId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>编写配置类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableConfigurationProperties</span><span style="color:#000;font-weight:bold">(</span>IdWorkerProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">IdWorkerConfig</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    <span style="color:#000;font-weight:bold">public</span> IdWorker <span style="color:#900;font-weight:bold">idWorker</span><span style="color:#000;font-weight:bold">(</span>IdWorkerProperties idWorkerProperties<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> IdWorker<span style="color:#000;font-weight:bold">(</span>idWorkerProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWorkerId</span><span style="color:#000;font-weight:bold">(),</span> idWorkerProperties<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getDataCenterId</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>使用： <code>直接</code>@Autowired<code>注入，然后使用</code></p>
+<p><strong>准备物流、收货人信息：</strong></p>
+<p>前端页面传递过来的是addressId，我们需要根据这个id查询物流信息，但是因为没有做物流地址管理，所以我们准备一些假数据：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Data</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AddressDTO</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String phone<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String state<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String city<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String district<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String address<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String zipCode<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Boolean isDefault<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>然后准备一个常量类：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">abstract</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">AddressClient</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> List<span style="color:#000;font-weight:bold">&lt;</span>AddressDTO<span style="color:#000;font-weight:bold">&gt;</span> addressList <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;</span>AddressDTO<span style="color:#000;font-weight:bold">&gt;(){</span>
+        <span style="color:#000;font-weight:bold">{</span>
+            AddressDTO address <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> AddressDTO<span style="color:#000;font-weight:bold">();</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>1L<span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;太白南路&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCity</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;西安&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setDistrict</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;雁塔区&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;max&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPhone</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;15656789999&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setState</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;陕西&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setZipCode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;7100710&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setIsDefault</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+            add<span style="color:#000;font-weight:bold">(</span>address<span style="color:#000;font-weight:bold">);</span>
+
+            AddressDTO address2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> AddressDTO<span style="color:#000;font-weight:bold">();</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>2L<span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAddress</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;学院路三号&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCity</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;太原&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setDistrict</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;尖草坪区&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setName</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;su&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPhone</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;15656781314&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setState</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;山西&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setZipCode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;03500150&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            address2<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setIsDefault</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+            add<span style="color:#000;font-weight:bold">(</span>address2<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">};</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> AddressDTO <span style="color:#900;font-weight:bold">findById</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>AddressDTO addressDTO <span style="color:#000;font-weight:bold">:</span> addressList<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>addressDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">==</span> id<span style="color:#000;font-weight:bold">){</span>
+                <span style="color:#000;font-weight:bold">return</span> addressDTO<span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>然后我们就可以在service中调用，根据id查到收货人信息</p>
+<p><strong>订单状态：</strong></p>
+<p>订单状态一般以数字表示状态，但是不容易理解，所以我们创建一个枚举：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">enum</span>  OrderStatusEnum <span style="color:#000;font-weight:bold">{</span>
+    UN_PAY<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;初始化，未付款&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    PAYED<span style="color:#000;font-weight:bold">(</span>2<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;已付款，未发货&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    DELIVERED<span style="color:#000;font-weight:bold">(</span>3<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;已发货，未确认&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    SUCCESS<span style="color:#000;font-weight:bold">(</span>4<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;已确认,未评价&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    CLOSED<span style="color:#000;font-weight:bold">(</span>5<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;已关闭，交易失败&#34;</span><span style="color:#000;font-weight:bold">),</span>
+    RATED<span style="color:#000;font-weight:bold">(</span>6<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;已评价，交易结束&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> code<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String msg<span style="color:#000;font-weight:bold">;</span>
+
+    OrderStatusEnum<span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> code<span style="color:#000;font-weight:bold">,</span> String msg<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">code</span> <span style="color:#000;font-weight:bold">=</span> code<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">msg</span> <span style="color:#000;font-weight:bold">=</span> msg<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">value</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">code</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">msg</span><span style="color:#000;font-weight:bold">(){</span>
+        <span style="color:#000;font-weight:bold">return</span> msg<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p><strong>减库存：</strong> 减库存应该是在属于商品微服务的业务，因此我们写一个接口，在商品微服务那边实现： GoodsClient：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@FeignClient</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ly-item-service&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">GoodsClient</span> <span style="color:#000;font-weight:bold">extends</span> GoodsApi <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>在ly-item-service服务中编写业务并且提供接口</p>
+<p>GoodsController</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 减库存
+</span><span style="color:#998;font-style:italic">     * @Param [cartDTOs]
+</span><span style="color:#998;font-style:italic">     * @return org.springframework.http.ResponseEntity&lt;java.lang.Void&gt;
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/15 14:02
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/stock/decrease&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Void<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestBody</span> List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> cartDTOs<span style="color:#000;font-weight:bold">){</span>
+        goodsService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>cartDTOs<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">status</span><span style="color:#000;font-weight:bold">(</span>HttpStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">NO_CONTENT</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">build</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>GoodApi</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * @Description 减库存
+</span><span style="color:#998;font-style:italic">     * @Param [cartDTOs]
+</span><span style="color:#998;font-style:italic">     * @return java.lang.Void
+</span><span style="color:#998;font-style:italic">     * @Date 2021/3/15 14:02
+</span><span style="color:#998;font-style:italic">     * @Author ChenSiYu
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#3c5d5d;font-weight:bold">@PostMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/stock/decrease&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    Void <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@RequestBody</span> List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> cartDTOs<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<blockquote>
+<p>分析：减库存的业务实现</p>
+</blockquote>
+<p>减库存可以采用同步调用（Feign的方式），也可以采用异步调用（RabbitMQ传递消息），我们这里采用同步调用，接下来我们分析为什么</p>
+<p>如果我们采用异步调用的方式，我们要先将订单、订单详情、订单状态生成并入库，生成订单后减库存，如果采用异步MQ的方式，那么在订单微服务中，将减库存的这条消息发送到MQ就不管了，MQ属于中间件，商品微服务那边监听消息，收到消息后执行减库存，那么商品微服务那边库存到底减成功了没有呢？这我们并不知道，如果库存不足或者过程中有异常，那么商品微服务减库存失败，但是订单微服务的service层的业务并不会回滚，就造成了订单已经形成，但是减库存失败，这个问题就是<code>分布式事务问题</code>，即跨服务的事务。减库存这个业务从订单微服务跨越到了商品微服务，而事务是由Spring来管理的，两套tomcat两套Spring，本身没有任何关联，但是却是一个事务，如果采用异步，这边的微服务执行失败另一边的微服务并不知道，破坏了事务的一致性，我们解决的方案是什么呢？</p>
+<p>更改异步调用为同步调用，通过feign的远程调用，在商品微服务中实现减库存逻辑并提供接口给订单微服务通过feign的方式调用，如果商品微服务中抛出异常，那么订单微服务自然也会抛出异常，这样事务自然会回滚。这样是碰巧解决了分布式事务问题，但是只是凑巧，我们现在业务单一，只有减库存并且减库存也只能放在最后，试想如果我们做优惠券功能，积分功能呢？当我们做了优惠券功能，那计算优惠和减库存哪个放在最后呢？放在最后的只能有一个。比如减库存放最后，如果减库存异常，那么它前面的所有（生成订单呀还有优惠券呀）这些都会回滚，但是如果优惠券业务异常了呢，减库存在优惠券后面，库存就无法回滚。这时候就必须解决分布式事务问题了。</p>
+<blockquote>
+<p>解决分布式事务问题：</p>
+</blockquote>
+<ol>
+<li>2PC（两阶段提交）：第一阶段，事务开始执行发送一条消息给相关的微服务告诉它们这个业务要开始执行，执行完毕后返回一条消息，告诉这个微服务业务执行成功了没有；第二阶，如果上一阶段返回的消息是执行成功，那么再发送一条消息告诉所有微服务事务执行成功了，相关所有事务都可以提交了，如果第一阶段有一个微服务执行失败，则所有事务都回滚。</li>
+</ol>
+<ul>
+<li>缺点：实现复杂、事务执行过程数据锁定的范围太大了，在本业务未执行完毕之前，数据库相关的表都是锁定状态，因此这种处理方式性能较差，在高并发的业务中较少使用。</li>
+</ul>
+<ol>
+<li>TCC（try-confirm-cancel）：这种处理方式的前提是面对事务都要有<code>一套确认事务执行的业务，一套取消执行的业务（即补偿业务）</code>。比如说减库存这个业务，确认执行业务就是减库存，取消执行业务就是加库存。这种处理方式是所有业务都开始执行，互相不等待，完成了就提交，解决了两阶段提交问题中数据大面积锁定的情况，但是如果业务A已经提交了，但是业务B失败了，没关系，会调用所有的补偿事务，这种解决方案不是靠事务回滚的方式，靠的是事务的补偿。</li>
+</ol>
+<ul>
+<li>缺点：解决了业务问题，但是使得业务变得复杂了，写一个业务必须写一个确定执行业务方法和一个补偿业务方法，除此之外还要考虑补偿方案的失败问题，当补偿方案也执行失败了呢，这时候就要考虑重试问题、人工介入问题。</li>
+</ul>
+<blockquote>
+<p>TCC原理：</p>
+<ul>
+<li>Try：尝试执行业务
+<ul>
+<li>完成所有业务检查（一致性）</li>
+<li>预留必须业务资源（准隔离性）</li>
+</ul>
+</li>
+<li>Confirm / Cancel阶段
+<ul>
+<li>Confirm：确认执行业务
+<ul>
+<li>真正执行业务</li>
+<li>不做任务业务检查</li>
+<li>Confirm操作满足幂等性</li>
+</ul>
+</li>
+<li>Cancel：取消执行业务
+<ul>
+<li>释放Try阶段预留的业务资源</li>
+<li>Cancel操作满足幂等性</li>
+<li>Confirm与Cancel互斥</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<ol>
+<li>异步确保：执行时发送一条消息，另一方接受消息，如果执行不成功会一直重试，直到成功。</li>
+</ol>
+<ul>
+<li>缺点：事务无法回滚，不合适减库存这个业务。</li>
+<li>2PC+MQ：两阶段提交方式结合异步确保。</li>
+</ul>
+<p>综上，在电商行业中适用的还是TCC，虽然业务变得复杂了，但是行之有效；如果是转账业务，适合异步确保，转账业务只需要消息可靠就可以，执行时间晚一点也无妨，所以异步确保的关键点是消息的可靠。</p>
+<p>但是在我们这个小项目中，无需把业务变得这么复杂，我们只有减库存业务，所以接下来讨论我们采用的同步调用的解决方案。</p>
+<blockquote>
+<p>同步调用中的业务：</p>
+</blockquote>
+<p>我们在商品微服务中实现减库存的业务，大家可以想到增删改操作，除了会引起刚刚说的事务问题，还会有线程安全问题。</p>
+<p>一般来说，我们先查询库存，然后if判断，库存足够就减库存。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> carts<span style="color:#000;font-weight:bold">){</span>
+	<span style="color:#000;font-weight:bold">for</span><span style="color:#000;font-weight:bold">(</span>CartDTO cart <span style="color:#000;font-weight:bold">:</span> carts<span style="color:#000;font-weight:bold">){</span>
+    	<span style="color:#998;font-style:italic">// 查询库存 比如我们现在假设当前这个商品查出的库存为1
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">int</span> stock <span style="color:#000;font-weight:bold">=</span> 1<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#998;font-style:italic">// 判断库存是否充足
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>stock <span style="color:#000;font-weight:bold">&gt;=</span> cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getNum</span><span style="color:#000;font-weight:bold">()){</span>
+         	<span style="color:#998;font-style:italic">// ... 减库存  
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>逻辑是对的，但是这么做有线程上的安全问题，当线程很多的时候，有可能引发超卖现象。比如秒杀，多个人下订单抢购商品，多个人一起进行到查出库存为1那一步，这几个人都买一件，都符合if的条件，全减了一遍库存，但是实际库存只剩1了，这就是超卖现象。</p>
+<p>怎么解决？</p>
+<blockquote>
+<p>加锁：synchronized</p>
+</blockquote>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">synchronized</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> carts<span style="color:#000;font-weight:bold">){</span>
+	<span style="color:#000;font-weight:bold">for</span><span style="color:#000;font-weight:bold">(</span>CartDTO cart <span style="color:#000;font-weight:bold">:</span> carts<span style="color:#000;font-weight:bold">){</span>
+    	<span style="color:#998;font-style:italic">// 查询库存 比如我们现在假设当前这个商品查出的库存为1
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#458;font-weight:bold">int</span> stock <span style="color:#000;font-weight:bold">=</span> 1<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#998;font-style:italic">// 判断库存是否充足
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>stock <span style="color:#000;font-weight:bold">&gt;=</span> cart<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getNum</span><span style="color:#000;font-weight:bold">()){</span>
+         	<span style="color:#998;font-style:italic">// ... 减库存  
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>性能太差了，只有一个线程可以执行，当搭了集群时synchronized只锁住了当前一个tomcat，看起来是可行的，但是在分布式系统下依然是不安全的</p>
+<blockquote>
+<p>分布式锁：zookeeper</p>
+</blockquote>
+<p>zookeeper是树结构，它利用<code>节点的唯一性</code>来实现，任何一个逻辑进入到减库存这个地方，都会创建一个节点，创建成功就认为得到了锁，继续执行代码；反之则失败，返回或者wait，因此只有一个人可以拿到这个锁，执行完毕后删除节点释放锁，其他人可以再次创建节点，说白了这个节点的创建权就相当于锁。</p>
+<p>zookeeper可以创建临时节点，当服务器宕机或者断开连接，会自动删除节点，自动释放锁。</p>
+<p>缺点：实现起来太复杂</p>
+<blockquote>
+<p>Redis：SETNX命令</p>
+</blockquote>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/6.png">
+            <img class="mx-auto" alt="6" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/6.png" />
+        </a>
+    </p>
+<p>6</p>
+<p>原理类似于上述的节点，只能set不存在的key，如果不存在则创建；如果存在它会set失败，并返回0，创建成功就相当于拿到锁，执行业务逻辑以后可以使用del命令删除这个key释放锁，然后轮到下一个人。</p>
+<p>缺点是存在死锁问题，假如SETNX成功，成功之后开始执行代码，但是此时服务器宕机，那del释放锁的命令一直没有执行，相当于这个锁一直被拿着，那么这个值将无法再被set成功。</p>
+<p>其实呢，这里不推荐加锁实现，因为用了锁，就变成单线程了，相当于一执行这段代码就把数据库锁死，同一时刻只能有一个人来操作，这样的实现类似于悲观锁，它默认线程安全问题一定会发生，在面对高并发时，往往性能很差。</p>
+<p>那既然不推荐悲观锁，是不是可以采用乐观锁呢？乐观锁是默认线程安全问题不会发生，不加锁，但是不加锁会有线程安全问题，那怎么处理这件事情呢？</p>
+<p>我们不做查询不做判断，业务执行到减库存代码这里之后直接开始减库存，唉？这不是会超卖吗？不要紧，我们的sql内部可以加条件来判断，失败则事务回滚，所有人不论怎么操作，最后都会来操作数据库，但是数据库写了判断语句来判断库存，每个人来执行都会被判断，本质上还是乐观锁。如果执行失败会反馈失败信息，而不像是悲观锁那样线程阻塞，导致一直等待，从性能上来讲，这种处理方式优于加锁，我们的sql语句如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#000;font-weight:bold">update</span> tb_stock <span style="color:#458;font-weight:bold">set</span> stock <span style="color:#000;font-weight:bold">=</span> stock <span style="color:#000;font-weight:bold">-</span> <span style="color:#998;font-style:italic">#{num} where sku_id = #{skuId} and stock &gt;= #{num}
+</span></code></pre></div><p>MYSQL</p>
+<p>StockMapper</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">StockMapper</span> <span style="color:#000;font-weight:bold">extends</span> MyBaseMapper<span style="color:#000;font-weight:bold">&lt;</span>Stock<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Update</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;update tb_stock set stock = stock - #{num} where sku_id = #{skuId} and stock &gt;= #{num}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;skuId&#34;</span><span style="color:#000;font-weight:bold">)</span> Long skuId<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;num&#34;</span><span style="color:#000;font-weight:bold">)</span> Integer num<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>GoodsServiceImpl实现减库存：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Transactional</span> <span style="color:#998;font-style:italic">// 事务, 出现异常回滚
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> cartDTOs<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>CartDTO cartDTO <span style="color:#000;font-weight:bold">:</span> cartDTOs<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#458;font-weight:bold">int</span> count <span style="color:#000;font-weight:bold">=</span> stockMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>cartDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getSkuId</span><span style="color:#000;font-weight:bold">(),</span>cartDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getNum</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>count <span style="color:#000;font-weight:bold">!=</span> 1<span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">STOCK_NOT_ENOUGH</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>最后回到我们的订单服务：</p>
+<p>OrderServiceImpl</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#3c5d5d;font-weight:bold">@Transactional</span>
+<span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">createOrder</span><span style="color:#000;font-weight:bold">(</span>OrderDTO orderDTO<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Order order <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Order<span style="color:#000;font-weight:bold">();</span>
+
+    <span style="color:#998;font-style:italic">// 生成orderId 初始化订单基本信息
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">long</span> orderId <span style="color:#000;font-weight:bold">=</span> idWorker<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">nextId</span><span style="color:#000;font-weight:bold">();</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderId</span><span style="color:#000;font-weight:bold">(</span>orderId<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">// 订单编号
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCreateTime</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> Date<span style="color:#000;font-weight:bold">());</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPaymentType</span><span style="color:#000;font-weight:bold">(</span>orderDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPaymentType</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">// 付款方式
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#998;font-style:italic">// 获取登录用户信息
+</span><span style="color:#998;font-style:italic"></span>    UserInfo userInfo <span style="color:#000;font-weight:bold">=</span> UserInterceptor<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getLoginUserInfo</span><span style="color:#000;font-weight:bold">();</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setUserId</span><span style="color:#000;font-weight:bold">(</span>userInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">// 用户id
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setBuyerNick</span><span style="color:#000;font-weight:bold">(</span>userInfo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getUsername</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">// 用户名
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setBuyerRate</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// 查询收货人信息 收获地址
+</span><span style="color:#998;font-style:italic"></span>    AddressDTO addr <span style="color:#000;font-weight:bold">=</span> AddressClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">findById</span><span style="color:#000;font-weight:bold">(</span>orderDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAddressId</span><span style="color:#000;font-weight:bold">());</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiver</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getName</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverMobile</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPhone</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人手机号码
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverAddress</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAddress</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货所在街道
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverState</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getState</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人所在省
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverCity</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCity</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人所在城市
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverDistrict</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getDistrict</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人所在区
+</span><span style="color:#998;font-style:italic"></span>    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setReceiverZip</span><span style="color:#000;font-weight:bold">(</span>addr<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getZipCode</span><span style="color:#000;font-weight:bold">());</span><span style="color:#998;font-style:italic">//收货人邮编
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#998;font-style:italic">// 处理金额和orderDetail
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>CartDTO<span style="color:#000;font-weight:bold">&gt;</span> cartDTOS <span style="color:#000;font-weight:bold">=</span> orderDTO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCarts</span><span style="color:#000;font-weight:bold">();</span>
+    Map<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">,</span> Integer<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> cartDTOS<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">stream</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">collect</span><span style="color:#000;font-weight:bold">(</span>Collectors<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toMap</span><span style="color:#000;font-weight:bold">(</span>CartDTO<span style="color:#000;font-weight:bold">::</span>getSkuId<span style="color:#000;font-weight:bold">,</span> CartDTO<span style="color:#000;font-weight:bold">::</span>getNum<span style="color:#000;font-weight:bold">));</span>
+    Set<span style="color:#000;font-weight:bold">&lt;</span>Long<span style="color:#000;font-weight:bold">&gt;</span> skuIds <span style="color:#000;font-weight:bold">=</span> map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">keySet</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#998;font-style:italic">// 查询商品信息
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>Sku<span style="color:#000;font-weight:bold">&gt;</span> skuList <span style="color:#000;font-weight:bold">=</span> goodsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">querySkusByIds</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;(</span>skuIds<span style="color:#000;font-weight:bold">));</span><span style="color:#998;font-style:italic">//一个集合转变成另一个集合
+</span><span style="color:#998;font-style:italic"></span>    Long totalPay <span style="color:#000;font-weight:bold">=</span> 0L<span style="color:#000;font-weight:bold">;</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>OrderDetail<span style="color:#000;font-weight:bold">&gt;</span> orderDetails <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ArrayList<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+    <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Sku sku <span style="color:#000;font-weight:bold">:</span> skuList<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">// 计算总金额 实付金额
+</span><span style="color:#998;font-style:italic"></span>        totalPay <span style="color:#000;font-weight:bold">+=</span> sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrice</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">*</span> map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">());</span>
+
+        <span style="color:#998;font-style:italic">// 封装orderDetail信息
+</span><span style="color:#998;font-style:italic"></span>        OrderDetail orderDetail <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> OrderDetail<span style="color:#000;font-weight:bold">();</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setImage</span><span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">substringBefore</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getImages</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#d14">&#34;,&#34;</span><span style="color:#000;font-weight:bold">));</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setNum</span><span style="color:#000;font-weight:bold">(</span>map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">()));</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderId</span><span style="color:#000;font-weight:bold">(</span>orderId<span style="color:#000;font-weight:bold">);</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOwnSpec</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getOwnSpec</span><span style="color:#000;font-weight:bold">());</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setPrice</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPrice</span><span style="color:#000;font-weight:bold">());</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSkuId</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">());</span>
+        orderDetail<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setTitle</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTitle</span><span style="color:#000;font-weight:bold">());</span>
+        orderDetails<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">add</span><span style="color:#000;font-weight:bold">(</span>orderDetail<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setTotalPay</span><span style="color:#000;font-weight:bold">(</span>totalPay<span style="color:#000;font-weight:bold">);</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setActualPay</span><span style="color:#000;font-weight:bold">(</span>totalPay <span style="color:#000;font-weight:bold">+</span> order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getPostFee</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">-</span> 0<span style="color:#000;font-weight:bold">);</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderDetails</span><span style="color:#000;font-weight:bold">(</span>orderDetails<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// order入库
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#458;font-weight:bold">int</span> count <span style="color:#000;font-weight:bold">=</span> orderMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertSelective</span><span style="color:#000;font-weight:bold">(</span>order<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>count <span style="color:#000;font-weight:bold">!=</span> 1<span style="color:#000;font-weight:bold">){</span>
+        LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[创建订单] 创建订单失败，orderID:{}&#34;</span><span style="color:#000;font-weight:bold">,</span> orderId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CREATE_ORDER_ERROR</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// orderDetail入库
+</span><span style="color:#998;font-style:italic"></span>    count <span style="color:#000;font-weight:bold">=</span> orderDetailMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertList</span><span style="color:#000;font-weight:bold">(</span>orderDetails<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>count <span style="color:#000;font-weight:bold">!=</span> orderDetails<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">size</span><span style="color:#000;font-weight:bold">()){</span>
+        LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[创建订单] 创建订单详情失败，orderID:{}&#34;</span><span style="color:#000;font-weight:bold">,</span> orderId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CREATE_ORDER_DETAIL_ERROR</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// 封装订单状态信息 目前还没付款
+</span><span style="color:#998;font-style:italic"></span>    OrderStatus orderStatus <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> OrderStatus<span style="color:#000;font-weight:bold">();</span>
+    orderStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderId</span><span style="color:#000;font-weight:bold">(</span>orderId<span style="color:#000;font-weight:bold">);</span>
+    orderStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setCreateTime</span><span style="color:#000;font-weight:bold">(</span>order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getCreateTime</span><span style="color:#000;font-weight:bold">());</span>
+    orderStatus<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStatus</span><span style="color:#000;font-weight:bold">(</span>OrderStatusEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">UN_PAY</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">value</span><span style="color:#000;font-weight:bold">());</span>
+
+    <span style="color:#998;font-style:italic">// orderStatus入库
+</span><span style="color:#998;font-style:italic"></span>    count <span style="color:#000;font-weight:bold">=</span> orderStatusMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertSelective</span><span style="color:#000;font-weight:bold">(</span>orderStatus<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>count <span style="color:#000;font-weight:bold">!=</span> 1<span style="color:#000;font-weight:bold">){</span>
+        LOGGER<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;[创建订单] 创建订单状态失败，orderID:{}&#34;</span><span style="color:#000;font-weight:bold">,</span> orderId<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">CREATE_ORDER_STATUS_ERROR</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// TODO 删除购物车中的已购买商品
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#998;font-style:italic">// 减库存
+</span><span style="color:#998;font-style:italic"></span>    goodsClient<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">decreaseStock</span><span style="color:#000;font-weight:bold">(</span>cartDTOS<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 返回订单编号
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">return</span> orderId<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h3 id="23点击提交订单跳转到订单支付页面">2.3点击提交订单跳转到订单支付页面</h3>
+<p>当写完订单业务时，跳转到支付页面，可以看到没有订单编号、二维码、支付金额这三项，同时前台页面发起了一个请求：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/7.png">
+            <img class="mx-auto" alt="7" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/7.png" />
+        </a>
+    </p>
+<p>7</p>
+<h4 id="231-controller">2.3.1 controller</h4>
+<ul>
+<li>请求方式：get</li>
+<li>请求路径：/order/订单编号</li>
+<li>请求参数：订单编号</li>
+<li>返回结果：order对象</li>
+</ul>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/{id}&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> ResponseEntity<span style="color:#000;font-weight:bold">&lt;</span>Order<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">queryOrderById</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@PathVariable</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span>Long id<span style="color:#000;font-weight:bold">){</span>
+    Order order <span style="color:#000;font-weight:bold">=</span> orderService<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">queryOrderById</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> ResponseEntity<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ok</span><span style="color:#000;font-weight:bold">(</span>order<span style="color:#000;font-weight:bold">);</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<h4 id="232-service">2.3.2 service</h4>
+<p>我们实际需求中会有 订单状态 这一选项供用户查看，因此查询的时候不单单要实现订单的查询，还要查询订单的金额和订单的状态：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Override</span>
+<span style="color:#000;font-weight:bold">public</span> Order <span style="color:#900;font-weight:bold">queryOrderById</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Order order <span style="color:#000;font-weight:bold">=</span> orderMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>order <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ORDER_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// 查询订单详情
+</span><span style="color:#998;font-style:italic"></span>    OrderDetail record <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> OrderDetail<span style="color:#000;font-weight:bold">();</span>
+    record<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderId</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>OrderDetail<span style="color:#000;font-weight:bold">&gt;</span> orderDetails <span style="color:#000;font-weight:bold">=</span> orderDetailMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>record<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>orderDetails<span style="color:#000;font-weight:bold">)){</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ORDER_DETAIL_NOT_FOUNT</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderDetails</span><span style="color:#000;font-weight:bold">(</span>orderDetails<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// 查询订单状态
+</span><span style="color:#998;font-style:italic"></span>    OrderStatus orderStatus <span style="color:#000;font-weight:bold">=</span> orderStatusMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>orderStatus <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ORDER_STATUS_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    order<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderStatus</span><span style="color:#000;font-weight:bold">(</span>orderStatus<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> order<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>现在刷新页面，发现又发起了两个请求，同时二维码还没有生成：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/8.png">
+            <img class="mx-auto" alt="8" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/order/8.png" />
+        </a>
+    </p>
+<p>8</p>
+<p>可以看到二维码是根据URL生成的，接下来，就该实现微信支付了。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/order-service.html">https://chanservy.github.io/2021/04/09/order-service.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/cart-service.html">购物车业务</a></li>
+        
+        <li><a href="/2021/04/09/auth-center.html">授权中心</a></li>
+        
+        <li><a href="/2021/04/09/register-step.html">项目中的注册流程</a></li>
+        
+        <li><a href="/2021/04/09/mq-data-together.html">RabbitMQ及数据同步</a></li>
+        
+        <li><a href="/2021/04/09/goods-details-page-static.html">商品详情及静态化</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+                <li><a href='/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81'>分布式锁</a></li>
+                
+                <li><a href='/tags/%E4%B9%90%E8%A7%82%E9%94%81'>乐观锁</a></li>
+                
+                <li><a href='/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1'>分布式事务</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

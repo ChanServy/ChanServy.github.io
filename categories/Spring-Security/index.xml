@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Security on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/Spring-Security/</link>
+    <description>Recent content in Spring Security on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 11:38:48 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Spring-Security/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Security使用JSON格式登录</title>
+      <link>https://chanservy.github.io/2020/12/22/security-json.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:38:48 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-json.html</guid>
+      <description>前言： 在使用 Spring Security 的过程中，大伙都知道默认的登录数据是通过 key/value 的形式来传递的，默认情况下不支持 JSON 格式的登录数据，如果有这种需求，就需要自己来解决，本着“升华思想”，在 Security 的基础上，让它增加对 JSON 格式的登录数据的支持。 Spring Security使用JSON格式登录 一、基本登录方案 在说如何使用 JSON 登录</description>
+    </item>
+    
+    <item>
+      <title>Spring Security结合OAuth2</title>
+      <link>https://chanservy.github.io/2020/12/22/security-oauth2.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:04:12 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-oauth2.html</guid>
+      <description>前言：OAuth 2.0 是目前最流行的授权机制，用来授权第三方应用，获取用户数据。这个标准比较抽象，使用了很多术语，初学者不容易理解。其实说起来并不复杂，下面我就通过一个简单的类比，帮助大家轻松理解，OAuth 2.0 到底是什么。 Spring Security结合OAuth2 OAuth 2.0 的一个简单解释 一、快递员</description>
+    </item>
+    
+    <item>
+      <title>Security基于数据库动态配置权限</title>
+      <link>https://chanservy.github.io/2020/12/22/security-by-db.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:46:44 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-by-db.html</guid>
+      <description>前言：对于Spring Security，由于也是近期才开始接触，所以还是处在慢慢摸索的阶段，前面与Spring Security相关的文章中的例子都是事先将用户，角色，资源的信息都写在了程序中，但是大家只有在生产环境中，没有一成不变的信息，因此本篇博客会将用户，角色，资源都写“活”</description>
+    </item>
+    
+    <item>
+      <title>Spring Security添加验证码</title>
+      <link>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:24:54 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</guid>
+      <description>&lt;p&gt;前言： 登录添加验证码是一个非常常见的需求，网上也有非常成熟的解决方案，其实，要是自己自定义登录实现这个并不难，但是如果需要在 Spring Security 框架中实现这个功能，还得稍费一点功夫。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Security</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:17:06 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</guid>
+      <description>前言： Spring Security 是 Spring 家族中的一个安全管理框架，实际上，在 Spring Boot 出现之前，Spring Security 就已经发展了多年了，但是使用的并不多，安全管理这个领域，一直是 Shiro 的天下。 相对于 Shiro，在 SSM/SSH 中整合 Spring Security 都是比较麻烦的操作，所以，Spring Security 虽然功能比 Shiro 强大，但是使用反而没有 Shiro 多，但是现如今随着项目</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RabbitMQ on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/RabbitMQ/</link>
+    <description>Recent content in RabbitMQ on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Apr 2021 16:55:13 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/RabbitMQ/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RabbitMQ及数据同步</title>
+      <link>https://chanservy.github.io/2021/04/09/mq-data-together.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:55:13 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/mq-data-together.html</guid>
+      <description>前言：RabbitMQ及数据同步。 1.RabbitMQ 1.1.搜索与商品服务的问题 目前我们已经完成了商品详情和搜索系统的开发。我们思考一下，是否存在问题？ 商品的原始数据保存在数据库中，增删改查都在数据库中完成。 搜索服务数据来源是索引库，如果数据库商品发生变化，索引库数据不能及时更新。 商品详情做了页</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合RabbitMQ</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</link>
+      <pubDate>Mon, 21 Dec 2020 16:54:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</guid>
+      <description>前言：在大多数的应用中都可以通过消息服务的中间件来提升系统的异步通信、扩展解耦的能力。这篇是有关于Spring Boot与消息队列的整合，本文主要以RabbitMQ为案例来介绍。 Spring Boot整合RabbitMQ 一、消息概述 消息服务中的两个重要的概念：消息代理（message broke</description>
+    </item>
+    
+  </channel>
+</rss>

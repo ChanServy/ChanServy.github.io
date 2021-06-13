@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>项目经验 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</link>
+    <description>Recent content in 项目经验 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 24 May 2021 22:20:34 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式事务之可靠消息最终一致性方案</title>
+      <link>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</link>
+      <pubDate>Mon, 24 May 2021 22:20:34 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</guid>
+      <description>&lt;p&gt;这几篇文章一直在讲有关分布式事务的问题，的确，在一些场景中，会涉及到分布式事务也就是数据不一致的问题，会发生在分布式微服务的项目中，所谓分布式事务就是数据涉及到多个微服务之间的接口调用，如果全部没错皆大欢喜，但凡有一个地方出现了报错，那就全部要回滚，保证数据的一致性和准确性，其实就是事务的特性。这篇讲的是通过消息队列来实现数据的最终一致性，可靠消息最终一致性方案，准确的说这并不是一套针对分布式事务的解决方案，而是一个通过MQ实现分布式事务效果（数据一致性）的方案。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之TCC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/tcc.html</link>
+      <pubDate>Mon, 24 May 2021 22:19:19 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/tcc.html</guid>
+      <description>&lt;p&gt;TCC又称补偿事务。其核心思想是：&amp;ldquo;针对每个操作都要有一个与其对应的尝试、确认和补偿（撤销操作）&amp;quot;。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之2PC和3PC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/2pcand3pc.html</link>
+      <pubDate>Fri, 21 May 2021 18:24:57 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/2pcand3pc.html</guid>
+      <description>&lt;p&gt;前言：如果一个系统操作多个数据库，肯定是有跨多个库的分布式事务的一个问题，今天的主要目标就是分布式事务的方案以及原理剖析。来自石杉老师的码农架构课的学习。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>订单业务</title>
+      <link>https://chanservy.github.io/2021/04/09/order-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:59:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/order-service.html</guid>
+      <description>前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt; &amp;lt;project xmlns=&amp;#34;http://maven.apache.org/POM/4.0.0&amp;#34; xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34; xsi:schemaLocation=&amp;#34;http://maven.apache.org/POM/4.0.0</description>
+    </item>
+    
+    <item>
+      <title>购物车业务</title>
+      <link>https://chanservy.github.io/2021/04/09/cart-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:54:34 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/cart-service.html</guid>
+      <description>前言：记一次项目中实现购物车业务的流程。 1.购物车功能分析 1.1.需求 需求描述： 用户可以在登录状态下将商品添加到购物车 放入数据库 放入redis（采用） 用户可以在未登录状态下将商品添加到购物车 放入localstorage 用户可以使用购物车一起结算下单 用户可以查询自己的购物车 用户可以</description>
+    </item>
+    
+    <item>
+      <title>授权中心</title>
+      <link>https://chanservy.github.io/2021/04/09/auth-center.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:46:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/auth-center.html</guid>
+      <description>前言：记一次项目中实现授权中心的流程。 1.无状态登录原理 1.1.什么是有状态？ 有状态服务，即服务端需要记录每次会话的客户端信息，从而识别客户端身份，根据用户身份进行请求的处理，典型的设计如tomcat中的session。 例如登录：用户登录后，我们把登录者的信息保存在服务端sess</description>
+    </item>
+    
+    <item>
+      <title>项目中的注册流程</title>
+      <link>https://chanservy.github.io/2021/04/09/register-step.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:23:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/register-step.html</guid>
+      <description>前言：记一次项目中的注册流程。 1.创建用户中心 用户搜索到自己心仪的商品，接下来就要去购买，但是购买必须先登录。所以接下来我们编写用户中心，实现用户的登录和注册功能。 用户中心的提供的服务： 用户的注册 用户登录 用户个人信息管理 用户地址管理 用户收藏管理 我的订单 优惠券管理 这里我们暂时先实现</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ及数据同步</title>
+      <link>https://chanservy.github.io/2021/04/09/mq-data-together.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:55:13 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/mq-data-together.html</guid>
+      <description>前言：RabbitMQ及数据同步。 1.RabbitMQ 1.1.搜索与商品服务的问题 目前我们已经完成了商品详情和搜索系统的开发。我们思考一下，是否存在问题？ 商品的原始数据保存在数据库中，增删改查都在数据库中完成。 搜索服务数据来源是索引库，如果数据库商品发生变化，索引库数据不能及时更新。 商品详情做了页</description>
+    </item>
+    
+    <item>
+      <title>商品详情及静态化</title>
+      <link>https://chanservy.github.io/2021/04/09/goods-details-page-static.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:48:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/goods-details-page-static.html</guid>
+      <description>&lt;p&gt;前言：接大上篇博客，当用户搜索到商品，肯定会点击查看，就会进入商品详情页，接下来我们完成商品详情页的展示。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>项目中的搜索服务</title>
+      <link>https://chanservy.github.io/2021/04/09/search-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:18:16 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/search-service.html</guid>
+      <description>&lt;p&gt;前言：上篇写了Elasticsearch的基本应用。今天就学以致用，搭建搜索微服务，实现搜索功能。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>电商项目中商品的分析和数据库设计</title>
+      <link>https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:35:38 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html</guid>
+      <description>电商项目中商品的分析和数据库设计 前言：众所周知，电商网站品类复杂多样，比如京东、淘宝、拼多多等等，诸如这些全品类的电商网站，商品的种类繁多，每一件商品，其属性又有差别。那么设计如此大型的电商网站，我们该如何设计商品信息的展示呢？本文大部分以京东官网的截图为例说明思路。 一、SPU和</description>
+    </item>
+    
+    <item>
+      <title>Centos下安装FastDFS并添加Nginx模块</title>
+      <link>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:23:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</guid>
+      <description>前言：Centos下安装FastDFS并添加Nginx模块。 1.1 上传 根目录只有一个，那就是/，主目录是当前用户的HOME目录，添加用户的时候指定的。 一般用户缺省的HOME目录是/home/xxx (xxx是用户名)，root用户的缺省HOME目录是/root，也就是~。 将文件上传到l</description>
+    </item>
+    
+    <item>
+      <title>跨域问题</title>
+      <link>https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html</link>
+      <pubDate>Fri, 09 Apr 2021 14:57:14 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html</guid>
+      <description>前言：微服务项目中，由于微服务众多，并且有不止一个环境，因此难免会有跨域的问题，这篇博客聊一聊跨域的问题。 一、跨域问题 1、什么是跨域 跨域是指跨域名的访问，以下情况都属于跨域： 跨域原因说明 示例 域名不同 www.jd.com 与 www.taobao.com 域名相同，端口不同 www.jd.com:8080 与 www.jd.com:8081 二级域名不同 item.jd.com 与 miaosha.jd.com 如果域名和端口都相同，但是请求路径</description>
+    </item>
+    
+    <item>
+      <title>微服务项目中的图片上传</title>
+      <link>https://chanservy.github.io/2020/02/05/upload-image.html</link>
+      <pubDate>Fri, 05 Feb 2021 22:02:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/02/05/upload-image.html</guid>
+      <description>&lt;p&gt;前言：文件的上传并不只是在某个微服务中有需求，以后的其它服务也可能需要，因此我们创建一个独立的微服务，专门处理各种上传。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>使用域名访问本地项目</title>
+      <link>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</link>
+      <pubDate>Fri, 05 Feb 2021 20:59:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</guid>
+      <description>前言：使用域名访问本地项目。 一、统一环境 比如我们现在访问页面使用的是：http://localhost:9001。 有没有什么问题？ 实际开发中，会有不同的环境： 开发环境：自己的电脑 测试环境：提供给测试人员使用的环境 预发布环境：数据是和生成环境的数据一致，运行最新的项目代码进去测试 生</description>
+    </item>
+    
+    <item>
+      <title>异常统一处理方案</title>
+      <link>https://chanservy.github.io/2021/02/05/error-common-deal.html</link>
+      <pubDate>Fri, 05 Feb 2021 19:24:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/02/05/error-common-deal.html</guid>
+      <description>前言：最近在自己写项目，也是边写边学习边总结了。回想一下，之前在写项目的时候，当项目中出现异常的时候，总是潦草解决，脑海中没有一个统一的轮廓或者标准，所以想来总结一下。 一、为什么要统一异常处理 我们在项目中，往往需要查询什么数据返回给前端，或者将前端传来的数据插入到数据库等等，比如</description>
+    </item>
+    
+  </channel>
+</rss>

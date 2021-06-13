@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>一个Java程序猿眼中的前后端分离以及Vue.js入门 | 迩东陈的博客</title>
+    <meta property="og:title" content="一个Java程序猿眼中的前后端分离以及Vue.js入门 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-01-14T21:14:34&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-01-14T21:14:34&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="一个Java程序猿眼中的前后端分离以及Vue.js入门.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2021/01/14/front-behind-divied.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一前后端不分">一、前后端不分</a></li>
+    <li><a href="#二前后端分离">二、前后端分离</a></li>
+    <li><a href="#三vue简介">三、Vue简介</a></li>
+    <li><a href="#四spa">四、SPA</a></li>
+    <li><a href="#五基本环境搭建">五、基本环境搭建</a></li>
+    <li><a href="#六vue2x-项目结构介绍">六、Vue2.x 项目结构介绍</a></li>
+    <li><a href="#七webstorm-中启动vue">七、WebStorm 中启动Vue</a></li>
+    <li><a href="#八项目编译">八、项目编译</a></li>
+    <li><a href="#九使用-vue-cli-4x创建项目">九、使用 vue-cli 4.x创建项目</a>
+      <ul>
+        <li><a href="#indexhtml">index.html</a></li>
+        <li><a href="#mainjs">main.js</a></li>
+        <li><a href="#appvue">App.vue</a></li>
+        <li><a href="#indexjs">index.js</a></li>
+        <li><a href="#homevue">Home.vue</a></li>
+        <li><a href="#helloworldvue">HelloWorld.vue</a></li>
+        <li><a href="#aboutvue">About.vue</a></li>
+        <li><a href="#vue中render-h--happ的理解">vue中render: h =&gt; h(App)的理解</a></li>
+        <li><a href="#大致流程">大致流程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">一个Java程序猿眼中的前后端分离以及Vue.js入门</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年1月14日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Vue'>Vue</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言：一个Java程序猿眼中的前后端分离以及Vue.js入门。</p>
+<h1 id="前后端分离以及vuejs入门">前后端分离以及Vue.js入门</h1>
+<h2 id="一前后端不分">一、前后端不分</h2>
+<ol>
+<li>后端模板：Jsp、FreeMarker</li>
+<li>前端模板：Thymeleaf</li>
+</ol>
+<p>前后端不分，Jsp 是一个非常典型写法，Jsp 将 HTML 和 Java 代码结合在一起，刚开始的时候，确实提高了生产力，但是时间久了，大伙就发现 Jsp 存在的问题了，对于后端工程师来说，可能不太精通 css ，所以流程一般是这样前端设计页面–&gt;后端把页面改造成 Jsp –&gt; 后端发现问题 –&gt; 页面给前端 –&gt; 前端不会Jsp。这种方式效率低下。特别是在移动互联网兴起后，公司的业务，一般除了 PC 端，还有手机端、小程序等，通常，一套后台系统需要对应多个前端，此时就不可以继续使用前后端不分的开发方式了。</p>
+<p>在前后端不分的开发方式中，一般来说，后端可能处理完值之后将值放到域对象中，然后返回一个 ModelAndView 或者一个 string （值为页面名），渲染成 HTML 之后，浏览器当然可以展示，但是对于小程序、移动端来说，并不能很好的展示 HTML（实际上移动端也支持HTML，只不过运行效率低下）。这种时候，后端和前端数据交互，主流方案就是通过 JSON 来实现。</p>
+<h2 id="二前后端分离">二、前后端分离</h2>
+<p>前后端分离后，后端不再写页面，只提供 JSON 数据接口（XML数据格式现在用的比较少），前端可以移动端、小程序、也可以是 PC 端，前端负责 JSON 的展示，页面跳转等都是通过前端来实现的。前端后分离后，前端目前有三大主流框架：</p>
+<ul>
+<li>
+<p>Vue</p>
+<p>作者尤雨溪，Vue本身借鉴了 Angular，目前GitHubstar数最多，建议后端工程师使用这个，最大的原因是Vue上手容易，可以快速学会，对于后端工程师来说，能快速搭建页面解决问题即可，但是如果你是专业的前端工程师，我会推荐你三个都去学习 。就目前国内前端框架使用情况来说，Vue 算是使用最多的。而且目前来说，有大量 Vue 相关的周边产品，各种 UI 框架，开源项目，学习资料非常多。</p>
+</li>
+<li>
+<p>React</p>
+<p>Facebook 的产品。是一个用于构建用户界面的 js 库，React 性能较好，代码逻辑简单。</p>
+</li>
+<li>
+<p>Angular</p>
+<p>AngularJS 是一款由 Google 维护的开源 JavaScript 库，用来协助单一页面应用程序运行。它的目标是透过 MVC 模式（MVC）功能增强基于浏览器的应用，使开发和测试变得更加容易。</p>
+</li>
+</ul>
+<h2 id="三vue简介">三、Vue简介</h2>
+<p>Vue (读音 /vjuː/，类似于 view) 是一套用于构建用户界面的渐进式框架。与其它大型框架不同的是，Vue 被设计为可以自底向上逐层应用。Vue 的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。另一方面，当与现代化的工具链以及各种支持类库结合使用时，Vue 也完全能够为复杂的单页应用提供驱动。</p>
+<ol>
+<li>只关注视图层</li>
+<li>MVVM 框架</li>
+</ol>
+<p>大家在使用 jQuery 过程中，掺杂了大量的 DOM 操作，修改视图或者获取 value ，都需要 DOM 操作，MVVM 是一种视图和数据模型双向绑定的框架，即数据发生变化，视图会跟着变化，视图发生变化，数据模型也会跟着变化，开发者再也不需要操作 DOM 节点。</p>
+<h2 id="四spa">四、SPA</h2>
+<p>SPA（single page web application），单页面应用，是一种网络应用程序或网站的模型，它通过动态重写当前页面来与用户交互，而非传统的从服务器重新加载整个新页面。这种方法避免了页面之间切换打断用户体验，使应用程序更像一个桌面应用程序。在单页应用中，所有必要的代码（ HTML、JavaScript 和 CSS ）都通过单个页面的加载而检索，或者根据需要（通常是为响应用户操作）动态装载适当的资源并添加到页面。SPA 有一个缺点，因为 SPA 应用部署后只有1个页面，而且这个页面只是一堆 js 、css 引用，没有其他有效价值，因此，SPA 应用不易被搜索引擎收录，所以，一般来说，SPA 适合做大型企业后台管理系统。</p>
+<p>Vue 使用方式大致上可以分为两大类：</p>
+<ol>
+<li>直接将Vue在页面中引入，不做 SPA 应用</li>
+<li>SPA应用</li>
+</ol>
+<h2 id="五基本环境搭建">五、基本环境搭建</h2>
+<p>首先需要安装两个东西：</p>
+<ol>
+<li>NodeJS</li>
+<li>npm</li>
+</ol>
+<p>直接搜索下载 NodeJS 即可，安装成功之后，npm 也就有了。安装成功之后，可以 在 cmd 命令哈验证是否安装成功：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/1.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/1.png" />
+        </a>
+    </p>
+<p>NodeJS 安装成功之后，接下来安装 Vue的工具：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">npm install -g vue-cli   <span style="color:#998;font-style:italic"># 只需要第一次安装时执行</span>
+vue init webpack my-project  <span style="color:#998;font-style:italic"># 使用webpack模板创建一个vue项目</span>
+<span style="color:#0086b3">cd</span> my-project <span style="color:#998;font-style:italic">#进入到项目目录中</span>
+npm install  <span style="color:#998;font-style:italic"># 下载依赖（如果在项目创建的最后一步选择了自动执行npm install，则该步骤可以省略）</span>
+npm run dev <span style="color:#998;font-style:italic"># 启动项目</span>
+</code></pre></div><p>启动成功后，浏览器输入 <code>http://localhost:8080</code> 就能看到如下页面：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/2.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/2.png" />
+        </a>
+    </p>
+<p><strong>执行 <code>npm install</code> 命令时，默认使用的是国外的下载源 ，可以通过如下代码配置为使用淘宝的镜像：</strong> cmd</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">npm config <span style="color:#0086b3">set</span> registry https://registry.npm.taobao.org
+</code></pre></div><p>修改完成后，就能有效提高下载的成功率。</p>
+<h2 id="六vue2x-项目结构介绍">六、Vue2.x 项目结构介绍</h2>
+<p>Vue 项目创建完成后，使用 Web Storm 打开项目，项目目录如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/3.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/3.png" />
+        </a>
+    </p>
+<ol>
+<li>build 文件夹，用来存放项目构建脚本</li>
+<li>config 中存放项目的一些基本配置信息，最常用的就是端口转发</li>
+<li>node_modules 这个目录存放的是项目的所有依赖，即 npm install 命令下载下来的文件</li>
+<li>src 这个目录下存放项目的源码，即开发者写的代码放在这里</li>
+<li>static 用来存放静态资源</li>
+<li>index.html 则是项目的首页，入口页，也是整个项目唯一的HTML页面</li>
+<li>package.json 中定义了项目的所有依赖，包括开发时依赖和发布时依赖</li>
+</ol>
+<p>对于开发者来说，以后 99.99% 的工作都是在 src 中完成的，src 中的文件目录如下：（vuetest忽略，是我自己建的）</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/4.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/4.png" />
+        </a>
+    </p>
+<ol>
+<li>assets 目录用来存放资源文件</li>
+<li>components 目录用来存放组件（一些可复用，非独立的页面），当然开发者也可以在 components 中直接创建完整页面。</li>
+<li>推荐在 components 中存放组件，另外单独新建一个 page 文件夹，专门用来放完整页面。</li>
+<li>router 目录中，存放了路由的js文件</li>
+<li>App.vue 是一个Vue组件，也是项目的第一个Vue组件</li>
+<li>main.js相当于Java中的main方法，是整个项目的入口js</li>
+</ol>
+<p>项目打开运行起来，我们看到浏览器的主页截图，首先它就是程序中的 index.html 页面：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- 运行成功显示的页面 只有一个div 这一个div首页咋能这么多东西 就要看src目录了 --&gt;</span>
+&lt;<span style="color:#000080">html</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;viewport&#34;</span> <span style="color:#008080">content</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;width=device-width,initial-scale=1.0&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;chan&lt;/<span style="color:#000080">title</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- 这个div被main.js中定义的template中的节点替代掉了 --&gt;</span>
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- built files will be auto injected --&gt;</span>
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+</code></pre></div><p>由内容我们心中不禁疑问，这就一个div节点，咋的能显示那么多内容呢？别急，我们一起来慢慢看，首先我们看到程序里有一个main.js，main.js 作用相当于 java 的 main 函数，是整个项目的入口，项目从它开始运行，我们看一看main.js中的内容：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#998;font-style:italic">// The Vue build version to load with the `import` command
+</span><span style="color:#998;font-style:italic">// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+</span><span style="color:#998;font-style:italic"></span><span style="color:#998;font-style:italic">/* 首先main.js 作用相当于java的main函数 整个项目的入口 从它开始运行 */</span>
+<span style="color:#000;font-weight:bold">import</span> Vue from <span style="color:#d14">&#39;vue&#39;</span>
+<span style="color:#998;font-style:italic">/* 将App组件导入进来 后缀名.vue可省略 */</span>
+<span style="color:#000;font-weight:bold">import</span> App from <span style="color:#d14">&#39;./App&#39;</span>
+<span style="color:#998;font-style:italic">/* import router from &#39;./router/index.js&#39; 后缀名.js可省略,如果文件名是index那么也可以省略 */</span>
+<span style="color:#000;font-weight:bold">import</span> router from <span style="color:#d14">&#39;./router&#39;</span>
+
+Vue.config.productionTip <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
+
+<span style="color:#998;font-style:italic">/* eslint-disable no-new */</span>
+<span style="color:#000;font-weight:bold">new</span> Vue({
+    <span style="color:#998;font-style:italic">/* index.html的div的id就是app */</span>
+    el<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;#app&#39;</span>,
+    <span style="color:#998;font-style:italic">// router也是简写的, 全部写法是router: router, 第一个router是key,第二个router是上面引入的 import router from &#39;./router&#39;
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// 路由 路由表就在./router/index.js
+</span><span style="color:#998;font-style:italic"></span>    router,
+    <span style="color:#998;font-style:italic">/* 上面导入组件后还没完 要在这注册 */</span>
+    components<span style="color:#000;font-weight:bold">:</span> {
+        <span style="color:#998;font-style:italic">/* App属于简写 它等价于&#39;App&#39;:App 这种都一样写法可以简写成App */</span>
+        App
+        <span style="color:#998;font-style:italic">/* 相当于我自定义了一个html元素 叫chen */</span>
+        <span style="color:#998;font-style:italic">// &#39;chen&#39;:App
+</span><span style="color:#998;font-style:italic"></span>    },
+    <span style="color:#998;font-style:italic">/* template中定义的节点会将index.html中的id为app的div代替 */</span>
+    template<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;&lt;App/&gt;&#39;</span>
+    <span style="color:#998;font-style:italic">// template: &#39;&lt;chen/&gt;&#39;
+</span><span style="color:#998;font-style:italic"></span>})
+
+</code></pre></div><ol>
+<li>在main.js 中，首先导入 Vue 对象</li>
+<li>导入 App.vue ，并且命名为 App</li>
+<li>导入router，注意，由于router目录下路由默认文件名为 index.js ，因此可以省略</li>
+<li>所有东西都导入成功后，创建一个Vue对象，设置要被Vue处理的节点是 ‘#app’，’#app’ 指提前在index.html 文件中定义的一个div</li>
+<li>将 router 设置到 vue 对象中，这里是一个简化的写法，完整的写法是 router:router，如果 key/value 一模一样，则可以简写。</li>
+<li>声明一个组件 App，App 这个组件在一开始已经导入到项目中了，但是直接导入的组件无法直接使用，必须要声明。</li>
+<li>template 中定义了页面模板，即将 App 组件中的内容渲染到 ‘#app’ 这个div 中。</li>
+</ol>
+<p>因此，可以猜测，项目启动成功后，看到的页面效果定义在 App.vue 中：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue"><span style="color:#998;font-style:italic">&lt;!--</span> 一般通过.vue文件来建立组件 包含三个部分 <span style="color:#000;font-weight:bold">--&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!--</span> 定义组件的html元素 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+        &lt;<span style="color:#000080">img</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;./assets/logo.png&#34;</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!--</span> router<span style="color:#000;font-weight:bold">-</span>view作用<span style="color:#000;font-weight:bold">:</span>占位符 不同的路径显示不同的内容 路径和路由规则配置在路由表.<span style="color:#000;font-weight:bold">/</span>router<span style="color:#000;font-weight:bold">/</span>index.js <span style="color:#000;font-weight:bold">--&gt;</span>
+        &lt;<span style="color:#000080">router-view</span>/&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+<span style="color:#998;font-style:italic">&lt;!--</span> 定义template中html元素涉及到的一些点击事件和数据处理等等 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> {
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;App&#39;</span>
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+
+<span style="color:#998;font-style:italic">&lt;!--</span> 定义template中html元素的样式 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">style</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">#</span>app {
+        font<span style="color:#000;font-weight:bold">-</span>family<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Avenir&#39;</span>, Helvetica, Arial, sans<span style="color:#000;font-weight:bold">-</span>serif;
+        <span style="color:#000;font-weight:bold">-</span>webkit<span style="color:#000;font-weight:bold">-</span>font<span style="color:#000;font-weight:bold">-</span>smoothing<span style="color:#000;font-weight:bold">:</span> antialiased;
+        <span style="color:#000;font-weight:bold">-</span>moz<span style="color:#000;font-weight:bold">-</span>osx<span style="color:#000;font-weight:bold">-</span>font<span style="color:#000;font-weight:bold">-</span>smoothing<span style="color:#000;font-weight:bold">:</span> grayscale;
+        text<span style="color:#000;font-weight:bold">-</span>align<span style="color:#000;font-weight:bold">:</span> center;
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">2</span>c3e50;
+        margin<span style="color:#000;font-weight:bold">-</span>top<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">60</span>px;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+
+</code></pre></div><ol>
+<li>App.vue 是一个vue组件，这个组件中包含三部分内容：1.页面模板（template）；2.页面脚本（script）；3.页面样式（style）</li>
+<li>页面模板中，定义了页面的 HTML 元素，这里定义了两个，一个是一张图片，另一个则是一个 router-view</li>
+<li>页面脚本主要用来实现当前页面数据初始化、事件处理等等操作</li>
+<li>页面样式就是针对 template 中 HTML 元素的页面美化操作</li>
+</ol>
+<p>需要额外解释的是，router-view，这个指展示路由页面的位置，可以简单理解为一个占位符，这个占位符展示的内容将根据当前具体的 URL 地址来定。具体展示的内容，要参考路由表，即 router/index.js 文件，该文件如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">import</span> Vue from <span style="color:#d14">&#39;vue&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> Router from <span style="color:#d14">&#39;vue-router&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> HelloWorld from <span style="color:#d14">&#39;@/components/HelloWorld&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> chen from <span style="color:#d14">&#39;@/components/chen&#39;</span>
+
+Vue.use(Router)
+
+<span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> <span style="color:#000;font-weight:bold">new</span> Router({
+    routes<span style="color:#000;font-weight:bold">:</span> [
+        {
+            path<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;/&#39;</span>,
+            name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;HelloWorld&#39;</span>,
+            component<span style="color:#000;font-weight:bold">:</span> HelloWorld
+        },{
+            path<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;/chen&#39;</span>,
+            name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;chen&#39;</span>,
+            component<span style="color:#000;font-weight:bold">:</span> chen
+        }
+    ]
+})
+
+</code></pre></div><ol>
+<li>这个文件中，首先导入了Vue对象、Router对象以及 HelloWorld 组件，</li>
+<li>创建一个Router对象，并定义路由表</li>
+<li>这里定义的路由表，path为 <code>/</code> ，对应的组件为 HelloWorld，即浏览器地址为 <code>/</code> 时，在router-view位置显示 HelloWorld 组件</li>
+</ol>
+<p>HelloWorld 组件：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue"><span style="color:#998;font-style:italic">&lt;!--</span> 一般通过.vue文件来建立组件 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hello&#34;</span>&gt;
+        &lt;<span style="color:#000080">h1</span>&gt;{{ msg }}&lt;/<span style="color:#000080">h1</span>&gt;
+        &lt;<span style="color:#000080">h2</span>&gt;Essential Links&lt;/<span style="color:#000080">h2</span>&gt;
+        &lt;<span style="color:#000080">ul</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://vuejs.org&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    Core Docs
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://forum.vuejs.org&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    Forum
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://chat.vuejs.org&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    Community Chat
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://twitter.com/vuejs&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    Twitter
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">br</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://vuejs-templates.github.io/webpack/&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    Docs <span style="color:#000;font-weight:bold">for</span> This Template
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+        &lt;/<span style="color:#000080">ul</span>&gt;
+        &lt;<span style="color:#000080">h2</span>&gt;Ecosystem&lt;/<span style="color:#000080">h2</span>&gt;
+        &lt;<span style="color:#000080">ul</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://router.vuejs.org/&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    vue<span style="color:#000;font-weight:bold">-</span>router
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://vuex.vuejs.org/&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    vuex
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;http://vue-loader.vuejs.org/&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    vue<span style="color:#000;font-weight:bold">-</span>loader
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;
+                &lt;<span style="color:#000080">a</span>
+                        <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://github.com/vuejs/awesome-vue&#34;</span>
+                        <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                &gt;
+                    awesome<span style="color:#000;font-weight:bold">-</span>vue
+                &lt;/<span style="color:#000080">a</span>&gt;
+            &lt;/<span style="color:#000080">li</span>&gt;
+        &lt;/<span style="color:#000080">ul</span>&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> {
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;HelloWorld&#39;</span>,
+        data() {
+            <span style="color:#000;font-weight:bold">return</span> {
+                msg<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Welcome to Your Vue.js App&#39;</span>
+            }
+        }
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+
+<span style="color:#998;font-style:italic">&lt;!--</span> Add <span style="color:#d14">&#34;scoped&#34;</span> attribute to limit CSS to <span style="color:#000;font-weight:bold">this</span> component only <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">style</span> <span style="color:#008080">scoped</span>&gt;
+    h1, h2 {
+        font<span style="color:#000;font-weight:bold">-</span>weight<span style="color:#000;font-weight:bold">:</span> normal;
+    }
+
+    ul {
+        list<span style="color:#000;font-weight:bold">-</span>style<span style="color:#000;font-weight:bold">-</span>type<span style="color:#000;font-weight:bold">:</span> none;
+        padding<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">0</span>;
+    }
+
+    li {
+        display<span style="color:#000;font-weight:bold">:</span> inline<span style="color:#000;font-weight:bold">-</span>block;
+        margin<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">0</span> <span style="color:#099">10</span>px;
+    }
+
+    a {
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">42</span>b983;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+
+</code></pre></div><p>自己新建测试路由用的 chen 组件：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue"><span style="color:#998;font-style:italic">&lt;!--</span> 自定义的组件 <span style="color:#000;font-weight:bold">--&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!--</span> 当我的组件定义好后 如果想通过路由表按照路由规则显示在占位符&lt;<span style="color:#000080">router-view</span>/&gt;的地方
+ 那么首先要将它注册到.<span style="color:#000;font-weight:bold">/</span>router<span style="color:#000;font-weight:bold">/</span>index.js中 注册后才能跳转 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span>&gt;
+        &lt;<span style="color:#000080">h1</span>&gt;hello chen<span style="color:#000;font-weight:bold">!</span>&lt;/<span style="color:#000080">h1</span>&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> {
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#34;chen&#34;</span>
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+
+&lt;<span style="color:#000080">style</span> <span style="color:#008080">scoped</span>&gt;
+
+&lt;/<span style="color:#000080">style</span>&gt;
+</code></pre></div><p>整个流程：template中定义的节点会将index.html中的id为app的div代替，然后template中的'<!-- raw HTML omitted -->&lsquo;找到components中的App，然后找到上面的import App from &lsquo;./App&rsquo;，然后看App.vue中的内容就能呈现前面截图的样子。</p>
+<p>测试一下 http://localhost:8080/#/chen ：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/12.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/12.png" />
+        </a>
+    </p>
+<h2 id="七webstorm-中启动vue">七、WebStorm 中启动Vue</h2>
+<p>也可以直接在 webstorm 中配置vue并启动，点击右上角进行配置：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/5.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/5.png" />
+        </a>
+    </p>
+<p>然后配置一下脚本 ：</p>
+<p>这里说明一下：vue-cli2.x配置脚本选择的是dev：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/6.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/6.png" />
+        </a>
+    </p>
+<p>vue-cli3.x以后配置脚本选择的是serve，我用的是4.x：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/7.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/7.png" />
+        </a>
+    </p>
+<p>配置完成后，点击右上角启动按钮，就可以启动一个 Vue 项目。</p>
+<h2 id="八项目编译">八、项目编译</h2>
+<p>这么大一个前端项目，肯定没法直接发布运行，当开发者完成项目开发后，将 cmd 命令行定位到当前项目目录，然后执行如下命令对项目进行打包：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">npm run build
+</code></pre></div><p>打包成功后，当前项目目录下会生成一个 dist 文件夹，这个文件夹中有两个文件，分别是 index.html 和 static ，index.html 页面就是我们 SPA 项目中唯一的 HTML 页面了，static 中则保存了编译后的 js、css等文件，项目发布时，可以使用 nginx 独立部署 dist 中的静态文件，也可以将静态文件拷贝到 Spring Boot 项目的 static 目录下，然后对 Spring Boot 项目进行编译打包发布。</p>
+<blockquote>
+<p><a href="http://www.javaboy.org/2019/0419/springboot-vue.html">http://www.javaboy.org/2019/0419/springboot-vue.html</a></p>
+</blockquote>
+<h2 id="九使用-vue-cli-4x创建项目">九、使用 vue-cli 4.x创建项目</h2>
+<p>首先，安装：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/9.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/9.png" />
+        </a>
+    </p>
+<p>安装之后，我们使用 vue-cli 4.x 创建项目，到一个目录中，我们使用shift+鼠标右键，将 windows powershell 打开，新建项目：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">vue create vue-pro2
+</code></pre></div><p>这个命令和2.x中不一样。创建的时候要选择几个初始化的选项，最后运行：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">npm run serve
+</code></pre></div><p>运行成功是这样的：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/10.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/10.png" />
+        </a>
+    </p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/13.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/13.png" />
+        </a>
+    </p>
+<p>将项目在 WebStorm 中打开，如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/8.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/8.png" />
+        </a>
+    </p>
+<p>我们会发现，这个版本的项目结构会简洁很多，然后我们看 src 目录：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/11.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/spa/11.png" />
+        </a>
+    </p>
+<p>这里会发现比刚才多了一个views文件夹，vue-cli2.x 版本的目录结构没有views文件夹，因为 4.x 版本中做了细化，components中的.vue文件是组件；views中的.vue是页面。我们创建的.vue文件既可以是一个组件(作为页面中的某一个部分存在)也可以作为一个单独的页面存在。</p>
+<p>页面和静态资源也会有一点差别，下面我罗列一下：</p>
+<h3 id="indexhtml">index.html</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#999;font-weight:bold;font-style:italic">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#000080">html</span> <span style="color:#008080">lang</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&#34;</span>&gt;
+&lt;<span style="color:#000080">head</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">charset</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;utf-8&#34;</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">http-equiv</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;X-UA-Compatible&#34;</span> <span style="color:#008080">content</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;IE=edge&#34;</span>&gt;
+    &lt;<span style="color:#000080">meta</span> <span style="color:#008080">name</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;viewport&#34;</span> <span style="color:#008080">content</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;width=device-width,initial-scale=1.0&#34;</span>&gt;
+    &lt;<span style="color:#000080">link</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;icon&#34;</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;&lt;%= BASE_URL %&gt;favicon.ico&#34;</span>&gt;
+    &lt;<span style="color:#000080">title</span>&gt;<span style="color:#a61717;background-color:#e3d2d2">&lt;</span>%= htmlWebpackPlugin.options.title %&gt;&lt;/<span style="color:#000080">title</span>&gt;
+&lt;/<span style="color:#000080">head</span>&gt;
+&lt;<span style="color:#000080">body</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- 浏览器不支持script脚本的话 展示这个内容 否则不展示 --&gt;</span>
+&lt;<span style="color:#000080">noscript</span>&gt;
+    &lt;<span style="color:#000080">strong</span>&gt;We&#39;re sorry but <span style="color:#a61717;background-color:#e3d2d2">&lt;</span>%= htmlWebpackPlugin.options.title %&gt; doesn&#39;t work properly without JavaScript enabled.
+        Please enable it to continue.&lt;/<span style="color:#000080">strong</span>&gt;
+&lt;/<span style="color:#000080">noscript</span>&gt;
+&lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;&lt;/<span style="color:#000080">div</span>&gt;
+<span style="color:#998;font-style:italic">&lt;!-- built files will be auto injected --&gt;</span>
+&lt;/<span style="color:#000080">body</span>&gt;
+&lt;/<span style="color:#000080">html</span>&gt;
+
+</code></pre></div><h3 id="mainjs">main.js</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">import</span> Vue from <span style="color:#d14">&#39;vue&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> App from <span style="color:#d14">&#39;./App.vue&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> router from <span style="color:#d14">&#39;./router&#39;</span>
+
+Vue.config.productionTip <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">false</span>
+
+<span style="color:#000;font-weight:bold">new</span> Vue({
+    router,
+    <span style="color:#998;font-style:italic">/* render代表要渲染的东西 h()中的值代表渲染对应的组件为App组件 vue4版本这里可以不用注册 */</span>
+    render<span style="color:#000;font-weight:bold">:</span> h =&gt; h(App)
+}).$mount(<span style="color:#d14">&#39;#app&#39;</span>)
+<span style="color:#998;font-style:italic">/* .$mount(&#39;#app&#39;)表示将这个new出来的Vue挂载到index.html页面的id为app的div上 */</span>
+
+<span style="color:#998;font-style:italic">/*
+</span><span style="color:#998;font-style:italic">new Vue({
+</span><span style="color:#998;font-style:italic">    /!* index.html的div的id就是app 接管它 *!/
+</span><span style="color:#998;font-style:italic">    el: &#39;#app&#39;,
+</span><span style="color:#998;font-style:italic">    // router也是简写的, 全部写法是router: router, 第一个router是key,第二个router是上面引入的 import router from &#39;./router&#39;
+</span><span style="color:#998;font-style:italic">    // 路由 路由表就在./router/index.js
+</span><span style="color:#998;font-style:italic">    router,
+</span><span style="color:#998;font-style:italic">    /!* 上面导入组件后还没完 要在这注册 *!/
+</span><span style="color:#998;font-style:italic">    components: {
+</span><span style="color:#998;font-style:italic">        /!* App属于简写 它等价于&#39;App&#39;:App 这种都一样写法可以简写成App *!/
+</span><span style="color:#998;font-style:italic">        App
+</span><span style="color:#998;font-style:italic">        /!* 相当于我自定义了一个html元素 叫chen *!/
+</span><span style="color:#998;font-style:italic">        // &#39;chen&#39;:App
+</span><span style="color:#998;font-style:italic">    },
+</span><span style="color:#998;font-style:italic">    /!* template中定义的节点会将index.html中的id为app的div代替 *!/
+</span><span style="color:#998;font-style:italic">    template: &#39;&lt;App/&gt;&#39;
+</span><span style="color:#998;font-style:italic">    // template: &#39;&lt;chen/&gt;&#39;
+</span><span style="color:#998;font-style:italic">})*/</span>
+
+</code></pre></div><h3 id="appvue">App.vue</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue">&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;app&#34;</span>&gt;
+        &lt;<span style="color:#000080">div</span> <span style="color:#008080">id</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;nav&#34;</span>&gt;
+            <span style="color:#998;font-style:italic">&lt;!--</span> 新增导航按钮 点击Home就走<span style="color:#000;font-weight:bold">/</span>;点击About就走<span style="color:#000;font-weight:bold">/</span>about <span style="color:#000;font-weight:bold">--&gt;</span>
+            &lt;<span style="color:#000080">router-link</span> <span style="color:#008080">to</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;/&#34;</span>&gt;Home<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/router-link&gt;</span>
+            <span style="color:#000;font-weight:bold">|</span>
+            &lt;<span style="color:#000080">router-link</span> <span style="color:#008080">to</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;/about&#34;</span>&gt;About<span style="color:#000;font-weight:bold">&lt;</span><span style="color:#a61717;background-color:#e3d2d2">/router-link&gt;</span>
+        &lt;/<span style="color:#000080">div</span>&gt;
+        &lt;<span style="color:#000080">router-view</span>/&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+&lt;<span style="color:#000080">style</span>&gt;
+    <span style="color:#a61717;background-color:#e3d2d2">#</span>app {
+        font<span style="color:#000;font-weight:bold">-</span>family<span style="color:#000;font-weight:bold">:</span> Avenir, Helvetica, Arial, sans<span style="color:#000;font-weight:bold">-</span>serif;
+        <span style="color:#000;font-weight:bold">-</span>webkit<span style="color:#000;font-weight:bold">-</span>font<span style="color:#000;font-weight:bold">-</span>smoothing<span style="color:#000;font-weight:bold">:</span> antialiased;
+        <span style="color:#000;font-weight:bold">-</span>moz<span style="color:#000;font-weight:bold">-</span>osx<span style="color:#000;font-weight:bold">-</span>font<span style="color:#000;font-weight:bold">-</span>smoothing<span style="color:#000;font-weight:bold">:</span> grayscale;
+        text<span style="color:#000;font-weight:bold">-</span>align<span style="color:#000;font-weight:bold">:</span> center;
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">2</span>c3e50;
+    }
+
+    <span style="color:#a61717;background-color:#e3d2d2">#</span>nav {
+        padding<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">30</span>px;
+    }
+
+    <span style="color:#a61717;background-color:#e3d2d2">#</span>nav a {
+        font<span style="color:#000;font-weight:bold">-</span>weight<span style="color:#000;font-weight:bold">:</span> bold;
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">2</span>c3e50;
+    }
+
+    <span style="color:#a61717;background-color:#e3d2d2">#</span>nav a.router<span style="color:#000;font-weight:bold">-</span>link<span style="color:#000;font-weight:bold">-</span>exact<span style="color:#000;font-weight:bold">-</span>active {
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">42</span>b983;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+
+</code></pre></div><h3 id="indexjs">index.js</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#000;font-weight:bold">import</span> Vue from <span style="color:#d14">&#39;vue&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> VueRouter from <span style="color:#d14">&#39;vue-router&#39;</span>
+<span style="color:#000;font-weight:bold">import</span> Home from <span style="color:#d14">&#39;../views/Home.vue&#39;</span>
+
+Vue.use(VueRouter)
+
+<span style="color:#000;font-weight:bold">const</span> routes <span style="color:#000;font-weight:bold">=</span> [
+    {
+        path<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;/&#39;</span>,
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Home&#39;</span>,
+        component<span style="color:#000;font-weight:bold">:</span> Home
+    },
+    {
+        path<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;/about&#39;</span>,
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;About&#39;</span>,
+        <span style="color:#998;font-style:italic">// route level code-splitting
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// this generates a separate chunk (about.[hash].js) for this route
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// which is lazy-loaded when the route is visited.
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">/* 动态引入 */</span>
+        <span style="color:#998;font-style:italic">// 不在上面引入 在这里动态引入 用的时候再引入
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">// component: () =&gt; import(/* webpackChunkName: &#34;about&#34; */ &#39;../views/About.vue&#39;)
+</span><span style="color:#998;font-style:italic"></span>        component<span style="color:#000;font-weight:bold">:</span> () =&gt; <span style="color:#000;font-weight:bold">import</span>(<span style="color:#d14">&#39;../views/About.vue&#39;</span>)
+    }
+]
+
+<span style="color:#000;font-weight:bold">const</span> router <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> VueRouter({
+    routes
+})
+
+<span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> router
+
+</code></pre></div><h3 id="homevue">Home.vue</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue">&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;home&#34;</span>&gt;
+        &lt;<span style="color:#000080">img</span> <span style="color:#008080">alt</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;Vue logo&#34;</span> <span style="color:#008080">src</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;../assets/logo.png&#34;</span>&gt;
+        <span style="color:#998;font-style:italic">&lt;!--</span> HelloWorld组件元素 <span style="color:#000;font-weight:bold">--&gt;</span>
+        &lt;<span style="color:#000080">HelloWorld</span> <span style="color:#008080">msg</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;Welcome to Your Vue.js App&#34;</span>/&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#998;font-style:italic">// @ is an alias to /src
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">/* 在Home页面引入HelloWorld组件 */</span>
+    <span style="color:#000;font-weight:bold">import</span> HelloWorld from <span style="color:#d14">&#39;@/components/HelloWorld.vue&#39;</span>
+
+    <span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> {
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;Home&#39;</span>,
+        <span style="color:#998;font-style:italic">/* 在Home.vue页面中引入HelloWorld.vue组件并输出 */</span>
+        components<span style="color:#000;font-weight:bold">:</span> {
+            HelloWorld
+        }
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+
+</code></pre></div><h3 id="helloworldvue">HelloWorld.vue</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue">&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;hello&#34;</span>&gt;
+        &lt;<span style="color:#000080">h1</span>&gt;{{ msg }}&lt;/<span style="color:#000080">h1</span>&gt;
+        &lt;<span style="color:#000080">p</span>&gt;
+            For a guide and recipes on how to configure <span style="color:#000;font-weight:bold">/</span> customize <span style="color:#000;font-weight:bold">this</span> project,&lt;<span style="color:#000080">br</span>&gt;
+            check out the
+            &lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://cli.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;vue<span style="color:#000;font-weight:bold">-</span>cli documentation&lt;/<span style="color:#000080">a</span>&gt;.
+        &lt;/<span style="color:#000080">p</span>&gt;
+        &lt;<span style="color:#000080">h3</span>&gt;Installed CLI Plugins&lt;/<span style="color:#000080">h3</span>&gt;
+        &lt;<span style="color:#000080">ul</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                   <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;babel&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                   <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;router&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+        &lt;/<span style="color:#000080">ul</span>&gt;
+        &lt;<span style="color:#000080">h3</span>&gt;Essential Links&lt;/<span style="color:#000080">h3</span>&gt;
+        &lt;<span style="color:#000080">ul</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;Core Docs&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://forum.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;Forum&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://chat.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;Community Chat&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://twitter.com/vuejs&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;Twitter&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://news.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;News&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+        &lt;/<span style="color:#000080">ul</span>&gt;
+        &lt;<span style="color:#000080">h3</span>&gt;Ecosystem&lt;/<span style="color:#000080">h3</span>&gt;
+        &lt;<span style="color:#000080">ul</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://router.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;vue<span style="color:#000;font-weight:bold">-</span>router&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://vuex.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;vuex&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://github.com/vuejs/vue-devtools#vue-devtools&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span>
+                   <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;vue<span style="color:#000;font-weight:bold">-</span>devtools&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://vue-loader.vuejs.org&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;vue<span style="color:#000;font-weight:bold">-</span>loader&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+            &lt;<span style="color:#000080">li</span>&gt;&lt;<span style="color:#000080">a</span> <span style="color:#008080">href</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;https://github.com/vuejs/awesome-vue&#34;</span> <span style="color:#008080">target</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;_blank&#34;</span> <span style="color:#008080">rel</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;noopener&#34;</span>&gt;awesome<span style="color:#000;font-weight:bold">-</span>vue&lt;/<span style="color:#000080">a</span>&gt;&lt;/<span style="color:#000080">li</span>&gt;
+        &lt;/<span style="color:#000080">ul</span>&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+&lt;<span style="color:#000080">script</span>&gt;
+    <span style="color:#000;font-weight:bold">export</span> <span style="color:#000;font-weight:bold">default</span> {
+        name<span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#39;HelloWorld&#39;</span>,
+        props<span style="color:#000;font-weight:bold">:</span> {
+            <span style="color:#998;font-style:italic">/* 定义组件要传的参数 */</span>
+            msg<span style="color:#000;font-weight:bold">:</span> <span style="color:#0086b3">String</span>
+        }
+    }
+&lt;/<span style="color:#000080">script</span>&gt;
+
+<span style="color:#998;font-style:italic">&lt;!--</span> Add <span style="color:#d14">&#34;scoped&#34;</span> attribute to limit CSS to <span style="color:#000;font-weight:bold">this</span> component only <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">style</span> <span style="color:#008080">scoped</span>&gt;
+    h3 {
+        margin<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">40</span>px <span style="color:#099">0</span> <span style="color:#099">0</span>;
+    }
+
+    ul {
+        list<span style="color:#000;font-weight:bold">-</span>style<span style="color:#000;font-weight:bold">-</span>type<span style="color:#000;font-weight:bold">:</span> none;
+        padding<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">0</span>;
+    }
+
+    li {
+        display<span style="color:#000;font-weight:bold">:</span> inline<span style="color:#000;font-weight:bold">-</span>block;
+        margin<span style="color:#000;font-weight:bold">:</span> <span style="color:#099">0</span> <span style="color:#099">10</span>px;
+    }
+
+    a {
+        color<span style="color:#000;font-weight:bold">:</span> <span style="color:#a61717;background-color:#e3d2d2">#</span><span style="color:#099">42</span>b983;
+    }
+&lt;/<span style="color:#000080">style</span>&gt;
+
+</code></pre></div><h3 id="aboutvue">About.vue</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-vue" data-lang="vue"><span style="color:#998;font-style:italic">&lt;!--</span> vue2版本的目录结构没有views文件夹 因为4版本中做了细化 components中的.vue文件是组件 views中的.vue是页面
+我们创建的.vue文件既可以是一个组件(作为页面中的某一个部分存在)也可以作为一个单独的页面存在 <span style="color:#000;font-weight:bold">--&gt;</span>
+&lt;<span style="color:#000080">template</span>&gt;
+    &lt;<span style="color:#000080">div</span> <span style="color:#008080">class</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;about&#34;</span>&gt;
+        &lt;<span style="color:#000080">h1</span>&gt;This is an about page&lt;/<span style="color:#000080">h1</span>&gt;
+    &lt;/<span style="color:#000080">div</span>&gt;
+&lt;/<span style="color:#000080">template</span>&gt;
+
+</code></pre></div><h3 id="vue中render-h--happ的理解">vue中render: h =&gt; h(App)的理解</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">render<span style="color:#000;font-weight:bold">:</span> h =&gt; h(App)
+</code></pre></div><p><code>=&gt;</code> 是<code>es6</code> 的箭头函数语法，并不陌生。但是<code>h</code>代表什么呢？跟踪源码后发现：<code>h</code>是<code>createElement</code>函数的别名，于是上面的写法等价于：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">render<span style="color:#000;font-weight:bold">:</span><span style="color:#000;font-weight:bold">function</span>(createElement){
+   <span style="color:#000;font-weight:bold">return</span> creatElemnt(App);
+}
+</code></pre></div><p><code>createElement</code>是一个函数，以<code>App</code>为参数进行调用，生成一个 <code>VNode</code>节点。<code>render</code> 函数得到这个<code>VNode</code>节点之后，返回给 <code>Vue.js</code> 的 <code>mount</code> 函数，渲染成真实 <code>DOM</code> 节点，并挂载到根节点上。</p>
+<h3 id="大致流程">大致流程</h3>
+<p><code>index.html</code>中的<code>&lt;div id=&quot;app&quot;&gt;&lt;/div&gt;</code>，然后id为app的div，找到$mount('#app&rsquo;)，进而进入到new的Vue中，然后发现要渲染App组件到这个id为app的div上，因此div的内容就是App组件，显示在body中，然后App组件通过路由，根据路径显示不同的页面。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/01/14/front-behind-divied.html">https://chanservy.github.io/2021/01/14/front-behind-divied.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/vue-saomang.html">Vue扫盲</a></li>
+        
+        <li><a href="/2020/12/25/lianluzhuizong.html">链路追踪</a></li>
+        
+        <li><a href="/2020/12/22/cloud-stream.html">Spring Cloud Stream消息驱动</a></li>
+        
+        <li><a href="/2020/12/22/cloud-bus.html">Spring Cloud Bus消息总线</a></li>
+        
+        <li><a href="/2020/12/22/cloud-config.html">Spring Cloud Config配置中心</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Vue'>Vue</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>热部署 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/</link>
+    <description>Recent content in 热部署 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 13:04:41 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot的热部署</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-rebushu.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:04:41 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-rebushu.html</guid>
+      <description>前言： Spring Boot 中的热部署相信大家都用过吧，只需要添加 spring-boot-devtools 依赖就可以轻松实现热部署。 Spring Boot的热部署 Spring Boot 中热部署最最关键的原理就是两个不同的 classloader： base classloader restart classloader 其中 base classloader 用来加载那些不会变化的类，例如各种第三方依赖，而 restart classloader 则用来加载那些会发生变化的类，例如你自己写的代码。Sp</description>
+    </item>
+    
+  </channel>
+</rss>

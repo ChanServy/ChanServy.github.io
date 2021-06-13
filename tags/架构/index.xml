@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>架构 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/</link>
+    <description>Recent content in 架构 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 22 Dec 2020 11:55:13 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>微服务概述</title>
+      <link>https://chanservy.github.io/2020/12/22/micro-service.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:55:13 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/micro-service.html</guid>
+      <description>前言：微服务概述。 微服务概述 1、微服务介绍 微服务架构越来越流行，这个没有异议。 2009 年，Netﬂix 重新定义了它的应用程序员的开发模型，这个算是微服务的首次探索。 2014 年，《Microservices》，这篇文章以一个更加通俗易懂的方式，为大家定义了微服务。为什么要用微服务？ 互联网应用产</description>
+    </item>
+    
+    <item>
+      <title>服务端高并发分布式架构演进之路</title>
+      <link>https://chanservy.github.io/2020/12/14/fuwuduangaobingfafenbushi.html</link>
+      <pubDate>Mon, 14 Dec 2020 11:21:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/14/fuwuduangaobingfafenbushi.html</guid>
+      <description>写在前面： IT行业就像浩瀚的大海，人们逐渐的开发与探索，积累并且创新迭代出了许多的产品，并且涌现出了许多关乎IT的专有名词。工作之余，我有幸读到前辈们的经验总结，并将这些五指不可触及的精华归纳入我自己的博客。 一、概述 本文以淘宝作为例子，介绍从一百个到千万级并发情况下服务端的架构的</description>
+    </item>
+    
+  </channel>
+</rss>

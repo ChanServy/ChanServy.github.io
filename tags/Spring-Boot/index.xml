@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Boot on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Spring-Boot/</link>
+    <description>Recent content in Spring Boot on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 16 Apr 2021 15:19:25 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Spring-Boot/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Freemarker研究</title>
+      <link>https://chanservy.github.io/2021/04/16/freemarker.html</link>
+      <pubDate>Fri, 16 Apr 2021 15:19:25 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/16/freemarker.html</guid>
+      <description>1. Freemarker介绍 Freemarker 是一个用 Java 开发的模板引擎，模板引擎即为一种基于模板和要改变的数据，并用来生成输出文本的通用工具。Freemarker 不是面向最终用户的，而是一个 Java 类库，是一款程序员可以嵌入他们所开发的产品的组件。常用的 Java 模板引擎还有：Jsp、Thymeleaf 等。 Fr</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot之集成通用Mapper</title>
+      <link>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</link>
+      <pubDate>Fri, 09 Apr 2021 18:18:11 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</guid>
+      <description>前言：Spring Boot之集成通用Mapper。 通用Mapper的接口，不同的接口会有不同的方法，适应不同的业务需求，因此为了满足大部分的业务需求，我们应该自定义Mapper接口，继承通用Mapper提供的各个接口。在项目中，如果使用通用Mapper，那么必然不止一个微服务会用</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Data JPA</title>
+      <link>https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html</link>
+      <pubDate>Fri, 09 Apr 2021 18:08:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html</guid>
+      <description>前言：Spring Boot整合Spring Data JPA。 一、Spring Data JPA介绍 Spring Data：其实 Spring Data 就是 Spring 提供的一个操作数据的框架。而 Spring Data JPA 只是 Spring Data 框架下的一个基于 JPA 标准操作数据的模块。 Spring Data JPA：基于 JPA 的标准数据进行操作。简化操作持久层的代码。只需要编写接口就可以。 二、Spri</description>
+    </item>
+    
+    <item>
+      <title>Redis的安装及操作</title>
+      <link>https://chanservy.github.io/2021/04/09/redis-load-operating.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:06:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/redis-load-operating.html</guid>
+      <description>前言：Redis的安装及操作，一般的Redis的指令和通过Spring Data Redis操作Redis。 redis安装和配置 1.安装 下载安装包 官网下载 上传到我们的home下：/home/leyou/ 解压 tar -xvf redis-4.0.9.tar.gz SHELL 编译安装 mv redis-4.0.9 redis cd redis make &amp;amp;&amp;amp; make install SHELL 2.配置 修改安装目录下的redis.conf文件</description>
+    </item>
+    
+    <item>
+      <title>Thymeleaf语法入门</title>
+      <link>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:30:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</guid>
+      <description>前言：模板引擎——Thymeleaf。 1.Thymeleaf简介 官方网站：https://www.thymeleaf.org/index.html Thymeleaf是用来开发Web和独立环境项目的现代服务器端Java模板引擎。 Thymeleaf的主要目标是为您的开发工作流程带来优</description>
+    </item>
+    
+    <item>
+      <title>前后端分离开发中权限管理的一点思路</title>
+      <link>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</link>
+      <pubDate>Fri, 29 Jan 2021 10:42:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</guid>
+      <description>前言：Spring Boot + Vue 前后端分离开发，权限管理的一点思路。 在传统的前后端不分的开发中，权限管理主要通过过滤器或者拦截器来进行（权限管理框架本身也是通过过滤器来实现功能），如果用户不具备某一个角色或者某一个权限，则无法访问某一个页面。 但是在前后端分离中，页面的跳转统统交给前端去做</description>
+    </item>
+    
+    <item>
+      <title>Spring Security添加验证码</title>
+      <link>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:24:54 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</guid>
+      <description>&lt;p&gt;前言： 登录添加验证码是一个非常常见的需求，网上也有非常成熟的解决方案，其实，要是自己自定义登录实现这个并不难，但是如果需要在 Spring Security 框架中实现这个功能，还得稍费一点功夫。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Security</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:17:06 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</guid>
+      <description>前言： Spring Security 是 Spring 家族中的一个安全管理框架，实际上，在 Spring Boot 出现之前，Spring Security 就已经发展了多年了，但是使用的并不多，安全管理这个领域，一直是 Shiro 的天下。 相对于 Shiro，在 SSM/SSH 中整合 Spring Security 都是比较麻烦的操作，所以，Spring Security 虽然功能比 Shiro 强大，但是使用反而没有 Shiro 多，但是现如今随着项目</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合RabbitMQ</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</link>
+      <pubDate>Mon, 21 Dec 2020 16:54:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</guid>
+      <description>前言：在大多数的应用中都可以通过消息服务的中间件来提升系统的异步通信、扩展解耦的能力。这篇是有关于Spring Boot与消息队列的整合，本文主要以RabbitMQ为案例来介绍。 Spring Boot整合RabbitMQ 一、消息概述 消息服务中的两个重要的概念：消息代理（message broke</description>
+    </item>
+    
+    <item>
+      <title>定时任务的两种实现方式</title>
+      <link>https://chanservy.github.io/2020/12/21/two-method-of-dingshirenwu.html</link>
+      <pubDate>Mon, 21 Dec 2020 16:46:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/two-method-of-dingshirenwu.html</guid>
+      <description>在 Spring + SpringMVC 环境中，一般来说，要实现定时任务，我们有两种方案，一种是使用 Spring 自带的定时任务处理器 @Scheduled 注解，另一种就是使用第三方框架 Quartz ，Spring Boot 源自 Spring+SpringMVC ，因此天生具备 Spring 中的定时任务的实现策略，当然也支持 Quartz，本文我们就来看下 Spring Boot 中两种定时任务的实现方式。 定时任务的两种实现方式 一</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Shiro</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-shiro.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:28:00 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-shiro.html</guid>
+      <description>前言： 在 Spring Boot 中做权限管理，一般来说，主流的方案是 Spring Security ，但是，仅仅从技术角度来说，也可以使用 Shiro。 Spring Boot整合Shiro 一般来说，Spring Security 和 Shiro 的比较如下： Spring Security 是一个重量级的安全管理框架；Shiro 则是一个轻量级的安全管理框架 Spring Security 概念复杂，配置繁琐；Shiro 概念简单、</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的热部署</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-rebushu.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:04:41 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-rebushu.html</guid>
+      <description>前言： Spring Boot 中的热部署相信大家都用过吧，只需要添加 spring-boot-devtools 依赖就可以轻松实现热部署。 Spring Boot的热部署 Spring Boot 中热部署最最关键的原理就是两个不同的 classloader： base classloader restart classloader 其中 base classloader 用来加载那些不会变化的类，例如各种第三方依赖，而 restart classloader 则用来加载那些会发生变化的类，例如你自己写的代码。Sp</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Cache操作Redis</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:00:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</guid>
+      <description>前言： 经过 Spring Boot 的整合封装与自动化配置，在 Spring Boot 中整合Redis 已经变得非常容易了，开发者只需要引入 Spring Data Redis 依赖，然后简单配下 redis 的基本信息，系统就会提供一个 RedisTemplate 供开发者使用，但是这篇文章聊的不是这种用法，而是结合 Cache 的用法。Spring3.1 中开始引入了令人激动的 Cache，在 Spring Boot 中，可以</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Mybatis案例</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:51:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</guid>
+      <description>前言：关于持久化层，从大学到现在陆陆续续的接触了很多，JDBCTemplate、Struts2、Hibernate、Mybatis、JPA等。到目前为止接触的最多的就是Mybatis，也是公司用的最多的，一直想总结一下的，一般的常规用的用法。这里Mybatis的一级缓存是默认开启</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Redis</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-redis.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:45:17 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-redis.html</guid>
+      <description>前言：Spring Boot整合Redis，项目里缓存是刚需，所以没啥可说的，做个笔记，很重要的一块。 Spring Boot整合Redis 在传统的 SSM 中，需要开发者自己来配置 Spring Data Redis ，这个配置比较繁琐，主要配置 3 个东西：连接池、连接器信息以及 key 和 value 的序列化方案。 在 Spring Boot 中，默认集成的 Redis 就是 Spring Data Red</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Session共享</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:33:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</guid>
+      <description>前言：由于项目的架构中采用了负载均衡，因此又不止一个的服务器，那么多个服务器之间一定有信息的交互问题，比如我的业务在服务器A中进行了操作，并且有了session数据在服务器A中，等下次请求来到了，由于Nginx的轮询机制，Nginx吧请求转发到了其他的服务器B中，这个时候服务器B</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的类型转换器</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-leixingzhuanhuanqi.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:19:37 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-leixingzhuanhuanqi.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot中的类型转换器。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的拦截器</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-lanjieqi.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:15:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-lanjieqi.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot中的拦截器。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>CORS解决跨域问题</title>
+      <link>https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:51:05 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html</guid>
+      <description>前言： 通过CORS解决跨域问题。 很多人对跨域有一种误解，以为这是前端的事，和后端没关系，其实不是这样的，说到跨域，就不得不说说浏览器的同源策略。 CORS解决跨域问题 1、同源策略 同源策略是由 Netscape 提出的一个著名的安全策略，它是浏览器最核心也最基本的安全功能，现在所有支持 JavaScript 的浏览器都会使</description>
+    </item>
+    
+    <item>
+      <title>说说不常见的@ControllerAdvice</title>
+      <link>https://chanservy.github.io/2020/12/21/controller-advice.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:43:24 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/controller-advice.html</guid>
+      <description>前言：@Controller，是我们大家耳熟能详的注解，但是它有一个增强的注解，那便是@ControllerAdvice，这个注解不知道大家常用不，反正我不是很常用它，所以对于这个注解一直不是很熟悉，即使之前见到过，那也并没有系统的总结过这个注解的用途，今天想好好的总结一下。 说说</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的文件上传</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-wenjianshangchuan.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:33:41 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-wenjianshangchuan.html</guid>
+      <description>&lt;p&gt;前言：我们后端开发人员，一定手写过文件上传，如果最初是用SSM写的文件上传，而后使用Spring Boot了的话，那么我们一定会觉得在SSM 中会更加的麻烦，还是那句话Spring Boot就像个慈祥的保姆，什么都为我们设置了默认的配置，亦或像一位不那么独断专制的霸主，允许我们按照需求规定自己的配置，并且方便的一批。本文介绍Spring Boot中的文件上传。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的静态资源配置</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:25:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</guid>
+      <description>&lt;p&gt;前言：“卧槽！我的HTML页面没有样式！”，相信刚入门的时候的我们基本上都会遇到这个问题。没错，在SSM中，当我们使用SpringMVC框架的时候，静态资源会被拦截，需要添加额外配置，所以在说Spring Boot之前，首先我们从Spring MVC说起。那是一个月黑风高的夜晚，我独自走在林间的小路上，啊呸，跑题了，下面步入正题。。。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的JSON</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-json.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:17:35 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-json.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot 中的 JSON 。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合视图层技术</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-shitucengjishu.html</link>
+      <pubDate>Mon, 21 Dec 2020 10:57:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-shitucengjishu.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot整合视图层技术。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>理解Spring Boot中自动化配置的原理</title>
+      <link>https://chanservy.github.io/2020/12/21/spring-boot-auto-config.html</link>
+      <pubDate>Mon, 21 Dec 2020 10:43:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/spring-boot-auto-config.html</guid>
+      <description>前言： 这里边有一个非常关键的点，那就是条件注解，甚至可以说条件注解是整个 Spring Boot 的基石。条件注解并非一个新事物，这是一个存在于 Spring 中的东西，我们在 Spring 中常用的 profile 实际上就是条件注解的一个特殊化。想要把 Spring Boot 的原理搞清，条件注解必须要会用。 理解Spring Boot中自动化配置的原理 一、定义 Spring4 中</description>
+    </item>
+    
+    <item>
+      <title>自定义Spring Boot中的starter</title>
+      <link>https://chanservy.github.io/2020/12/14/starter-by-myself.html</link>
+      <pubDate>Mon, 14 Dec 2020 13:25:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/14/starter-by-myself.html</guid>
+      <description>前言：我们使用Spring Boot，基本上都是馋它的身子，哈哈哈，无非就是觉得Spring Boot中的一些自动化配置为我们提供了更加便捷的开发效率，确实，Starter为我们带来的众多的自动化配置，让我们可以不费吹灰之力就能搭建一个生产级的开发环境。Wow, so crazy! 其实Starter</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的基础配置</title>
+      <link>https://chanservy.github.io/2020/12/22/spring-boot-jichupeizhi.html</link>
+      <pubDate>Mon, 14 Dec 2020 12:31:37 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/spring-boot-jichupeizhi.html</guid>
+      <description>前言：Spring Boot的基础配置。 Spring Boot的基础配置 1. 容器的相关配置 众所周知，Spring Boot 的启动不同于普通的 SSM 项目，因为最初的三层架构的项目启动的话，最常见的我们需要配置一个容器，也就是一个服务器的环境，但是 Spring Boot 不需要，因为 Spring Boot 内置了 Tomcat 的 starter。 当使用 Spring Boot 原生的内</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析</title>
+      <link>https://chanservy.github.io/2020/12/22/spring-boot-chuangjianfangshi.html</link>
+      <pubDate>Sun, 13 Dec 2020 18:12:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/spring-boot-chuangjianfangshi.html</guid>
+      <description>前言：Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析。 Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析 1. Spring Boot的特点 更广泛的快速的Spring开发体验 一系列开箱即用的starter 一系列非功能性的自动化配置 没有xml配置文件的生成 2. 工程创建的三</description>
+    </item>
+    
+    <item>
+      <title>抛弃web.xml，纯Java搭建的SSM环境</title>
+      <link>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</link>
+      <pubDate>Sat, 12 Dec 2020 15:10:32 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</guid>
+      <description>&lt;p&gt;&lt;strong&gt;前言&lt;/strong&gt;：在Spring boot的项目中，是不涉及到xml的配置的，是因为Spring boot不推荐使用xml，并非不支持。Spring Boot 中，大量的自动化配置都是通过 Java 配置来实现的，因此在学习Spring boot之前，我们抛弃之前的xml的方式，使用纯Java搭建一套SSM的环境。即，在项目的配置中，完全使用Java来配置，不使用任何的xml配置文件，包括web.xml。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

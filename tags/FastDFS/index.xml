@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>FastDFS on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/FastDFS/</link>
+    <description>Recent content in FastDFS on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Apr 2021 15:23:31 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/FastDFS/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Centos下安装FastDFS并添加Nginx模块</title>
+      <link>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:23:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</guid>
+      <description>前言：Centos下安装FastDFS并添加Nginx模块。 1.1 上传 根目录只有一个，那就是/，主目录是当前用户的HOME目录，添加用户的时候指定的。 一般用户缺省的HOME目录是/home/xxx (xxx是用户名)，root用户的缺省HOME目录是/root，也就是~。 将文件上传到l</description>
+    </item>
+    
+  </channel>
+</rss>

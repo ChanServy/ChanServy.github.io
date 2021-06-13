@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Boot之集成通用Mapper | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Boot之集成通用Mapper - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-04-09T18:18:11&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-04-09T18:18:11&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Boot之集成通用Mapper">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Boot之集成通用Mapper</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>前言：Spring Boot之集成通用Mapper。</p>
+<p>通用Mapper的接口，不同的接口会有不同的方法，适应不同的业务需求，因此为了满足大部分的业务需求，我们应该自定义Mapper接口，继承通用Mapper提供的各个接口。在项目中，如果使用通用Mapper，那么必然不止一个微服务会用到，因此将自定义的Mapper接口放到一个common模块会很方便其它服务的调用，其他服务模块直接引入common模块就可以。</p>
+<p>当通用Mapper提供的方法不够满足业务需要并且通过Example拼接条件依然不够满足业务需要的时候，我们就可以像正常的mybatis一样实现，使用注解或者xml的方式，但是前提是xml的方式别忘了配置xml的路径。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mapper-core<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.4<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mapper-extra<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.4<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mapper-base<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.4<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<p>自定义mapper：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.common.mapper</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.additional.idlist.IdListMapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.annotation.RegisterMapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.common.Mapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#998;font-style:italic">//import tk.mybatis.mapper.common.special.InsertListMapper;
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.additional.insert.InsertListMapper</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyBaseMapper
+</span><span style="color:#998;font-style:italic"> * @Description
+</span><span style="color:#998;font-style:italic"> * 自定义的通用mapper接口,基本方法在Mapper&lt;T&gt;,
+</span><span style="color:#998;font-style:italic"> * 通过id批量删除和查询在IdListMapper&lt;T, Long&gt;,
+</span><span style="color:#998;font-style:italic"> * 批量新增在InsertListMapper&lt;T&gt;,
+</span><span style="color:#998;font-style:italic"> * 批量新增有两个InsertListMapper&lt;T&gt;:
+</span><span style="color:#998;font-style:italic"> * 1. import tk.mybatis.mapper.additional.insert.InsertListMapper;
+</span><span style="color:#998;font-style:italic"> * 2. import tk.mybatis.mapper.common.special.InsertListMapper; 特别要求主键字段名必须写成&#34;id&#34;
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/23 13:20
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RegisterMapper</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">MyBaseMapper</span><span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">extends</span> Mapper<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;,</span> IdListMapper<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">,</span> Long<span style="color:#000;font-weight:bold">&gt;,</span> InsertListMapper<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>各个服务中集成通用Mapper</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>tk.mybatis<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mapper-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span><span style="color:#998;font-style:italic">&lt;!-- 版本在父模块集中管理 --&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>com.leyou.common<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>ly-common<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>1.0.0-SNAPSHOT<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>mysql<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#998;font-style:italic">&lt;!-- mybatis启动器 --&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.mybatis.spring.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>mybatis-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;dependency&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>com.alibaba<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>druid-spring-boot-starter<span style="color:#000080">&lt;/artifactId&gt;</span>
+<span style="color:#000080">&lt;/dependency&gt;</span>
+</code></pre></div><p>XML</p>
+<p>配置文件</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">application</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>ly-item-service<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">datasource</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">type</span>:<span style="color:#bbb"> </span>com.alibaba.druid.pool.DruidDataSource<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">driver-class-name</span>:<span style="color:#bbb"> </span>com.mysql.jdbc.Driver<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span>jdbc:mysql://localhost:3306/leyou?useUnicode=true&amp;characterEncoding=UTF8&amp;useSSL=false<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span>root<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123456</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#000080">mybatis</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">configuration</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">log-impl</span>:<span style="color:#bbb"> </span>org.apache.ibatis.logging.stdout.StdOutImpl<span style="color:#bbb"> </span><span style="color:#998;font-style:italic">#输出sql</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic"># 指向mapper的xml文件位置(如果mybatis是xml的形式)</span><span style="color:#bbb">
+</span><span style="color:#bbb"></span><span style="color:#998;font-style:italic"># mybatis.mapper-locations=classpath*:mapper/*Mapper.xml</span><span style="color:#bbb">
+</span></code></pre></div><p>YML</p>
+<p>启动类</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#3c5d5d;font-weight:bold">@EnableDiscoveryClient</span>
+<span style="color:#3c5d5d;font-weight:bold">@MapperScan</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;com.leyou.item.mapper&#34;</span><span style="color:#000;font-weight:bold">)</span><span style="color:#998;font-style:italic">//tk.mybatis的
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LyItemServiceApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>LyItemServiceApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>pojo</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.item.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.fasterxml.jackson.annotation.JsonIgnore</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.annotation.KeySql</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Id</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Table</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Date</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Spu
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/22 14:06
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_spu&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Spu</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Long brandId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Long cid1<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 1级类目
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long cid2<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 2级类目
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Long cid3<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 3级类目
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String title<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 标题
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String subTitle<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 子标题
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Boolean saleable<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 是否上架
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#000;font-weight:bold">private</span> Boolean valid<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 是否有效，逻辑删除用 返回页面的时候忽略这个字段
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Date createTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 创建时间
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#3c5d5d;font-weight:bold">@JsonIgnore</span>
+    <span style="color:#000;font-weight:bold">private</span> Date lastUpdateTime<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 最后修改时间 返回页面的时候忽略这个字段
+</span><span style="color:#998;font-style:italic">//    @Transient
+</span><span style="color:#998;font-style:italic">//    private String cname; // 分类名称 数据库tb_spu表是没有这个字段的 只是业务需要.为了防止让mapper以为数据库中有这个字段 加@Transient
+</span><span style="color:#998;font-style:italic">//    @Transient
+</span><span style="color:#998;font-style:italic">//    private String bname; // 品牌名称 数据库tb_spu表是没有这个字段的 只是业务需要.为了防止让mapper以为数据库中有这个字段 加@Transient
+</span><span style="color:#998;font-style:italic"></span>
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getBrandId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> brandId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setBrandId</span><span style="color:#000;font-weight:bold">(</span>Long brandId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">brandId</span> <span style="color:#000;font-weight:bold">=</span> brandId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCid1</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> cid1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCid1</span><span style="color:#000;font-weight:bold">(</span>Long cid1<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">cid1</span> <span style="color:#000;font-weight:bold">=</span> cid1<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCid2</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> cid2<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCid2</span><span style="color:#000;font-weight:bold">(</span>Long cid2<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">cid2</span> <span style="color:#000;font-weight:bold">=</span> cid2<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getCid3</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> cid3<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCid3</span><span style="color:#000;font-weight:bold">(</span>Long cid3<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">cid3</span> <span style="color:#000;font-weight:bold">=</span> cid3<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getTitle</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> title<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setTitle</span><span style="color:#000;font-weight:bold">(</span>String title<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">title</span> <span style="color:#000;font-weight:bold">=</span> title<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getSubTitle</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> subTitle<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setSubTitle</span><span style="color:#000;font-weight:bold">(</span>String subTitle<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">subTitle</span> <span style="color:#000;font-weight:bold">=</span> subTitle<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Boolean <span style="color:#900;font-weight:bold">getSaleable</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> saleable<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setSaleable</span><span style="color:#000;font-weight:bold">(</span>Boolean saleable<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">saleable</span> <span style="color:#000;font-weight:bold">=</span> saleable<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Boolean <span style="color:#900;font-weight:bold">getValid</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> valid<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setValid</span><span style="color:#000;font-weight:bold">(</span>Boolean valid<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">valid</span> <span style="color:#000;font-weight:bold">=</span> valid<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Date <span style="color:#900;font-weight:bold">getCreateTime</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> createTime<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setCreateTime</span><span style="color:#000;font-weight:bold">(</span>Date createTime<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createTime</span> <span style="color:#000;font-weight:bold">=</span> createTime<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Date <span style="color:#900;font-weight:bold">getLastUpdateTime</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> lastUpdateTime<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLastUpdateTime</span><span style="color:#000;font-weight:bold">(</span>Date lastUpdateTime<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lastUpdateTime</span> <span style="color:#000;font-weight:bold">=</span> lastUpdateTime<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#998;font-style:italic">//    public String getCname() {
+</span><span style="color:#998;font-style:italic">//        return cname;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//    public void setCname(String cname) {
+</span><span style="color:#998;font-style:italic">//        this.cname = cname;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//    public String getBname() {
+</span><span style="color:#998;font-style:italic">//        return bname;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//    public void setBname(String bname) {
+</span><span style="color:#998;font-style:italic">//        this.bname = bname;
+</span><span style="color:#998;font-style:italic">//    }
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.item.pojo</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">tk.mybatis.mapper.annotation.KeySql</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Id</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.persistence.Table</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname Brand
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2021/2/5 10:55
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Table</span><span style="color:#000;font-weight:bold">(</span>name <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;tb_brand&#34;</span><span style="color:#000;font-weight:bold">)</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Brand</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Id</span>
+    <span style="color:#3c5d5d;font-weight:bold">@KeySql</span><span style="color:#000;font-weight:bold">(</span>useGeneratedKeys <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">private</span> Long id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 品牌名称
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> String image<span style="color:#000;font-weight:bold">;</span><span style="color:#998;font-style:italic">// 品牌图片
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">private</span> Character letter<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Long <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">name</span> <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getImage</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> image<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setImage</span><span style="color:#000;font-weight:bold">(</span>String image<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">image</span> <span style="color:#000;font-weight:bold">=</span> image<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Character <span style="color:#900;font-weight:bold">getLetter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> letter<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setLetter</span><span style="color:#000;font-weight:bold">(</span>Character letter<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">letter</span> <span style="color:#000;font-weight:bold">=</span> letter<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>说明：</p>
+<ul>
+<li>表名默认使用类名,驼峰转下划线(只对大写字母进行处理),如UserInfo默认对应的表名为user_info</li>
+<li>表名可以使用@Table(name = “tableName”)进行指定,对不符合第一条默认规则的可以通过这种方式指定表名</li>
+<li>字段默认和@Column一样,都会作为表字段,表字段默认为Java对象的Field名字驼峰转下划线形式</li>
+<li>可以使用@Column(name = “fieldName”)指定不符合第3条规则的字段名</li>
+<li>使用@Transient注解可以忽略字段,添加该注解的字段不会作为表字段使用</li>
+<li>建议一定是有一个@Id注解作为主键的字段,可以有多个@Id注解的字段作为联合主键</li>
+<li>如果是MySQL的自增字段，加上@GeneratedValue(generator = “JDBC”)即可</li>
+<li>@KeySql(useGeneratedKeys = true)是专属通用Mapper的注解,表示自增</li>
+</ul>
+<p>mapper接口</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">BrandMapper</span> <span style="color:#000;font-weight:bold">extends</span> MyBaseMapper<span style="color:#000;font-weight:bold">&lt;</span>Brand<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#3c5d5d;font-weight:bold">@Repository</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">interface</span> <span style="color:#458;font-weight:bold">SpuMapper</span> <span style="color:#000;font-weight:bold">extends</span> Mapper<span style="color:#000;font-weight:bold">&lt;</span>Spu<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>业务，只列举了部分复杂的涉及到通用Mapper的业务</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> PageResult<span style="color:#000;font-weight:bold">&lt;</span>SpuVo<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySpuByPageAndSort</span><span style="color:#000;font-weight:bold">(</span>Integer page<span style="color:#000;font-weight:bold">,</span> Integer rows<span style="color:#000;font-weight:bold">,</span> Boolean saleable<span style="color:#000;font-weight:bold">,</span> String key<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">// 查询Spu
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// 分页,最多允许查100条
+</span><span style="color:#998;font-style:italic"></span>    PageHelper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">startPage</span><span style="color:#000;font-weight:bold">(</span>page<span style="color:#000;font-weight:bold">,</span> Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">min</span><span style="color:#000;font-weight:bold">(</span>rows<span style="color:#000;font-weight:bold">,</span> 100<span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#998;font-style:italic">// 创建查询条件
+</span><span style="color:#998;font-style:italic"></span>    Example example <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Example<span style="color:#000;font-weight:bold">(</span>Spu<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+    Example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Criteria</span> criteria <span style="color:#000;font-weight:bold">=</span> example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createCriteria</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#998;font-style:italic">// 是否过滤上下架
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>saleable <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        criteria<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">andEqualTo</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;saleable&#34;</span><span style="color:#000;font-weight:bold">,</span> saleable<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">// 是否模糊查询 搜索字段过滤
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isNotBlank</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        criteria<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">andLike</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;title&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;%&#34;</span> <span style="color:#000;font-weight:bold">+</span> key <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">// 默认排序
+</span><span style="color:#998;font-style:italic"></span>    example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderByClause</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;last_update_time DESC&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 查询
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>Spu<span style="color:#000;font-weight:bold">&gt;</span> spus <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">spuMapper</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByExample</span><span style="color:#000;font-weight:bold">(</span>example<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">// 判断
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>spus<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">GOODS_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// 将cname和bname加入 变成SpuVo的集合
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>SpuVo<span style="color:#000;font-weight:bold">&gt;</span> spuVos <span style="color:#000;font-weight:bold">=</span> loadCategoryAndBrandName<span style="color:#000;font-weight:bold">(</span>spus<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#998;font-style:italic">// 解析最终的分页结果
+</span><span style="color:#998;font-style:italic"></span>    PageInfo<span style="color:#000;font-weight:bold">&lt;</span>SpuVo<span style="color:#000;font-weight:bold">&gt;</span> info <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PageInfo<span style="color:#000;font-weight:bold">&lt;&gt;(</span>spuVos<span style="color:#000;font-weight:bold">);</span>
+    PageResult<span style="color:#000;font-weight:bold">&lt;</span>SpuVo<span style="color:#000;font-weight:bold">&gt;</span> result <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PageResult<span style="color:#000;font-weight:bold">&lt;&gt;(</span>info<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotal</span><span style="color:#000;font-weight:bold">(),</span> spuVos<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> result<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> PageResult<span style="color:#000;font-weight:bold">&lt;</span>Brand<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">queryBrandByPage</span><span style="color:#000;font-weight:bold">(</span>Integer page<span style="color:#000;font-weight:bold">,</span> Integer rows<span style="color:#000;font-weight:bold">,</span> String sortBy<span style="color:#000;font-weight:bold">,</span> Boolean desc<span style="color:#000;font-weight:bold">,</span> String key<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">//只要是单表的业务通用mapper基本上都能解决
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">//page-helper其实就2步
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">//1.分页
+</span><span style="color:#998;font-style:italic"></span>    PageHelper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">startPage</span><span style="color:#000;font-weight:bold">(</span>page<span style="color:#000;font-weight:bold">,</span> rows<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#998;font-style:italic">//条件过滤
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">/* SELECT * FROM tb_brand WHERE `name` LIKE &#34;%x%&#34; OR letter == &#39;x&#39; ORDER BY id DESC */</span>
+    Example example <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Example<span style="color:#000;font-weight:bold">(</span>Brand<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isNotBlank</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#998;font-style:italic">//过滤条件  WHERE `name` LIKE &#34;%x%&#34; OR letter == &#39;x&#39;
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//通过tk.mybatis的example来设置条件
+</span><span style="color:#998;font-style:italic"></span>        example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createCriteria</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">orLike</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;%&#34;</span> <span style="color:#000;font-weight:bold">+</span> key <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;%&#34;</span><span style="color:#000;font-weight:bold">).</span><span style="color:#008080">orEqualTo</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;letter&#34;</span><span style="color:#000;font-weight:bold">,</span> key<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">toUpperCase</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">//排序 ORDER BY id DESC 其中 按照什么排序 和 升序还是降序 需要我们自己写子句指定
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>StringUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isNotBlank</span><span style="color:#000;font-weight:bold">(</span>sortBy<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        String orderByClause <span style="color:#000;font-weight:bold">=</span> sortBy <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34; &#34;</span> <span style="color:#000;font-weight:bold">+</span> <span style="color:#000;font-weight:bold">(</span>desc <span style="color:#000;font-weight:bold">?</span> <span style="color:#d14">&#34;DESC&#34;</span> <span style="color:#000;font-weight:bold">:</span> <span style="color:#d14">&#34;ASC&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setOrderByClause</span><span style="color:#000;font-weight:bold">(</span>orderByClause<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//Clause英文是子句的意思
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">//查询
+</span><span style="color:#998;font-style:italic"></span>    List<span style="color:#000;font-weight:bold">&lt;</span>Brand<span style="color:#000;font-weight:bold">&gt;</span> brands <span style="color:#000;font-weight:bold">=</span> brandMapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByExample</span><span style="color:#000;font-weight:bold">(</span>example<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>brands<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">BRAND_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">//2.解析分页结果 方便封装成PageResult&lt;Brand&gt;返回
+</span><span style="color:#998;font-style:italic"></span>    PageInfo<span style="color:#000;font-weight:bold">&lt;</span>Brand<span style="color:#000;font-weight:bold">&gt;</span> info <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PageInfo<span style="color:#000;font-weight:bold">&lt;&gt;(</span>brands<span style="color:#000;font-weight:bold">);</span>
+    PageResult<span style="color:#000;font-weight:bold">&lt;</span>Brand<span style="color:#000;font-weight:bold">&gt;</span> result <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> PageResult<span style="color:#000;font-weight:bold">&lt;&gt;(</span>info<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getTotal</span><span style="color:#000;font-weight:bold">(),</span> brands<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">return</span> result<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> List<span style="color:#000;font-weight:bold">&lt;</span>Sku<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">querySkuListBySpuId</span><span style="color:#000;font-weight:bold">(</span>Long id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+    Sku record <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Sku<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#998;font-style:italic">// 封装查询条件
+</span><span style="color:#998;font-style:italic"></span>    record<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSpuId</span><span style="color:#000;font-weight:bold">(</span>id<span style="color:#000;font-weight:bold">);</span>
+    List<span style="color:#000;font-weight:bold">&lt;</span>Sku<span style="color:#000;font-weight:bold">&gt;</span> skus <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">skuMapper</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">select</span><span style="color:#000;font-weight:bold">(</span>record<span style="color:#000;font-weight:bold">);</span><span style="color:#998;font-style:italic">//这个方法是按传入的对象属性非空的查
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>CollectionUtils<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">isEmpty</span><span style="color:#000;font-weight:bold">(</span>skus<span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LyException<span style="color:#000;font-weight:bold">(</span>ExceptionEnum<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">GOODS_NOT_FOUND</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">//顺带着查库存
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">for</span> <span style="color:#000;font-weight:bold">(</span>Sku sku <span style="color:#000;font-weight:bold">:</span> skus<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        Stock stock <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">stockMapper</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getId</span><span style="color:#000;font-weight:bold">());</span>
+        sku<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStock</span><span style="color:#000;font-weight:bold">(</span>stock<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getStock</span><span style="color:#000;font-weight:bold">());</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">return</span> skus<span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>JAVA</p>
+<p>通用Mapper新增一条数据返回1表示成功</p>
+<p>通用Mapper新增一整个集合的数据返回集合的size表示成功</p>
+<p>部分总结：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Select
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span>List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">select</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据实体中的属性值进行查询<span style="color:#a61717;background-color:#e3d2d2">，</span>查询条件使用等号
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span>T <span style="color:#900;font-weight:bold">selectByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>Object key<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据主键字段进行查询<span style="color:#a61717;background-color:#e3d2d2">，</span>方法参数必须包含完整的主键属性<span style="color:#a61717;background-color:#e3d2d2">，</span>查询条件使用等号
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span>List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">selectAll</span><span style="color:#000;font-weight:bold">();</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>查询全部结果<span style="color:#a61717;background-color:#e3d2d2">，</span>select<span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span>方法能达到同样的效果
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span>T <span style="color:#900;font-weight:bold">selectOne</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据实体中的属性进行查询<span style="color:#a61717;background-color:#e3d2d2">，</span>只能有一个返回值<span style="color:#a61717;background-color:#e3d2d2">，</span>有多个结果是抛出异常<span style="color:#a61717;background-color:#e3d2d2">，</span>查询条件使用等号
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">selectCount</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据实体中的属性查询总数<span style="color:#a61717;background-color:#e3d2d2">，</span>查询条件使用等号
+
+Insert
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">insert</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>保存一个实体<span style="color:#a61717;background-color:#e3d2d2">，</span>null的属性也会保存<span style="color:#a61717;background-color:#e3d2d2">，</span>不会使用数据库默认值
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">insertSelective</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>保存一个实体<span style="color:#a61717;background-color:#e3d2d2">，</span>null的属性不会保存<span style="color:#a61717;background-color:#e3d2d2">，</span>会使用数据库默认值
+
+Update
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">updateByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据主键更新实体全部字段<span style="color:#a61717;background-color:#e3d2d2">，</span>null值会被更新
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">updateByPrimaryKeySelective</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据主键更新属性不为null的值
+
+Delete
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">delete</span><span style="color:#000;font-weight:bold">(</span>T record<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据实体属性作为条件进行删除<span style="color:#a61717;background-color:#e3d2d2">，</span>查询条件使用等号
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">deleteByPrimaryKey</span><span style="color:#000;font-weight:bold">(</span>Object key<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据主键字段进行删除<span style="color:#a61717;background-color:#e3d2d2">，</span>方法参数必须包含完整的主键属性
+
+    Example方法
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span>List<span style="color:#000;font-weight:bold">&lt;</span>T<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#900;font-weight:bold">selectByExample</span><span style="color:#000;font-weight:bold">(</span>Object example<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据Example条件进行查询
+    重点<span style="color:#a61717;background-color:#e3d2d2">：</span>这个查询支持通过Example类指定查询列<span style="color:#a61717;background-color:#e3d2d2">，</span>通过selectProperties方法指定查询列
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">selectCountByExample</span><span style="color:#000;font-weight:bold">(</span>Object example<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据Example条件进行查询总数
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">updateByExample</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;record&#34;</span><span style="color:#000;font-weight:bold">)</span> T record<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;example&#34;</span><span style="color:#000;font-weight:bold">)</span> Object example<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据Example条件更新实体record包含的全部属性<span style="color:#a61717;background-color:#e3d2d2">，</span>null值会被更新
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">updateByExampleSelective</span><span style="color:#000;font-weight:bold">(</span><span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;record&#34;</span><span style="color:#000;font-weight:bold">)</span> T record<span style="color:#000;font-weight:bold">,</span> <span style="color:#3c5d5d;font-weight:bold">@Param</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;example&#34;</span><span style="color:#000;font-weight:bold">)</span> Object example<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据Example条件更新实体record包含的不是null的属性值
+
+    方法<span style="color:#a61717;background-color:#e3d2d2">：</span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">deleteByExample</span><span style="color:#000;font-weight:bold">(</span>Object example<span style="color:#000;font-weight:bold">);</span>
+    说明<span style="color:#a61717;background-color:#e3d2d2">：</span>根据Example条件删除数据
+</code></pre></div><p>JAVA</p>
+<p>下面演示大概的写法： 新增</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TestTableVO vo <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> TestTableVO<span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">// 省略为vo设置属性...
+</span><span style="color:#998;font-style:italic"></span><span style="color:#458;font-weight:bold">int</span> row <span style="color:#000;font-weight:bold">=</span> testTableDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">insertSelective</span><span style="color:#000;font-weight:bold">(</span>vo<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>修改</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TestTableVO vo <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> TestTableVO<span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">// 省略为vo设置属性...
+</span><span style="color:#998;font-style:italic"></span><span style="color:#458;font-weight:bold">int</span> row <span style="color:#000;font-weight:bold">=</span> testTableDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">updateByPrimaryKeySelective</span><span style="color:#000;font-weight:bold">(</span>vo<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>单个查询</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">TestTableVO vo <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> TestTableVO<span style="color:#000;font-weight:bold">();</span>
+vo<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setId</span><span style="color:#000;font-weight:bold">(</span>123L<span style="color:#000;font-weight:bold">);</span>
+TestTableVO result <span style="color:#000;font-weight:bold">=</span> testTableDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectOne</span><span style="color:#000;font-weight:bold">(</span>vo<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>JAVA</p>
+<p>条件查询</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">// 创建Example
+</span><span style="color:#998;font-style:italic"></span>Example example <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Example<span style="color:#000;font-weight:bold">(</span>TestTableVO<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+<span style="color:#998;font-style:italic">// 创建Criteria
+</span><span style="color:#998;font-style:italic"></span>Example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Criteria</span> criteria <span style="color:#000;font-weight:bold">=</span> example<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">createCriteria</span><span style="color:#000;font-weight:bold">();</span>
+<span style="color:#998;font-style:italic">// 添加条件
+</span><span style="color:#998;font-style:italic"></span>criteria<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">andEqualTo</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;isDelete&#34;</span><span style="color:#000;font-weight:bold">,</span> 0<span style="color:#000;font-weight:bold">);</span>
+criteria<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">andLike</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;name&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;%abc123%&#34;</span><span style="color:#000;font-weight:bold">);</span>
+List<span style="color:#000;font-weight:bold">&lt;</span>TestTableVO<span style="color:#000;font-weight:bold">&gt;</span> list <span style="color:#000;font-weight:bold">=</span> testTableDao<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">selectByExample</span><span style="color:#000;font-weight:bold">(</span>example<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html">https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/04/09/boot-with-data-jpa.html">Spring Boot整合Spring Data JPA</a></li>
+        
+        <li><a href="/2021/04/09/redis-load-operating.html">Redis的安装及操作</a></li>
+        
+        <li><a href="/2021/04/09/thymeleaf-study.html">Thymeleaf语法入门</a></li>
+        
+        <li><a href="/2021/01/29/some-idea-about-divide.html">前后端分离开发中权限管理的一点思路</a></li>
+        
+        <li><a href="/2020/12/22/security-tianjiayanzhengma.html">Spring Security添加验证码</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Boot'>Spring Boot</a></li>
+                
+                <li><a href='/tags/%E9%80%9A%E7%94%A8mapper'>通用mapper</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

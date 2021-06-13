@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Mybatis on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Mybatis/</link>
+    <description>Recent content in Mybatis on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 12:51:58 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Mybatis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot整合Mybatis案例</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:51:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</guid>
+      <description>前言：关于持久化层，从大学到现在陆陆续续的接触了很多，JDBCTemplate、Struts2、Hibernate、Mybatis、JPA等。到目前为止接触的最多的就是Mybatis，也是公司用的最多的，一直想总结一下的，一般的常规用的用法。这里Mybatis的一级缓存是默认开启</description>
+    </item>
+    
+  </channel>
+</rss>

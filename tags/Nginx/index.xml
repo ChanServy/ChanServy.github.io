@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nginx on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Nginx/</link>
+    <description>Recent content in Nginx on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 05 Feb 2021 20:59:21 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Nginx/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>使用域名访问本地项目</title>
+      <link>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</link>
+      <pubDate>Fri, 05 Feb 2021 20:59:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</guid>
+      <description>前言：使用域名访问本地项目。 一、统一环境 比如我们现在访问页面使用的是：http://localhost:9001。 有没有什么问题？ 实际开发中，会有不同的环境： 开发环境：自己的电脑 测试环境：提供给测试人员使用的环境 预发布环境：数据是和生成环境的数据一致，运行最新的项目代码进去测试 生</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Session共享</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:33:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</guid>
+      <description>前言：由于项目的架构中采用了负载均衡，因此又不止一个的服务器，那么多个服务器之间一定有信息的交互问题，比如我的业务在服务器A中进行了操作，并且有了session数据在服务器A中，等下次请求来到了，由于Nginx的轮询机制，Nginx吧请求转发到了其他的服务器B中，这个时候服务器B</description>
+    </item>
+    
+    <item>
+      <title>Nginx扫盲</title>
+      <link>https://chanservy.github.io/2020/12/21/nginx-saomang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:23:54 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/nginx-saomang.html</guid>
+      <description>前言： 之前一直都有接触过Nginx，但是一直没有系统的写一篇关于它的博客， 也一直稀里糊涂的，一直想总结一下，但是一拖再拖，包括之前我的服务器上安装Nginx的时候也遇到了很多的问题，一顿百度的感觉很不爽，于是准备自己写一篇。正好最近看到松哥的视频和博客，因此想总结一番。 Nginx</description>
+    </item>
+    
+  </channel>
+</rss>

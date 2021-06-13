@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vue on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/Vue/</link>
+    <description>Recent content in Vue on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 29 Jan 2021 10:42:23 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/Vue/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>前后端分离开发中权限管理的一点思路</title>
+      <link>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</link>
+      <pubDate>Fri, 29 Jan 2021 10:42:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</guid>
+      <description>前言：Spring Boot + Vue 前后端分离开发，权限管理的一点思路。 在传统的前后端不分的开发中，权限管理主要通过过滤器或者拦截器来进行（权限管理框架本身也是通过过滤器来实现功能），如果用户不具备某一个角色或者某一个权限，则无法访问某一个页面。 但是在前后端分离中，页面的跳转统统交给前端去做</description>
+    </item>
+    
+    <item>
+      <title>一个Java程序猿眼中的前后端分离以及Vue.js入门</title>
+      <link>https://chanservy.github.io/2021/01/14/front-behind-divied.html</link>
+      <pubDate>Thu, 14 Jan 2021 21:14:34 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/01/14/front-behind-divied.html</guid>
+      <description>前言：一个Java程序猿眼中的前后端分离以及Vue.js入门。 前后端分离以及Vue.js入门 一、前后端不分 后端模板：Jsp、FreeMarker 前端模板：Thymeleaf 前后端不分，Jsp 是一个非常典型写法，Jsp 将 HTML 和 Java 代码结合在一起，刚开始的时候，确实提高了生产力，但是时间</description>
+    </item>
+    
+    <item>
+      <title>Vue扫盲</title>
+      <link>https://chanservy.github.io/2020/12/22/vue-saomang.html</link>
+      <pubDate>Wed, 06 Jan 2021 11:06:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/vue-saomang.html</guid>
+      <description>&lt;p&gt;前言：Vue是一套用于构建用户界面的渐进式框架。与其它大型框架不同的是，Vue被设计为可以自底向上逐层应用。Vue的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。另一方面，当与现代化的工具链以及各种支持类库结合使用时，Vue也完全能够为复杂的单页应用提供驱动。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

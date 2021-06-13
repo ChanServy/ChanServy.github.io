@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Session on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/Session/</link>
+    <description>Recent content in Session on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Dec 2020 12:33:51 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Session/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot整合Session共享</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:33:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</guid>
+      <description>前言：由于项目的架构中采用了负载均衡，因此又不止一个的服务器，那么多个服务器之间一定有信息的交互问题，比如我的业务在服务器A中进行了操作，并且有了session数据在服务器A中，等下次请求来到了，由于Nginx的轮询机制，Nginx吧请求转发到了其他的服务器B中，这个时候服务器B</description>
+    </item>
+    
+  </channel>
+</rss>

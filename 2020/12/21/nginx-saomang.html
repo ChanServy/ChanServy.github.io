@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Nginx扫盲 | 迩东陈的博客</title>
+    <meta property="og:title" content="Nginx扫盲 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-21T12:23:54&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-21T12:23:54&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Nginx扫盲.">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/21/nginx-saomang.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一基本介绍">一、基本介绍</a></li>
+    <li><a href="#二nginx的优势">二、Nginx的优势</a>
+      <ul>
+        <li><a href="#1正向代理的应用">1、正向代理的应用</a></li>
+        <li><a href="#2反向代理的应用">2、反向代理的应用</a></li>
+        <li><a href="#3正向代理和反向代理的区别">3、正向代理和反向代理的区别</a></li>
+        <li><a href="#4全面的代理架构流程解析">4、全面的代理架构流程解析</a></li>
+      </ul>
+    </li>
+    <li><a href="#三nginx的安装">三、Nginx的安装</a>
+      <ul>
+        <li><a href="#1首先下载-nginx">1、首先下载 Nginx</a></li>
+        <li><a href="#2解压到指定的目录">2、解压到指定的目录</a></li>
+        <li><a href="#3-进入解压目录中在编译安装之前需要安装两个依赖">3、 进入解压目录中，在编译安装之前，需要安装两个依赖</a></li>
+        <li><a href="#4-开始编译安装">4、 开始编译安装</a></li>
+      </ul>
+    </li>
+    <li><a href="#四在linux上搭建nginx负载均衡集群">四、在Linux上搭建Nginx负载均衡集群</a>
+      <ul>
+        <li><a href="#1准备两个tomcat">1、准备两个Tomcat</a></li>
+        <li><a href="#2分别修改端口号">2、分别修改端口号</a></li>
+        <li><a href="#3配置nginx的负载均衡">3、配置Nginx的负载均衡</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Nginx扫盲</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月21日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Nginx'>Nginx</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言： 之前一直都有接触过Nginx，但是一直没有系统的写一篇关于它的博客， 也一直稀里糊涂的，一直想总结一下，但是一拖再拖，包括之前我的服务器上安装Nginx的时候也遇到了很多的问题，一顿百度的感觉很不爽，于是准备自己写一篇。正好最近看到松哥的视频和博客，因此想总结一番。</p>
+<h1 id="nginx扫盲">Nginx扫盲</h1>
+<h2 id="一基本介绍">一、基本介绍</h2>
+<p><code>Nginx</code> 是一个高性能的 <code>HTTP</code> 和反向代理 <code>web</code> 服务器，同时也提供了 <code>IMAP/POP3/SMTP</code> 服务。</p>
+<p><code>Nginx</code> 是由伊戈尔·赛索耶夫为俄罗斯访问量第二的 <code>Rambler.ru</code> 站点开发的，第一个公开版本 <code>0.1.0</code> 发布于 <code>2004</code> 年 <code>10</code> 月 <code>4</code> 日。</p>
+<p><code>Nginx</code> 特点是占有内存少，并发能力强。</p>
+<p>事实上 <code>nginx</code> 的并发能力确实在同类型的网页服务器中表现较好，一般来说，如果我们在项目中引入了 <code>Nginx</code> ，我们的项目架构可能是这样：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/1.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/1.png" />
+        </a>
+    </p>
+<p>在这样的架构中 ， <code>Nginx</code> 所代表的角色叫做负载均衡服务器或者反向代理服务器，所有请求首先到达 <code>Nginx</code> 上，再由 <code>Nginx</code> 根据提前配置好的转发规则，将客户端发来的请求转发到某一个 <code>Tomcat</code> 上去。</p>
+<p>那么这里涉及到两个概念：</p>
+<ul>
+<li>负载均衡服务器</li>
+</ul>
+<p>就是进行请求转发，降低某一个服务器的压力。负载均衡策略很多，也有很多层，对于一些大型网站基本上从 <code>DNS</code> 就开始负载均衡，负载均衡有硬件和软件之分，各自代表分别是 <code>F5</code> 和 <code>Nginx</code> （目前 <code>Nginx</code> 已经被 <code>F5</code> 收购），早些年，也可以使用 <code>Apache</code> 来做负载均衡，但是效率不如 <code>Nginx</code> ，所以现在主流方案是 <code>Nginx</code> 。</p>
+<ul>
+<li>反向代理服务器：</li>
+</ul>
+<p>另一个概念是反向代理服务器，得先说正向代理，看下面一张图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/2.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/2.png" />
+        </a>
+    </p>
+<p>在这个过程中，Google 并不知道真正访问它的客户端是谁，它只知道这个中间服务器在访问它。因此，这里的代理，实际上是<code>中间服务器代理了客户端</code>，因为客户端想访问谷歌（访问不了），借助中间服务器，中间服务器访问谷歌，为客户端服务器达成目的，这种代理叫做正向代理。</p>
+<p>那么什么是反向代理呢？看下面一张图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/3.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/3.png" />
+        </a>
+    </p>
+<p>在这个过程中，10086 这个号码相当于是一个代理，真正提供服务的，是话务员，但是对于客户来说，他不关心到底是哪一个话务员提供的服务，他只需要记得 10086 这个号码就行了。</p>
+<p>所有的请求打到 10086 上，再由 10086 将请求转发给某一个话务员去处理。因此，在这里，10086 就相当于是一个代理，只不过<code>它代理的是话务员而不是客户端</code>，这种代理称之为反向代理。</p>
+<h2 id="二nginx的优势">二、Nginx的优势</h2>
+<p>在 Java 开发中，Nginx 有着非常广泛的使用，随便举几点：</p>
+<ol>
+<li>使用 Nginx 做静态资源服务器：Java 中的资源可以分为动态和静态，动态需要经过 Tomcat 解析之后，才能返回给浏览器，例如 JSP 页面、Freemarker 页面、控制器返回的 JSON 数据等，都算作动态资源，动态资源经过了 Tomcat 处理，速度必然降低。对于静态资源，例如图片、HTML、JS、CSS 等资源，这种资源可以不必经过 Tomcat 解析，当客户端请求这些资源时，之间将资源返回给客户端就行了。此时，可以使用 Nginx 搭建静态资源服务器，将静态资源直接返回给客户端。</li>
+<li>使用 Nginx 做负载均衡服务器，无论是使用 Dubbo 还是 Spirng Cloud ，除了使用各自自带的负载均衡策略之外，也都可以使用 Nginx 做负载均衡服务器。</li>
+<li>支持高并发、内存消耗少、成本低廉、配置简单、运行稳定等。</li>
+</ol>
+<h3 id="1正向代理的应用">1、正向代理的应用</h3>
+<ol>
+<li>访问原来无法访问的资源</li>
+<li>用作缓存，加速访问速度</li>
+<li>对客户端访问授权，上网进行认证</li>
+<li>代理可以记录用户访问记录（上网行为管理），对外隐藏用户信息</li>
+</ol>
+<h3 id="2反向代理的应用">2、反向代理的应用</h3>
+<ol>
+<li>保护内网安全</li>
+<li>负载均衡</li>
+<li>缓存，减少服务器的压力</li>
+</ol>
+<h3 id="3正向代理和反向代理的区别">3、正向代理和反向代理的区别</h3>
+<ul>
+<li>
+<p>位置不同
+正向代理，架设在客户机和目标主机之间；
+反向代理，架设在服务器端；</p>
+</li>
+<li>
+<p>代理对象不同
+正向代理，代理客户端，服务端不知道实际发起请求的客户端；
+反向代理，代理服务端，客户端不知道实际提供服务的服务端；</p>
+<p>备注：正向代理–HTTP代理为多个人提供翻墙服务；反向代理–美团外卖为多个商户提供平台给某个用户提供外卖服务。</p>
+</li>
+<li>
+<p>用途不同
+正向代理，为在防火墙内的局域网客户端提供访问Internet的途径；
+反向代理，将防火墙后面的服务器提供给Internet访问；</p>
+</li>
+<li>
+<p>安全性不同
+正向代理允许客户端通过它访问任意网站并且隐藏客户端自身，因此必须采取安全措施以确保仅为授权的客户端提供服务；
+反向代理都对外都是透明的，访问者并不知道自己访问的是哪一个代理。</p>
+</li>
+</ul>
+<h3 id="4全面的代理架构流程解析">4、全面的代理架构流程解析</h3>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/%E4%BB%A3%E7%90%86%E6%9E%B6%E6%9E%84%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/%E4%BB%A3%E7%90%86%E6%9E%B6%E6%9E%84%E6%B5%81%E7%A8%8B%E5%9B%BE.png" />
+        </a>
+    </p>
+<p>由上图所示，客户端的请求来到服务端，客户端需要配置正向代理服务器的ip和端口，然后到达正向代理服务器，正向代理服务器会帮我们将请求带到服务端，然后在服务端，有可能请求高并发，单个服务器将不再能承受住压力，因此需要多个服务器共同分担压力，那么各个服务器之间怎么协同工作的呢？由此引入Nginx 反向代理服务器，到达了负载均衡的效果，反向代理服务器是存在于服务端内部的，请求到达服务端之后，先到达反向代理服务器，由反向代理服务器将请求分发到各个目标服务器上，Nginx的内部有一套机制，可以将请求以轮询等的方式分发。</p>
+<h2 id="三nginx的安装">三、Nginx的安装</h2>
+<p>由于基本上都是在 Linux 上使用 Nginx，因此这里主要展示 CentOS 7 安装的Nginx：</p>
+<h3 id="1首先下载-nginx">1、首先下载 Nginx</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">wget http://nginx.org/download/nginx-1.17.0.tar.gz
+</code></pre></div><h3 id="2解压到指定的目录">2、解压到指定的目录</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">tar zxvf nginx-1.17.0.tar.gz -C 指定目录 
+</code></pre></div><h3 id="3-进入解压目录中在编译安装之前需要安装两个依赖">3、 进入解压目录中，在编译安装之前，需要安装两个依赖</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">yum -y install pcre-devel
+yum -y install openssl openssl-devel
+</code></pre></div><h3 id="4-开始编译安装">4、 开始编译安装</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">./configure
+make
+make install
+</code></pre></div><p>装好之后，默认安装位置在 ：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">/usr/local/nginx/sbin/nginx
+</code></pre></div><p>进入到 <code>sbin</code> 的目录下，执行 <code>nginx</code> 即可启动 <code>Nginx</code> ：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/5.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/5.png" />
+        </a>
+    </p>
+<p>Nginx 启动成功之后，在浏览器中直接访问 Nginx 地址，是如图这样的：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/4.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/4.png" />
+        </a>
+    </p>
+<p>看到如上页面，表示 Nginx 已经安装成功了。</p>
+<p>如果修改了 Nginx 配置，则可以通过如下命令重新加载 Nginx 配置文件：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">./nginx -s reload
+</code></pre></div><h2 id="四在linux上搭建nginx负载均衡集群">四、在Linux上搭建Nginx负载均衡集群</h2>
+<p>上面说了，负载均衡是通过 Nginx  配置的反向代理实现的，这样我们只需要访问 Nginx 的地址即可，由 Nginx 决定在内部转发到哪个服务器。</p>
+<p>这个案例是好久之前做的了，是之前写的比较零碎的东西。此集群是采用一台 Centos6.8 进行设置的，这里以2个tomcat服务器为例进行演示。</p>
+<h3 id="1准备两个tomcat">1、准备两个Tomcat</h3>
+<p>新建2个目录，分别叫 tomcat1、tomcat2；
+将之前解压过的Tomcat，复制到 tomcat1 的里面；
+再次选择之前解压的Tomcat，复制到 tomcat2 的里面。</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/cb52741a/nginx2.jpg">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/cb52741a/nginx2.jpg" />
+        </a>
+    </p>
+<h3 id="2分别修改端口号">2、分别修改端口号</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic">#需要将tomcat1的conf/server.xml中的端口号分别进行修改</span>
+<span style="color:#998;font-style:italic">#主要是8005、8080、8009</span>
+<span style="color:#998;font-style:italic">#修改为8105、8180、8109</span>
+<span style="color:#998;font-style:italic">#命令：</span>
+vim tomcat1/conf/server.xml
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic">#需要将tomcat2的conf/server.xml中的端口号分别进行修改</span>
+<span style="color:#998;font-style:italic">#主要是8005、8080、8009</span>
+<span style="color:#998;font-style:italic">#修改为8205、8280、8209</span>
+<span style="color:#998;font-style:italic">#命令：</span>
+vim tomcat2/conf/server.xml
+</code></pre></div><p>注：其实端口号可以任意只要不冲突即可</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic">#测试刚刚改变的端口号是否能用</span>
+<span style="color:#998;font-style:italic">#分别启动刚刚配置的2个Tomcat，再在浏览器中访问</span>
+/opt/work/tomcat1/bin/startup.sh
+/opt/work/tomcat2/bin/startup.sh   ./startup.sh
+<span style="color:#998;font-style:italic">#这里的路径就是tomcat的路径</span>
+</code></pre></div><h3 id="3配置nginx的负载均衡">3、配置Nginx的负载均衡</h3>
+<p>找到Nginx的安装目录（默认的目录前面说过），找到名为nginx.conf的文件</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic">#使用下面的命令编辑nginx的配置文件</span>
+vim /opt/work/nginx/conf/nginx.conf
+<span style="color:#998;font-style:italic">#在http标签的内部，配置需要进行负载均衡的N台服务器的地址，添加：</span>
+upstream server_xph<span style="color:#000;font-weight:bold">{</span>
+<span style="color:#998;font-style:italic">#加权重weight 大约值 例如下面的例子中 在nginx转发请求的时候 每10次有9次到8180  有1次到8280</span>
+    server 10.211.55.12:8180 <span style="color:#008080">weight</span><span style="color:#000;font-weight:bold">=</span>9;
+    server 10.211.55.12:8280 <span style="color:#008080">weight</span><span style="color:#000;font-weight:bold">=</span>1;
+<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#998;font-style:italic">#其中 server_xph代表是别名,内部指向多台服务器</span>
+<span style="color:#998;font-style:italic">#然后在server标签修改添加：</span>
+<span style="color:#998;font-style:italic">#location 代表访问的路径,当前代表访问nginx的根路径</span>
+<span style="color:#998;font-style:italic">#proxy_pass代表转发到什么地址,后面填写别名(随意写)就可以,它会⾃动从别名的服务器列表中选择一个地址进⾏访问</span>
+location / <span style="color:#000;font-weight:bold">{</span>
+    proxy_pass http://server_xph;
+<span style="color:#000;font-weight:bold">}</span>
+<span style="color:#998;font-style:italic"># 如果只做一台机器的反向代理,则不需要配置别名,只需要将proxy_pass的值设置为具体的访问地址即可</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#998;font-style:italic">#重新启动nginx即可,命令：</span>
+nginx -s reload
+</code></pre></div><p>其中Nginx代理的地址就是 http://server_xph 在浏览器访问Nginx的地址直接就可以，Nginx可以帮我们代理到upstream server_xph{&hellip;}中配置的两个地址。前提是代理地址后面的路径和upstream后面指定的名称一致，这两个地址就是输入的IP地址，上面的10000和20000是两个端口号。Nginx反向代理服务器会以轮询的方式，在两个目标服务器之间做负载均衡，从而达到降低服务器压力的效果。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/21/nginx-saomang.html">https://chanservy.github.io/2020/12/21/nginx-saomang.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/boot-leixingzhuanhuanqi.html">Spring Boot中的类型转换器</a></li>
+        
+        <li><a href="/2020/12/22/boot-lanjieqi.html">Spring Boot中的拦截器</a></li>
+        
+        <li><a href="/2020/12/21/cors-deal-kuayu.html">CORS解决跨域问题</a></li>
+        
+        <li><a href="/2020/12/21/controller-advice.html">说说不常见的@ControllerAdvice</a></li>
+        
+        <li><a href="/2020/12/22/boot-wenjianshangchuan.html">Spring Boot的文件上传</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Nginx'>Nginx</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/post/</link>
+    <description>Recent content in Posts on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 24 May 2021 22:20:34 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式事务之可靠消息最终一致性方案</title>
+      <link>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</link>
+      <pubDate>Mon, 24 May 2021 22:20:34 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</guid>
+      <description>&lt;p&gt;这几篇文章一直在讲有关分布式事务的问题，的确，在一些场景中，会涉及到分布式事务也就是数据不一致的问题，会发生在分布式微服务的项目中，所谓分布式事务就是数据涉及到多个微服务之间的接口调用，如果全部没错皆大欢喜，但凡有一个地方出现了报错，那就全部要回滚，保证数据的一致性和准确性，其实就是事务的特性。这篇讲的是通过消息队列来实现数据的最终一致性，可靠消息最终一致性方案，准确的说这并不是一套针对分布式事务的解决方案，而是一个通过MQ实现分布式事务效果（数据一致性）的方案。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之TCC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/tcc.html</link>
+      <pubDate>Mon, 24 May 2021 22:19:19 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/tcc.html</guid>
+      <description>&lt;p&gt;TCC又称补偿事务。其核心思想是：&amp;ldquo;针对每个操作都要有一个与其对应的尝试、确认和补偿（撤销操作）&amp;quot;。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之2PC和3PC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/2pcand3pc.html</link>
+      <pubDate>Fri, 21 May 2021 18:24:57 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/2pcand3pc.html</guid>
+      <description>&lt;p&gt;前言：如果一个系统操作多个数据库，肯定是有跨多个库的分布式事务的一个问题，今天的主要目标就是分布式事务的方案以及原理剖析。来自石杉老师的码农架构课的学习。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>数据库事务有哪些隔离级别?</title>
+      <link>https://chanservy.github.io/2021/05/16/mysql-interview.html</link>
+      <pubDate>Fri, 21 May 2021 12:13:54 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/mysql-interview.html</guid>
+      <description>&lt;p&gt;面试题：事务的几个特点是什么？数据库事务有哪些隔离级别？MySQL的默认隔离级别是？可重复读的原理？MVCC机制？&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Nacos集群部署以及RPC框架选型</title>
+      <link>https://chanservy.github.io/2021/05/16/nacos-cluster.html</link>
+      <pubDate>Sat, 15 May 2021 22:35:42 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/nacos-cluster.html</guid>
+      <description>&lt;p&gt;前言：在进入正题”Nacos集群部署之前“，先从最先的单体架构开始说起，这也是我在中华石杉老师的架构课学习到的知识，想总结到自己的博客中，方便日后复习观看。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Java基础</title>
+      <link>https://chanservy.github.io/2021/05/06/java-foundation.html</link>
+      <pubDate>Thu, 06 May 2021 17:52:22 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/06/java-foundation.html</guid>
+      <description>&lt;p&gt;前言：Java 语言是美国 Sun 公司，在1995年推出的高级编程语言。所谓编程语言，是计算机的语言，人们可以使用编程语言对计算机下达命令，让计算机完成人们需要的功能。Java 语言主要应用在互联网程序的开发领域。常见的互联网程序比如天猫、京东、物流系统、网银系统等，以及服务器后台处理大数据的存储、查询、数据挖掘等也有很多应用。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Freemarker研究</title>
+      <link>https://chanservy.github.io/2021/04/16/freemarker.html</link>
+      <pubDate>Fri, 16 Apr 2021 15:19:25 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/16/freemarker.html</guid>
+      <description>1. Freemarker介绍 Freemarker 是一个用 Java 开发的模板引擎，模板引擎即为一种基于模板和要改变的数据，并用来生成输出文本的通用工具。Freemarker 不是面向最终用户的，而是一个 Java 类库，是一款程序员可以嵌入他们所开发的产品的组件。常用的 Java 模板引擎还有：Jsp、Thymeleaf 等。 Fr</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot之集成通用Mapper</title>
+      <link>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</link>
+      <pubDate>Fri, 09 Apr 2021 18:18:11 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html</guid>
+      <description>前言：Spring Boot之集成通用Mapper。 通用Mapper的接口，不同的接口会有不同的方法，适应不同的业务需求，因此为了满足大部分的业务需求，我们应该自定义Mapper接口，继承通用Mapper提供的各个接口。在项目中，如果使用通用Mapper，那么必然不止一个微服务会用</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Data JPA</title>
+      <link>https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html</link>
+      <pubDate>Fri, 09 Apr 2021 18:08:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html</guid>
+      <description>前言：Spring Boot整合Spring Data JPA。 一、Spring Data JPA介绍 Spring Data：其实 Spring Data 就是 Spring 提供的一个操作数据的框架。而 Spring Data JPA 只是 Spring Data 框架下的一个基于 JPA 标准操作数据的模块。 Spring Data JPA：基于 JPA 的标准数据进行操作。简化操作持久层的代码。只需要编写接口就可以。 二、Spri</description>
+    </item>
+    
+    <item>
+      <title>订单业务</title>
+      <link>https://chanservy.github.io/2021/04/09/order-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:59:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/order-service.html</guid>
+      <description>前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt; &amp;lt;project xmlns=&amp;#34;http://maven.apache.org/POM/4.0.0&amp;#34; xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34; xsi:schemaLocation=&amp;#34;http://maven.apache.org/POM/4.0.0</description>
+    </item>
+    
+    <item>
+      <title>购物车业务</title>
+      <link>https://chanservy.github.io/2021/04/09/cart-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:54:34 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/cart-service.html</guid>
+      <description>前言：记一次项目中实现购物车业务的流程。 1.购物车功能分析 1.1.需求 需求描述： 用户可以在登录状态下将商品添加到购物车 放入数据库 放入redis（采用） 用户可以在未登录状态下将商品添加到购物车 放入localstorage 用户可以使用购物车一起结算下单 用户可以查询自己的购物车 用户可以</description>
+    </item>
+    
+    <item>
+      <title>授权中心</title>
+      <link>https://chanservy.github.io/2021/04/09/auth-center.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:46:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/auth-center.html</guid>
+      <description>前言：记一次项目中实现授权中心的流程。 1.无状态登录原理 1.1.什么是有状态？ 有状态服务，即服务端需要记录每次会话的客户端信息，从而识别客户端身份，根据用户身份进行请求的处理，典型的设计如tomcat中的session。 例如登录：用户登录后，我们把登录者的信息保存在服务端sess</description>
+    </item>
+    
+    <item>
+      <title>项目中的注册流程</title>
+      <link>https://chanservy.github.io/2021/04/09/register-step.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:23:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/register-step.html</guid>
+      <description>前言：记一次项目中的注册流程。 1.创建用户中心 用户搜索到自己心仪的商品，接下来就要去购买，但是购买必须先登录。所以接下来我们编写用户中心，实现用户的登录和注册功能。 用户中心的提供的服务： 用户的注册 用户登录 用户个人信息管理 用户地址管理 用户收藏管理 我的订单 优惠券管理 这里我们暂时先实现</description>
+    </item>
+    
+    <item>
+      <title>Redis的安装及操作</title>
+      <link>https://chanservy.github.io/2021/04/09/redis-load-operating.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:06:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/redis-load-operating.html</guid>
+      <description>前言：Redis的安装及操作，一般的Redis的指令和通过Spring Data Redis操作Redis。 redis安装和配置 1.安装 下载安装包 官网下载 上传到我们的home下：/home/leyou/ 解压 tar -xvf redis-4.0.9.tar.gz SHELL 编译安装 mv redis-4.0.9 redis cd redis make &amp;amp;&amp;amp; make install SHELL 2.配置 修改安装目录下的redis.conf文件</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ及数据同步</title>
+      <link>https://chanservy.github.io/2021/04/09/mq-data-together.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:55:13 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/mq-data-together.html</guid>
+      <description>前言：RabbitMQ及数据同步。 1.RabbitMQ 1.1.搜索与商品服务的问题 目前我们已经完成了商品详情和搜索系统的开发。我们思考一下，是否存在问题？ 商品的原始数据保存在数据库中，增删改查都在数据库中完成。 搜索服务数据来源是索引库，如果数据库商品发生变化，索引库数据不能及时更新。 商品详情做了页</description>
+    </item>
+    
+    <item>
+      <title>商品详情及静态化</title>
+      <link>https://chanservy.github.io/2021/04/09/goods-details-page-static.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:48:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/goods-details-page-static.html</guid>
+      <description>&lt;p&gt;前言：接大上篇博客，当用户搜索到商品，肯定会点击查看，就会进入商品详情页，接下来我们完成商品详情页的展示。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Thymeleaf语法入门</title>
+      <link>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:30:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/thymeleaf-study.html</guid>
+      <description>前言：模板引擎——Thymeleaf。 1.Thymeleaf简介 官方网站：https://www.thymeleaf.org/index.html Thymeleaf是用来开发Web和独立环境项目的现代服务器端Java模板引擎。 Thymeleaf的主要目标是为您的开发工作流程带来优</description>
+    </item>
+    
+    <item>
+      <title>项目中的搜索服务</title>
+      <link>https://chanservy.github.io/2021/04/09/search-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 16:18:16 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/search-service.html</guid>
+      <description>&lt;p&gt;前言：上篇写了Elasticsearch的基本应用。今天就学以致用，搭建搜索微服务，实现搜索功能。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>ElasticSearch学习记录</title>
+      <link>https://chanservy.github.io/2021/04/09/study-of-elasticsearch.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:43:35 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/study-of-elasticsearch.html</guid>
+      <description>前言：目标是：独立安装Elasticsearch、会使用Rest的API操作索引、会使用Rest的API查询数据、会使用Rest的API聚合数据、掌握Spring Data Elasticsearch使用。 1.Elasticsearch介绍和安装 1.1.简介 1.1.1.Elastic Elastic官网：https</description>
+    </item>
+    
+    <item>
+      <title>电商项目中商品的分析和数据库设计</title>
+      <link>https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:35:38 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html</guid>
+      <description>电商项目中商品的分析和数据库设计 前言：众所周知，电商网站品类复杂多样，比如京东、淘宝、拼多多等等，诸如这些全品类的电商网站，商品的种类繁多，每一件商品，其属性又有差别。那么设计如此大型的电商网站，我们该如何设计商品信息的展示呢？本文大部分以京东官网的截图为例说明思路。 一、SPU和</description>
+    </item>
+    
+    <item>
+      <title>Centos下安装FastDFS并添加Nginx模块</title>
+      <link>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</link>
+      <pubDate>Fri, 09 Apr 2021 15:23:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html</guid>
+      <description>前言：Centos下安装FastDFS并添加Nginx模块。 1.1 上传 根目录只有一个，那就是/，主目录是当前用户的HOME目录，添加用户的时候指定的。 一般用户缺省的HOME目录是/home/xxx (xxx是用户名)，root用户的缺省HOME目录是/root，也就是~。 将文件上传到l</description>
+    </item>
+    
+    <item>
+      <title>跨域问题</title>
+      <link>https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html</link>
+      <pubDate>Fri, 09 Apr 2021 14:57:14 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html</guid>
+      <description>前言：微服务项目中，由于微服务众多，并且有不止一个环境，因此难免会有跨域的问题，这篇博客聊一聊跨域的问题。 一、跨域问题 1、什么是跨域 跨域是指跨域名的访问，以下情况都属于跨域： 跨域原因说明 示例 域名不同 www.jd.com 与 www.taobao.com 域名相同，端口不同 www.jd.com:8080 与 www.jd.com:8081 二级域名不同 item.jd.com 与 miaosha.jd.com 如果域名和端口都相同，但是请求路径</description>
+    </item>
+    
+    <item>
+      <title>微服务项目中的图片上传</title>
+      <link>https://chanservy.github.io/2020/02/05/upload-image.html</link>
+      <pubDate>Fri, 05 Feb 2021 22:02:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/02/05/upload-image.html</guid>
+      <description>&lt;p&gt;前言：文件的上传并不只是在某个微服务中有需求，以后的其它服务也可能需要，因此我们创建一个独立的微服务，专门处理各种上传。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>使用域名访问本地项目</title>
+      <link>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</link>
+      <pubDate>Fri, 05 Feb 2021 20:59:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/02/05/arrive-local-project-by-webname.html</guid>
+      <description>前言：使用域名访问本地项目。 一、统一环境 比如我们现在访问页面使用的是：http://localhost:9001。 有没有什么问题？ 实际开发中，会有不同的环境： 开发环境：自己的电脑 测试环境：提供给测试人员使用的环境 预发布环境：数据是和生成环境的数据一致，运行最新的项目代码进去测试 生</description>
+    </item>
+    
+    <item>
+      <title>异常统一处理方案</title>
+      <link>https://chanservy.github.io/2021/02/05/error-common-deal.html</link>
+      <pubDate>Fri, 05 Feb 2021 19:24:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/02/05/error-common-deal.html</guid>
+      <description>前言：最近在自己写项目，也是边写边学习边总结了。回想一下，之前在写项目的时候，当项目中出现异常的时候，总是潦草解决，脑海中没有一个统一的轮廓或者标准，所以想来总结一下。 一、为什么要统一异常处理 我们在项目中，往往需要查询什么数据返回给前端，或者将前端传来的数据插入到数据库等等，比如</description>
+    </item>
+    
+    <item>
+      <title>前后端分离开发中权限管理的一点思路</title>
+      <link>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</link>
+      <pubDate>Fri, 29 Jan 2021 10:42:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/01/29/some-idea-about-divide.html</guid>
+      <description>前言：Spring Boot + Vue 前后端分离开发，权限管理的一点思路。 在传统的前后端不分的开发中，权限管理主要通过过滤器或者拦截器来进行（权限管理框架本身也是通过过滤器来实现功能），如果用户不具备某一个角色或者某一个权限，则无法访问某一个页面。 但是在前后端分离中，页面的跳转统统交给前端去做</description>
+    </item>
+    
+    <item>
+      <title>一个Java程序猿眼中的前后端分离以及Vue.js入门</title>
+      <link>https://chanservy.github.io/2021/01/14/front-behind-divied.html</link>
+      <pubDate>Thu, 14 Jan 2021 21:14:34 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/01/14/front-behind-divied.html</guid>
+      <description>前言：一个Java程序猿眼中的前后端分离以及Vue.js入门。 前后端分离以及Vue.js入门 一、前后端不分 后端模板：Jsp、FreeMarker 前端模板：Thymeleaf 前后端不分，Jsp 是一个非常典型写法，Jsp 将 HTML 和 Java 代码结合在一起，刚开始的时候，确实提高了生产力，但是时间</description>
+    </item>
+    
+    <item>
+      <title>Vue扫盲</title>
+      <link>https://chanservy.github.io/2020/12/22/vue-saomang.html</link>
+      <pubDate>Wed, 06 Jan 2021 11:06:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/vue-saomang.html</guid>
+      <description>&lt;p&gt;前言：Vue是一套用于构建用户界面的渐进式框架。与其它大型框架不同的是，Vue被设计为可以自底向上逐层应用。Vue的核心库只关注视图层，不仅易于上手，还便于与第三方库或既有项目整合。另一方面，当与现代化的工具链以及各种支持类库结合使用时，Vue也完全能够为复杂的单页应用提供驱动。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>链路追踪</title>
+      <link>https://chanservy.github.io/2020/12/25/lianluzhuizong.html</link>
+      <pubDate>Fri, 25 Dec 2020 13:07:17 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/25/lianluzhuizong.html</guid>
+      <description>前言：在这种大规模的分布式系统中，一个完整的系统是由多个不同的服务来共同支撑的。不同的系统可能分布在上千台服务器上，横跨多个不同的数据中心。一旦系统出问题，此时问题的定位就比较麻烦。链路追踪可以解决。 链路追踪 一、Spring Cloud Sleuth 1、简介 分布式链路追踪： 在微服务环境下，一次客户端请</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud Stream消息驱动</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-stream.html</link>
+      <pubDate>Tue, 22 Dec 2020 19:20:53 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-stream.html</guid>
+      <description>前言：Spring Cloud Stream消息驱动。 Spring Cloud Stream 1、简介 Spring Cloud Stream 是一个用来为微服务应用构建消息驱动能力的框架。它可以基于 Spring Boot 来创建独立的、可用于生产的 Spring 应用程序。Spring Cloud Stream 为一些供应商的消息中间件产品提供了个性化的自动化配置实现，并引入了发布-订阅、消费组、分区这三个核心概念</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud Bus消息总线</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-bus.html</link>
+      <pubDate>Tue, 22 Dec 2020 18:22:12 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-bus.html</guid>
+      <description>&lt;p&gt;前言：Spring Cloud Bus消息总线。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud Config配置中心</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-config.html</link>
+      <pubDate>Tue, 22 Dec 2020 18:14:57 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-config.html</guid>
+      <description>前言：SpringCloudConfig配置中心。 Spring Cloud Config 一、简介 一个分布式系统配置管理的解决方案，包含了Client和Server。配置文件放在Server端，通过接口的形式提供给Client。 Spring Cloud Config的主要功能： 集中管理各个环境、各个微服务的配置文件 提供服务端和客户端支</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud Gateway网关</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-gateway.html</link>
+      <pubDate>Tue, 22 Dec 2020 18:04:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-gateway.html</guid>
+      <description>前言：Spring Cloud Gateway。 Spring Cloud Gateway 1.1 SpringCloud Gateway 简介 SpringCloud Gateway 是 Spring Cloud 的一个全新项目，该项目是基于 Spring 5.0，Spring Boot 2.0 和 Project Reactor 等技术开发的网关，它旨在为微服务架构提供一种简单有效的统一的 API 路由管理方式。 SpringCloud Gateway 作为 Spring Cloud 生态系统中的网关，目标是替代 Zuul，在Spring Cloud 2.0以上版本中</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Resilience4j</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-resilience4j.html</link>
+      <pubDate>Tue, 22 Dec 2020 17:35:33 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-resilience4j.html</guid>
+      <description>前言：Spring Cloud之Resilience4j。 Resilience4j Resilience4j 是 Spring Cloud GreenWich 版推荐的容错解决方案，相比 Hystrix ， Resilience4j 专为 Java8 以及函数式编程而设计。由于奈飞的断更， Hystrix 将来有可能被 Resilience4j 取而代之。 Resilience4j 主要提供了如下功能： 断路器 限流 基于信号量的隔离 缓存 限时 请求重试 1、结合微服务 Retry、CircuitBre</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Hystrix Dashboard</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-hystrix-dashboard.html</link>
+      <pubDate>Tue, 22 Dec 2020 17:12:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-hystrix-dashboard.html</guid>
+      <description>前言：Spring Cloud之Hystrix Dashboard。 一、Hystrix Dashboard是什么？ Hystrix提供了对于微服务调用状态的监控信息，但是需要结合spring-boot-actuator模块一起使用。 Hystrix Dashboard主要用来实时监控Hystrix的各项</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Zuul网关(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-zuul.html</link>
+      <pubDate>Tue, 22 Dec 2020 16:27:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-zuul.html</guid>
+      <description>前言：Spring Cloud之Zuul网关(H版)。 一、什么是网关 API Gateway，是系统的唯一对外的入口，介于客户端和服务器端之间的中间层，处理非业务功能 提供路由请求、鉴权、监控、缓存、限流等功能。 统一接入 智能路由 AB测试、灰度测试 负载均衡、容灾处理 日志埋点（类似Nginx日志</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Hystrix(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-hystrixH.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:59:16 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-hystrixH.html</guid>
+      <description>前言：Spring Cloud之Hystrix(H版)。 一、断路器简介 在微服务架构中，根据业务来拆分成一个个的服务，服务与服务之间可以相互调用（RPC），在Spring Cloud可以用RestTemplate+Ribbon和Feign来调用。为了保证其高可用，单个服务通常会集群部署</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Feign(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-feignH.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:41:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-feignH.html</guid>
+      <description>前言：Spring Cloud之Feign(H版)。 一、Feign简介 Feign是一个声明式的伪Http客户端，它使得写Http客户端变得更简单。使用Feign，只需要创建一个接口并注解。它具有可插拔的注解特性，可使用Feign 注解和JAX-RS注解。Feign支持可插拔的编码器和</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Ribbon(H版)</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-ribbonH.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:20:31 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-ribbonH.html</guid>
+      <description>前言：Spring Cloud之Ribbon(H版)。 Spring Cloud之Ribbon(H版) 一、ribbon简介 Ribbon is a client side load balancer which gives you a lot of control over the behaviour of HTTP and TCP clients. Feign already uses Ribbon, so if you are using @FeignClient then this section also applies. —–摘自官网 ribbon是一个负载均衡客户端，可以很好的控制 http 和 tcp 的一些行为。Feign默认集成了r</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之Eureka集群搭建</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-eurekajiqun.html</link>
+      <pubDate>Tue, 22 Dec 2020 15:08:12 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-eurekajiqun.html</guid>
+      <description>&lt;p&gt;前言：Spring Cloud之Eureka集群搭建。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Cloud之服务注册中心</title>
+      <link>https://chanservy.github.io/2020/12/22/cloud-eureka.html</link>
+      <pubDate>Tue, 22 Dec 2020 12:28:36 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/cloud-eureka.html</guid>
+      <description>前言：首先，如果是一个传统的单体应用的话，所有的业务都集中在一个项目中，当用户在浏览器发出请求时，直接由前端发起请求给后端，后端调用业务逻辑，给前端请求作出响应，完成一次调用。整个调用过程是一条直线，不需要服务之间的中转，所有没有必要引入注册中心。 注册中心Eureka 随着公司项目</description>
+    </item>
+    
+    <item>
+      <title>微服务概述</title>
+      <link>https://chanservy.github.io/2020/12/22/micro-service.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:55:13 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/micro-service.html</guid>
+      <description>前言：微服务概述。 微服务概述 1、微服务介绍 微服务架构越来越流行，这个没有异议。 2009 年，Netﬂix 重新定义了它的应用程序员的开发模型，这个算是微服务的首次探索。 2014 年，《Microservices》，这篇文章以一个更加通俗易懂的方式，为大家定义了微服务。为什么要用微服务？ 互联网应用产</description>
+    </item>
+    
+    <item>
+      <title>Spring Security使用JSON格式登录</title>
+      <link>https://chanservy.github.io/2020/12/22/security-json.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:38:48 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-json.html</guid>
+      <description>前言： 在使用 Spring Security 的过程中，大伙都知道默认的登录数据是通过 key/value 的形式来传递的，默认情况下不支持 JSON 格式的登录数据，如果有这种需求，就需要自己来解决，本着“升华思想”，在 Security 的基础上，让它增加对 JSON 格式的登录数据的支持。 Spring Security使用JSON格式登录 一、基本登录方案 在说如何使用 JSON 登录</description>
+    </item>
+    
+    <item>
+      <title>Spring Security结合OAuth2</title>
+      <link>https://chanservy.github.io/2020/12/22/security-oauth2.html</link>
+      <pubDate>Tue, 22 Dec 2020 11:04:12 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-oauth2.html</guid>
+      <description>前言：OAuth 2.0 是目前最流行的授权机制，用来授权第三方应用，获取用户数据。这个标准比较抽象，使用了很多术语，初学者不容易理解。其实说起来并不复杂，下面我就通过一个简单的类比，帮助大家轻松理解，OAuth 2.0 到底是什么。 Spring Security结合OAuth2 OAuth 2.0 的一个简单解释 一、快递员</description>
+    </item>
+    
+    <item>
+      <title>Security基于数据库动态配置权限</title>
+      <link>https://chanservy.github.io/2020/12/22/security-by-db.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:46:44 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-by-db.html</guid>
+      <description>前言：对于Spring Security，由于也是近期才开始接触，所以还是处在慢慢摸索的阶段，前面与Spring Security相关的文章中的例子都是事先将用户，角色，资源的信息都写在了程序中，但是大家只有在生产环境中，没有一成不变的信息，因此本篇博客会将用户，角色，资源都写“活”</description>
+    </item>
+    
+    <item>
+      <title>WebSocket在线聊天</title>
+      <link>https://chanservy.github.io/2020/12/22/websocket-zaixianliaotian.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:30:28 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/websocket-zaixianliaotian.html</guid>
+      <description>前言：在 http 的协议中，所有的请求都是由客户端发起的，服务端进行响应，但是服务端的话是没办法直接给客户端推送消息的。但是在一些需要即时通信的应用中，我们会有这样的需求，而且这种需求很常见，比如在线游戏、在线股票、支付和最典型的在线聊天等。 WebSocket在线聊天 开头先说说长轮循：请</description>
+    </item>
+    
+    <item>
+      <title>Spring Security添加验证码</title>
+      <link>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:24:54 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/security-tianjiayanzhengma.html</guid>
+      <description>&lt;p&gt;前言： 登录添加验证码是一个非常常见的需求，网上也有非常成熟的解决方案，其实，要是自己自定义登录实现这个并不难，但是如果需要在 Spring Security 框架中实现这个功能，还得稍费一点功夫。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Security</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</link>
+      <pubDate>Mon, 21 Dec 2020 17:17:06 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-security.html</guid>
+      <description>前言： Spring Security 是 Spring 家族中的一个安全管理框架，实际上，在 Spring Boot 出现之前，Spring Security 就已经发展了多年了，但是使用的并不多，安全管理这个领域，一直是 Shiro 的天下。 相对于 Shiro，在 SSM/SSH 中整合 Spring Security 都是比较麻烦的操作，所以，Spring Security 虽然功能比 Shiro 强大，但是使用反而没有 Shiro 多，但是现如今随着项目</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合RabbitMQ</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</link>
+      <pubDate>Mon, 21 Dec 2020 16:54:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-rabbitmq.html</guid>
+      <description>前言：在大多数的应用中都可以通过消息服务的中间件来提升系统的异步通信、扩展解耦的能力。这篇是有关于Spring Boot与消息队列的整合，本文主要以RabbitMQ为案例来介绍。 Spring Boot整合RabbitMQ 一、消息概述 消息服务中的两个重要的概念：消息代理（message broke</description>
+    </item>
+    
+    <item>
+      <title>定时任务的两种实现方式</title>
+      <link>https://chanservy.github.io/2020/12/21/two-method-of-dingshirenwu.html</link>
+      <pubDate>Mon, 21 Dec 2020 16:46:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/two-method-of-dingshirenwu.html</guid>
+      <description>在 Spring + SpringMVC 环境中，一般来说，要实现定时任务，我们有两种方案，一种是使用 Spring 自带的定时任务处理器 @Scheduled 注解，另一种就是使用第三方框架 Quartz ，Spring Boot 源自 Spring+SpringMVC ，因此天生具备 Spring 中的定时任务的实现策略，当然也支持 Quartz，本文我们就来看下 Spring Boot 中两种定时任务的实现方式。 定时任务的两种实现方式 一</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Shiro</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-shiro.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:28:00 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-shiro.html</guid>
+      <description>前言： 在 Spring Boot 中做权限管理，一般来说，主流的方案是 Spring Security ，但是，仅仅从技术角度来说，也可以使用 Shiro。 Spring Boot整合Shiro 一般来说，Spring Security 和 Shiro 的比较如下： Spring Security 是一个重量级的安全管理框架；Shiro 则是一个轻量级的安全管理框架 Spring Security 概念复杂，配置繁琐；Shiro 概念简单、</description>
+    </item>
+    
+    <item>
+      <title>Shiro注解式开发揉入项目</title>
+      <link>https://chanservy.github.io/2020/12/22/shiro-zhujieshi.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:23:40 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/shiro-zhujieshi.html</guid>
+      <description>&lt;p&gt;前言：这是个很久之前的项目案例了，今天做一下总结，在博客中写出了大致的步骤，以及配置文件等等。（这个是在原先的SSM架构的项目（好像是毕设）的基础上加入的Shiro权限校验。）&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Shiro心得</title>
+      <link>https://chanservy.github.io/2020/12/22/shiro-xinde.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:09:36 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/shiro-xinde.html</guid>
+      <description>前言：由于做项目的时候难免会用到权限管理，之前也一直有接触到过，诸如Shiro，Spring Security此类的。不过一直只是零零碎碎的记一些东西，一直都没有系统的总结过这部分的知识。到目前为止，我在项目里使用的大部分都是Shiro，因为它比较轻量级。这篇博客先写写对Shiro</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的热部署</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-rebushu.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:04:41 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-rebushu.html</guid>
+      <description>前言： Spring Boot 中的热部署相信大家都用过吧，只需要添加 spring-boot-devtools 依赖就可以轻松实现热部署。 Spring Boot的热部署 Spring Boot 中热部署最最关键的原理就是两个不同的 classloader： base classloader restart classloader 其中 base classloader 用来加载那些不会变化的类，例如各种第三方依赖，而 restart classloader 则用来加载那些会发生变化的类，例如你自己写的代码。Sp</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Spring Cache操作Redis</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</link>
+      <pubDate>Mon, 21 Dec 2020 13:00:21 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-springcache.html</guid>
+      <description>前言： 经过 Spring Boot 的整合封装与自动化配置，在 Spring Boot 中整合Redis 已经变得非常容易了，开发者只需要引入 Spring Data Redis 依赖，然后简单配下 redis 的基本信息，系统就会提供一个 RedisTemplate 供开发者使用，但是这篇文章聊的不是这种用法，而是结合 Cache 的用法。Spring3.1 中开始引入了令人激动的 Cache，在 Spring Boot 中，可以</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Mybatis案例</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:51:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-mybaties.html</guid>
+      <description>前言：关于持久化层，从大学到现在陆陆续续的接触了很多，JDBCTemplate、Struts2、Hibernate、Mybatis、JPA等。到目前为止接触的最多的就是Mybatis，也是公司用的最多的，一直想总结一下的，一般的常规用的用法。这里Mybatis的一级缓存是默认开启</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Redis</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-redis.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:45:17 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-redis.html</guid>
+      <description>前言：Spring Boot整合Redis，项目里缓存是刚需，所以没啥可说的，做个笔记，很重要的一块。 Spring Boot整合Redis 在传统的 SSM 中，需要开发者自己来配置 Spring Data Redis ，这个配置比较繁琐，主要配置 3 个东西：连接池、连接器信息以及 key 和 value 的序列化方案。 在 Spring Boot 中，默认集成的 Redis 就是 Spring Data Red</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合Session共享</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:33:51 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-zhenghe-session-gongxiang.html</guid>
+      <description>前言：由于项目的架构中采用了负载均衡，因此又不止一个的服务器，那么多个服务器之间一定有信息的交互问题，比如我的业务在服务器A中进行了操作，并且有了session数据在服务器A中，等下次请求来到了，由于Nginx的轮询机制，Nginx吧请求转发到了其他的服务器B中，这个时候服务器B</description>
+    </item>
+    
+    <item>
+      <title>Nginx扫盲</title>
+      <link>https://chanservy.github.io/2020/12/21/nginx-saomang.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:23:54 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/nginx-saomang.html</guid>
+      <description>前言： 之前一直都有接触过Nginx，但是一直没有系统的写一篇关于它的博客， 也一直稀里糊涂的，一直想总结一下，但是一拖再拖，包括之前我的服务器上安装Nginx的时候也遇到了很多的问题，一顿百度的感觉很不爽，于是准备自己写一篇。正好最近看到松哥的视频和博客，因此想总结一番。 Nginx</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的类型转换器</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-leixingzhuanhuanqi.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:19:37 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-leixingzhuanhuanqi.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot中的类型转换器。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的拦截器</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-lanjieqi.html</link>
+      <pubDate>Mon, 21 Dec 2020 12:15:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-lanjieqi.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot中的拦截器。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>CORS解决跨域问题</title>
+      <link>https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:51:05 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/cors-deal-kuayu.html</guid>
+      <description>前言： 通过CORS解决跨域问题。 很多人对跨域有一种误解，以为这是前端的事，和后端没关系，其实不是这样的，说到跨域，就不得不说说浏览器的同源策略。 CORS解决跨域问题 1、同源策略 同源策略是由 Netscape 提出的一个著名的安全策略，它是浏览器最核心也最基本的安全功能，现在所有支持 JavaScript 的浏览器都会使</description>
+    </item>
+    
+    <item>
+      <title>说说不常见的@ControllerAdvice</title>
+      <link>https://chanservy.github.io/2020/12/21/controller-advice.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:43:24 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/controller-advice.html</guid>
+      <description>前言：@Controller，是我们大家耳熟能详的注解，但是它有一个增强的注解，那便是@ControllerAdvice，这个注解不知道大家常用不，反正我不是很常用它，所以对于这个注解一直不是很熟悉，即使之前见到过，那也并没有系统的总结过这个注解的用途，今天想好好的总结一下。 说说</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的文件上传</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-wenjianshangchuan.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:33:41 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-wenjianshangchuan.html</guid>
+      <description>&lt;p&gt;前言：我们后端开发人员，一定手写过文件上传，如果最初是用SSM写的文件上传，而后使用Spring Boot了的话，那么我们一定会觉得在SSM 中会更加的麻烦，还是那句话Spring Boot就像个慈祥的保姆，什么都为我们设置了默认的配置，亦或像一位不那么独断专制的霸主，允许我们按照需求规定自己的配置，并且方便的一批。本文介绍Spring Boot中的文件上传。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的静态资源配置</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:25:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-jingtaiziyuanpeizhi.html</guid>
+      <description>&lt;p&gt;前言：“卧槽！我的HTML页面没有样式！”，相信刚入门的时候的我们基本上都会遇到这个问题。没错，在SSM中，当我们使用SpringMVC框架的时候，静态资源会被拦截，需要添加额外配置，所以在说Spring Boot之前，首先我们从Spring MVC说起。那是一个月黑风高的夜晚，我独自走在林间的小路上，啊呸，跑题了，下面步入正题。。。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot中的JSON</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-json.html</link>
+      <pubDate>Mon, 21 Dec 2020 11:17:35 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-json.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot 中的 JSON 。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot整合视图层技术</title>
+      <link>https://chanservy.github.io/2020/12/22/boot-shitucengjishu.html</link>
+      <pubDate>Mon, 21 Dec 2020 10:57:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/boot-shitucengjishu.html</guid>
+      <description>&lt;p&gt;前言：Spring Boot整合视图层技术。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>理解Spring Boot中自动化配置的原理</title>
+      <link>https://chanservy.github.io/2020/12/21/spring-boot-auto-config.html</link>
+      <pubDate>Mon, 21 Dec 2020 10:43:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/21/spring-boot-auto-config.html</guid>
+      <description>前言： 这里边有一个非常关键的点，那就是条件注解，甚至可以说条件注解是整个 Spring Boot 的基石。条件注解并非一个新事物，这是一个存在于 Spring 中的东西，我们在 Spring 中常用的 profile 实际上就是条件注解的一个特殊化。想要把 Spring Boot 的原理搞清，条件注解必须要会用。 理解Spring Boot中自动化配置的原理 一、定义 Spring4 中</description>
+    </item>
+    
+    <item>
+      <title>自定义Spring Boot中的starter</title>
+      <link>https://chanservy.github.io/2020/12/14/starter-by-myself.html</link>
+      <pubDate>Mon, 14 Dec 2020 13:25:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/14/starter-by-myself.html</guid>
+      <description>前言：我们使用Spring Boot，基本上都是馋它的身子，哈哈哈，无非就是觉得Spring Boot中的一些自动化配置为我们提供了更加便捷的开发效率，确实，Starter为我们带来的众多的自动化配置，让我们可以不费吹灰之力就能搭建一个生产级的开发环境。Wow, so crazy! 其实Starter</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的基础配置</title>
+      <link>https://chanservy.github.io/2020/12/22/spring-boot-jichupeizhi.html</link>
+      <pubDate>Mon, 14 Dec 2020 12:31:37 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/spring-boot-jichupeizhi.html</guid>
+      <description>前言：Spring Boot的基础配置。 Spring Boot的基础配置 1. 容器的相关配置 众所周知，Spring Boot 的启动不同于普通的 SSM 项目，因为最初的三层架构的项目启动的话，最常见的我们需要配置一个容器，也就是一个服务器的环境，但是 Spring Boot 不需要，因为 Spring Boot 内置了 Tomcat 的 starter。 当使用 Spring Boot 原生的内</description>
+    </item>
+    
+    <item>
+      <title>服务端高并发分布式架构演进之路</title>
+      <link>https://chanservy.github.io/2020/12/14/fuwuduangaobingfafenbushi.html</link>
+      <pubDate>Mon, 14 Dec 2020 11:21:50 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/14/fuwuduangaobingfafenbushi.html</guid>
+      <description>写在前面： IT行业就像浩瀚的大海，人们逐渐的开发与探索，积累并且创新迭代出了许多的产品，并且涌现出了许多关乎IT的专有名词。工作之余，我有幸读到前辈们的经验总结，并将这些五指不可触及的精华归纳入我自己的博客。 一、概述 本文以淘宝作为例子，介绍从一百个到千万级并发情况下服务端的架构的</description>
+    </item>
+    
+    <item>
+      <title>Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析</title>
+      <link>https://chanservy.github.io/2020/12/22/spring-boot-chuangjianfangshi.html</link>
+      <pubDate>Sun, 13 Dec 2020 18:12:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/22/spring-boot-chuangjianfangshi.html</guid>
+      <description>前言：Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析。 Spring Boot的创建方式、启动类的注解以及pom文件的底层剖析 1. Spring Boot的特点 更广泛的快速的Spring开发体验 一系列开箱即用的starter 一系列非功能性的自动化配置 没有xml配置文件的生成 2. 工程创建的三</description>
+    </item>
+    
+    <item>
+      <title>抛弃web.xml，纯Java搭建的SSM环境</title>
+      <link>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</link>
+      <pubDate>Sat, 12 Dec 2020 15:10:32 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/12/12/ssm-environment-allwith-java.html</guid>
+      <description>&lt;p&gt;&lt;strong&gt;前言&lt;/strong&gt;：在Spring boot的项目中，是不涉及到xml的配置的，是因为Spring boot不推荐使用xml，并非不支持。Spring Boot 中，大量的自动化配置都是通过 Java 配置来实现的，因此在学习Spring boot之前，我们抛弃之前的xml的方式，使用纯Java搭建一套SSM的环境。即，在项目的配置中，完全使用Java来配置，不使用任何的xml配置文件，包括web.xml。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Spring Cloud Alibaba on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/Spring-Cloud-Alibaba/</link>
+    <description>Recent content in Spring Cloud Alibaba on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 15 May 2021 22:35:42 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Nacos集群部署以及RPC框架选型</title>
+      <link>https://chanservy.github.io/2021/05/16/nacos-cluster.html</link>
+      <pubDate>Sat, 15 May 2021 22:35:42 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/nacos-cluster.html</guid>
+      <description>&lt;p&gt;前言：在进入正题”Nacos集群部署之前“，先从最先的单体架构开始说起，这也是我在中华石杉老师的架构课学习到的知识，想总结到自己的博客中，方便日后复习观看。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

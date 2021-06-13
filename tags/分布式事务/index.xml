@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>分布式事务 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/</link>
+    <description>Recent content in 分布式事务 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 24 May 2021 22:20:34 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式事务之可靠消息最终一致性方案</title>
+      <link>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</link>
+      <pubDate>Mon, 24 May 2021 22:20:34 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</guid>
+      <description>&lt;p&gt;这几篇文章一直在讲有关分布式事务的问题，的确，在一些场景中，会涉及到分布式事务也就是数据不一致的问题，会发生在分布式微服务的项目中，所谓分布式事务就是数据涉及到多个微服务之间的接口调用，如果全部没错皆大欢喜，但凡有一个地方出现了报错，那就全部要回滚，保证数据的一致性和准确性，其实就是事务的特性。这篇讲的是通过消息队列来实现数据的最终一致性，可靠消息最终一致性方案，准确的说这并不是一套针对分布式事务的解决方案，而是一个通过MQ实现分布式事务效果（数据一致性）的方案。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之TCC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/tcc.html</link>
+      <pubDate>Mon, 24 May 2021 22:19:19 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/tcc.html</guid>
+      <description>&lt;p&gt;TCC又称补偿事务。其核心思想是：&amp;ldquo;针对每个操作都要有一个与其对应的尝试、确认和补偿（撤销操作）&amp;quot;。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>分布式事务之2PC和3PC方案</title>
+      <link>https://chanservy.github.io/2021/05/16/2pcand3pc.html</link>
+      <pubDate>Fri, 21 May 2021 18:24:57 +0000</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/05/16/2pcand3pc.html</guid>
+      <description>&lt;p&gt;前言：如果一个系统操作多个数据库，肯定是有跨多个库的分布式事务的一个问题，今天的主要目标就是分布式事务的方案以及原理剖析。来自石杉老师的码农架构课的学习。&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>订单业务</title>
+      <link>https://chanservy.github.io/2021/04/09/order-service.html</link>
+      <pubDate>Fri, 09 Apr 2021 17:59:46 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/04/09/order-service.html</guid>
+      <description>前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &amp;lt;?xml version=&amp;#34;1.0&amp;#34; encoding=&amp;#34;UTF-8&amp;#34;?&amp;gt; &amp;lt;project xmlns=&amp;#34;http://maven.apache.org/POM/4.0.0&amp;#34; xmlns:xsi=&amp;#34;http://www.w3.org/2001/XMLSchema-instance&amp;#34; xsi:schemaLocation=&amp;#34;http://maven.apache.org/POM/4.0.0</description>
+    </item>
+    
+  </channel>
+</rss>

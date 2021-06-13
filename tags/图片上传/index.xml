@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>图片上传 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/</link>
+    <description>Recent content in 图片上传 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 05 Feb 2021 22:02:58 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>微服务项目中的图片上传</title>
+      <link>https://chanservy.github.io/2020/02/05/upload-image.html</link>
+      <pubDate>Fri, 05 Feb 2021 22:02:58 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2020/02/05/upload-image.html</guid>
+      <description>&lt;p&gt;前言：文件的上传并不只是在某个微服务中有需求，以后的其它服务也可能需要，因此我们创建一个独立的微服务，专门处理各种上传。&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

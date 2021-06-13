@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Spring Security使用JSON格式登录 | 迩东陈的博客</title>
+    <meta property="og:title" content="Spring Security使用JSON格式登录 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2020-12-22T11:38:48&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-12-22T11:38:48&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Spring Security使用JSON格式登录">
+        <meta name="author" content="迩东陈">
+        
+    <meta property="og:url" content="https://chanservy.github.io/2020/12/22/security-json.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#一基本登录方案">一、基本登录方案</a>
+      <ul>
+        <li><a href="#security-配置">Security 配置</a></li>
+      </ul>
+    </li>
+    <li><a href="#二使用-json-登录">二、使用 JSON 登录</a>
+      <ul>
+        <li><a href="#运行结果">运行结果</a></li>
+      </ul>
+    </li>
+    <li><a href="#三说点题外话objectmapper">三、说点题外话ObjectMapper</a>
+      <ul>
+        <li><a href="#常用方法">常用方法:</a></li>
+        <li><a href="#运行结果-1">运行结果：</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Spring Security使用JSON格式登录</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2020年12月22日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Security'>Spring Security</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="clear" style="display: none">
+            <div class="toc-article">
+                <div class="toc-title">文章目录</div>
+            </div>
+        </div>
+        
+        <div class="post-content">
+            <p>前言： 在使用 Spring Security 的过程中，大伙都知道默认的登录数据是通过 key/value 的形式来传递的，默认情况下不支持 JSON 格式的登录数据，如果有这种需求，就需要自己来解决，本着“升华思想”，在 Security 的基础上，让它增加对 JSON 格式的登录数据的支持。</p>
+<h1 id="spring-security使用json格式登录">Spring Security使用JSON格式登录</h1>
+<h2 id="一基本登录方案">一、基本登录方案</h2>
+<p>在说如何使用 JSON 登录之前，我们先来复习一下基本的登录吧，具体的操作在我前面的文章中已经写的很详细了。本文为了简单，Spring Security 在使用中就不连接数据库了，直接在内存中配置用户名和密码，并且只写核心的东西。</p>
+<h3 id="security-配置">Security 配置</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/18 18:16
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityConfig</span> <span style="color:#000;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    PasswordEncoder <span style="color:#900;font-weight:bold">passwordEncoder</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> BCryptPasswordEncoder<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>AuthenticationManagerBuilder auth<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        auth<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">inMemoryAuthentication</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">withUser</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;chan&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">password</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;$2a$10$2O4EwLrrFPEboTfDOtC0F.RpUMk.3q3KvBHRx7XXKUMLBGjOOBs8q&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">roles</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;user&#34;</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>WebSecurity web<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>HttpSecurity http<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizeRequests</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">anyRequest</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">authenticated</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">formLogin</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loginProcessingUrl</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/doLogin&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">successHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AuthenticationSuccessHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+                    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">onAuthenticationSuccess</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest req<span style="color:#000;font-weight:bold">,</span> HttpServletResponse resp<span style="color:#000;font-weight:bold">,</span> Authentication authentication<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+                        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;登录成功&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        PrintWriter out <span style="color:#000;font-weight:bold">=</span> resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>map<span style="color:#000;font-weight:bold">));</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">})</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">failureHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AuthenticationFailureHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+                    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">onAuthenticationFailure</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest req<span style="color:#000;font-weight:bold">,</span> HttpServletResponse resp<span style="color:#000;font-weight:bold">,</span> AuthenticationException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+                        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;登录失败&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        PrintWriter out <span style="color:#000;font-weight:bold">=</span> resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>map<span style="color:#000;font-weight:bold">));</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">})</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">loginPage</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/login&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">permitAll</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">logout</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">logoutUrl</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/logout&#34;</span><span style="color:#000;font-weight:bold">)</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">logoutSuccessHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> LogoutSuccessHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+                    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">onLogoutSuccess</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest req<span style="color:#000;font-weight:bold">,</span> HttpServletResponse resp<span style="color:#000;font-weight:bold">,</span> Authentication authentication<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+                        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;注销成功&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        PrintWriter out <span style="color:#000;font-weight:bold">=</span> resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>map<span style="color:#000;font-weight:bold">));</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">})</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">permitAll</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">csrf</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">disable</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exceptionHandling</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">accessDeniedHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AccessDeniedHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+                    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">handle</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest req<span style="color:#000;font-weight:bold">,</span> HttpServletResponse resp<span style="color:#000;font-weight:bold">,</span> AccessDeniedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                        Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span> String<span style="color:#000;font-weight:bold">&gt;</span> map <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> HashMap<span style="color:#000;font-weight:bold">&lt;&gt;();</span>
+                        map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;权限不足，访问失败&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setStatus</span><span style="color:#000;font-weight:bold">(</span>403<span style="color:#000;font-weight:bold">);</span>
+                        resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                        PrintWriter out <span style="color:#000;font-weight:bold">=</span> resp<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>map<span style="color:#000;font-weight:bold">));</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                        out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                <span style="color:#000;font-weight:bold">});</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>这里的配置虽然有点长，但是很基础，配置含义也比较清晰，首先提供 BCryptPasswordEncoder 作为 PasswordEncoder，可以实现对密码的自动加密加盐，非常方便，然后提供了一个名为 <code>chan</code> 的用户，密码是 <code>123</code> ，角色是 <code>user</code> ，最后配置登录逻辑，所有的请求都需要登录后才能访问，登录接口是 <code>/doLogin</code> ，用户名的 key 是 username，密码的 key 是 password，同时配置登录成功、登录失败以及注销成功、权限不足时都给用户返回 JSON 提示，另外，这里虽然配置了登录页面为 <code>/login</code> ，实际上在这里它不是一个页面，而是一段 JSON，在 LoginController 中提供该接口，如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#3c5d5d;font-weight:bold">@Controller</span>
+<span style="color:#3c5d5d;font-weight:bold">@ResponseBody</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LoginController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/login&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> JSONObject <span style="color:#900;font-weight:bold">login</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        JSONObject jsonObject <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> JSONObject<span style="color:#000;font-weight:bold">();</span><span style="color:#998;font-style:italic">//用Map封装数据也ok
+</span><span style="color:#998;font-style:italic"></span>        jsonObject<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;尚未登录，请登录&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">return</span> jsonObject<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>这里的 <code>/login</code> 只是一个 JSON 提示，而不是页面， <code>/hello</code> 则是一个测试接口。</p>
+<p>OK，做完上述步骤就可以启动项目测试了。这里就不展示了。</p>
+<h2 id="二使用-json-登录">二、使用 JSON 登录</h2>
+<p>上面演示的是一种原始的登录方案，如果想将用户名密码通过 JSON 的方式进行传递，则需要自定义相关过滤器，通过分析源码我们发现，默认的用户名密码提取在 UsernamePasswordAuthenticationFilter 过滤器中，部分源码如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">UsernamePasswordAuthenticationFilter</span> <span style="color:#000;font-weight:bold">extends</span>
+        AbstractAuthenticationProcessingFilter <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#998;font-style:italic">//这便可以看出是key-value的形式
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String SPRING_SECURITY_FORM_USERNAME_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> String SPRING_SECURITY_FORM_PASSWORD_KEY <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;password&#34;</span><span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">private</span> String usernameParameter <span style="color:#000;font-weight:bold">=</span> SPRING_SECURITY_FORM_USERNAME_KEY<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String passwordParameter <span style="color:#000;font-weight:bold">=</span> SPRING_SECURITY_FORM_PASSWORD_KEY<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">boolean</span> postOnly <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">UsernamePasswordAuthenticationFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AntPathRequestMatcher<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/login&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;POST&#34;</span><span style="color:#000;font-weight:bold">));</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Authentication <span style="color:#900;font-weight:bold">attemptAuthentication</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span>
+            HttpServletResponse response<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AuthenticationException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>postOnly <span style="color:#000;font-weight:bold">&amp;&amp;</span> <span style="color:#000;font-weight:bold">!</span>request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMethod</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;POST&#34;</span><span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> AuthenticationServiceException<span style="color:#000;font-weight:bold">(</span>
+                    <span style="color:#d14">&#34;Authentication method not supported: &#34;</span> <span style="color:#000;font-weight:bold">+</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMethod</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">}</span>
+		<span style="color:#998;font-style:italic">//再次证明k-v  点击这里进入
+</span><span style="color:#998;font-style:italic"></span>        String username <span style="color:#000;font-weight:bold">=</span> obtainUsername<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">);</span>
+        String password <span style="color:#000;font-weight:bold">=</span> obtainPassword<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>username <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            username <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>password <span style="color:#000;font-weight:bold">==</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            password <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        username <span style="color:#000;font-weight:bold">=</span> username<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">trim</span><span style="color:#000;font-weight:bold">();</span>
+
+        UsernamePasswordAuthenticationToken authRequest <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UsernamePasswordAuthenticationToken<span style="color:#000;font-weight:bold">(</span>
+                username<span style="color:#000;font-weight:bold">,</span> password<span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#998;font-style:italic">// Allow subclasses to set the &#34;details&#34; property
+</span><span style="color:#998;font-style:italic"></span>        setDetails<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">,</span> authRequest<span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAuthenticationManager</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">authenticate</span><span style="color:#000;font-weight:bold">(</span>authRequest<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">protected</span> String <span style="color:#900;font-weight:bold">obtainPassword</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getParameter</span><span style="color:#000;font-weight:bold">(</span>passwordParameter<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">protected</span> String <span style="color:#900;font-weight:bold">obtainUsername</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getParameter</span><span style="color:#000;font-weight:bold">(</span>usernameParameter<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#998;font-style:italic">//...
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">//...
+</span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>上述的部分代码的中，有下面两行：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">String username <span style="color:#000;font-weight:bold">=</span> obtainUsername<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">);</span>
+String password <span style="color:#000;font-weight:bold">=</span> obtainPassword<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">);</span>
+</code></pre></div><p>我们从这里点击方法进入：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * Enables subclasses to override the composition of the password, such as by
+</span><span style="color:#998;font-style:italic">	 * including additional values and a separator.
+</span><span style="color:#998;font-style:italic">	 * &lt;p&gt;
+</span><span style="color:#998;font-style:italic">	 * This might be used for example if a postcode/zipcode was required in addition to
+</span><span style="color:#998;font-style:italic">	 * the password. A delimiter such as a pipe (|) should be used to separate the
+</span><span style="color:#998;font-style:italic">	 * password and extended value(s). The &lt;code&gt;AuthenticationDao&lt;/code&gt; will need to
+</span><span style="color:#998;font-style:italic">	 * generate the expected password in a corresponding manner.
+</span><span style="color:#998;font-style:italic">	 * &lt;/p&gt;
+</span><span style="color:#998;font-style:italic">	 *
+</span><span style="color:#998;font-style:italic">	 * @param request so that request attributes can be retrieved
+</span><span style="color:#998;font-style:italic">	 *
+</span><span style="color:#998;font-style:italic">	 * @return the password that will be presented in the &lt;code&gt;Authentication&lt;/code&gt;
+</span><span style="color:#998;font-style:italic">	 * request token to the &lt;code&gt;AuthenticationManager&lt;/code&gt;
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#000;font-weight:bold">protected</span> String <span style="color:#900;font-weight:bold">obtainPassword</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getParameter</span><span style="color:#000;font-weight:bold">(</span>passwordParameter<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+
+	<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">	 * Enables subclasses to override the composition of the username, such as by
+</span><span style="color:#998;font-style:italic">	 * including additional values and a separator.
+</span><span style="color:#998;font-style:italic">	 *
+</span><span style="color:#998;font-style:italic">	 * @param request so that request attributes can be retrieved
+</span><span style="color:#998;font-style:italic">	 *
+</span><span style="color:#998;font-style:italic">	 * @return the username that will be presented in the &lt;code&gt;Authentication&lt;/code&gt;
+</span><span style="color:#998;font-style:italic">	 * request token to the &lt;code&gt;AuthenticationManager&lt;/code&gt;
+</span><span style="color:#998;font-style:italic">	 */</span>
+	<span style="color:#000;font-weight:bold">protected</span> String <span style="color:#900;font-weight:bold">obtainUsername</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+		<span style="color:#000;font-weight:bold">return</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getParameter</span><span style="color:#000;font-weight:bold">(</span>usernameParameter<span style="color:#000;font-weight:bold">);</span>
+	<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>由此看来，Spring Security 确实是默认key-value的形式，并且还是基于Servlet获取的用户名和密码，默认的 <code>用户名/密码</code> 提取就是通过 request 中的 getParameter 来提取的，如果想使用 JSON 传递用户名密码，只需要将这个过滤器替换掉即可，自定义过滤器如下：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.securityJson.filter</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.fasterxml.jackson.databind.ObjectMapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.http.MediaType</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.AuthenticationServiceException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.authentication.UsernamePasswordAuthenticationToken</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.Authentication</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.AuthenticationException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.servlet.http.HttpServletRequest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.servlet.http.HttpServletResponse</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.IOException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.InputStream</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.util.Map</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname MyAuthenticationFilter
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/18 17:29
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">MyAuthenticationFilter</span> <span style="color:#000;font-weight:bold">extends</span> UsernamePasswordAuthenticationFilter <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> Authentication <span style="color:#900;font-weight:bold">attemptAuthentication</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> AuthenticationException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(!</span>request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMethod</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;POST&#34;</span><span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> AuthenticationServiceException<span style="color:#000;font-weight:bold">(</span>
+                    <span style="color:#d14">&#34;Authentication method not supported: &#34;</span> <span style="color:#000;font-weight:bold">+</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getMethod</span><span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getContentType</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>MediaType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">APPLICATION_JSON_UTF8_VALUE</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">||</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getContentType</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>MediaType<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">APPLICATION_JSON_VALUE</span><span style="color:#000;font-weight:bold">))</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//说明用户以 JSON 的形式传递的参数
+</span><span style="color:#998;font-style:italic"></span>
+            ObjectMapper mapper <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#998;font-style:italic">//里面包含username password
+</span><span style="color:#998;font-style:italic"></span>            UsernamePasswordAuthenticationToken authRequest <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+
+            String username <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+            String password <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">//从request中提取JSON数据
+</span><span style="color:#998;font-style:italic"></span>                InputStream is <span style="color:#000;font-weight:bold">=</span> request<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getInputStream</span><span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#998;font-style:italic">//通过ObjectMapper将JSON转化成Map对象
+</span><span style="color:#998;font-style:italic"></span>                Map<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">,</span>String<span style="color:#000;font-weight:bold">&gt;</span> authenticationBean <span style="color:#000;font-weight:bold">=</span> mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">readValue</span><span style="color:#000;font-weight:bold">(</span>is<span style="color:#000;font-weight:bold">,</span> Map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+                username <span style="color:#000;font-weight:bold">=</span> authenticationBean<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;username&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                password <span style="color:#000;font-weight:bold">=</span> authenticationBean<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;password&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                authRequest <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UsernamePasswordAuthenticationToken<span style="color:#000;font-weight:bold">(</span>username<span style="color:#000;font-weight:bold">,</span> password<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>IOException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+                authRequest <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UsernamePasswordAuthenticationToken<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">finally</span> <span style="color:#000;font-weight:bold">{</span>
+                setDetails<span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">,</span> authRequest<span style="color:#000;font-weight:bold">);</span>
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getAuthenticationManager</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">authenticate</span><span style="color:#000;font-weight:bold">(</span>authRequest<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">//说明用户以 K-V 的形式传递的参数
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">attemptAuthentication</span><span style="color:#000;font-weight:bold">(</span>request<span style="color:#000;font-weight:bold">,</span> response<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#998;font-style:italic">//        if (request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
+</span><span style="color:#998;font-style:italic">//            //说明用户以 JSON 的形式传递的参数
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            String username = null;
+</span><span style="color:#998;font-style:italic">//            String password = null;
+</span><span style="color:#998;font-style:italic">//            try {
+</span><span style="color:#998;font-style:italic">//                Map&lt;String, String&gt; map = new ObjectMapper().readValue(request.getInputStream(), Map.class);
+</span><span style="color:#998;font-style:italic">//                username = map.get(&#34;username&#34;);
+</span><span style="color:#998;font-style:italic">//                password = map.get(&#34;password&#34;);
+</span><span style="color:#998;font-style:italic">//            } catch (IOException e) {
+</span><span style="color:#998;font-style:italic">//                e.printStackTrace();
+</span><span style="color:#998;font-style:italic">//            }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            if (username == null) {
+</span><span style="color:#998;font-style:italic">//                username = &#34;&#34;;
+</span><span style="color:#998;font-style:italic">//            }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            if (password == null) {
+</span><span style="color:#998;font-style:italic">//                password = &#34;&#34;;
+</span><span style="color:#998;font-style:italic">//            }
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            username = username.trim();
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            // Allow subclasses to set the &#34;details&#34; property
+</span><span style="color:#998;font-style:italic">//            setDetails(request, authRequest);
+</span><span style="color:#998;font-style:italic">//
+</span><span style="color:#998;font-style:italic">//            return this.getAuthenticationManager().authenticate(authRequest);
+</span><span style="color:#998;font-style:italic">//        }
+</span><span style="color:#998;font-style:italic">//        return super.attemptAuthentication(request, response);
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><blockquote>
+<p>从request中提取JSON数据：如果是SpringMVC框架的话，那么只需要@RequestBody就可以，如果不是MVC框架而是Servlet中的话（Security的底层就使用的servlet）可以用request.getInputStream()提取JSON，如果前端传的JSON 那么将这个流解析出来就是JSON字符串了，但是在这里需要注意的是，并不是所有的请求都有流！GET、DELETE请求就没有流，有请求body的才可以通过流来解析。</p>
+</blockquote>
+<p>这里只是将用户名/密码的获取方案升级一下，改为可以从 JSON 中获取用户名密码，但是原来的key-value的方式依然行得通。然后在 SecurityConfig 中作出如下修改：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.chan.securityJson.config</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.alibaba.fastjson.JSONObject</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.chan.securityJson.filter.MyAuthenticationFilter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">com.fasterxml.jackson.databind.ObjectMapper</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Bean</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.builders.HttpSecurity</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.Authentication</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.core.AuthenticationException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.authentication.AuthenticationFailureHandler</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.authentication.AuthenticationSuccessHandler</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.servlet.ServletException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.servlet.http.HttpServletRequest</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">javax.servlet.http.HttpServletResponse</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.IOException</span><span style="color:#000;font-weight:bold">;</span>
+<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">java.io.PrintWriter</span><span style="color:#000;font-weight:bold">;</span>
+
+<span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityConfig
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/18 17:35
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityConfig</span> <span style="color:#000;font-weight:bold">extends</span> WebSecurityConfigurerAdapter <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">configure</span><span style="color:#000;font-weight:bold">(</span>HttpSecurity http<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">authorizeRequests</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">anyRequest</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">authenticated</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">formLogin</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">permitAll</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">and</span><span style="color:#000;font-weight:bold">()</span>
+                <span style="color:#000;font-weight:bold">.</span><span style="color:#008080">csrf</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">disable</span><span style="color:#000;font-weight:bold">();</span>
+        http<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addFilterAt</span><span style="color:#000;font-weight:bold">(</span>myAuthenticationFilter<span style="color:#000;font-weight:bold">(),</span> UsernamePasswordAuthenticationFilter<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
+    MyAuthenticationFilter <span style="color:#900;font-weight:bold">myAuthenticationFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">throws</span> Exception <span style="color:#000;font-weight:bold">{</span>
+        MyAuthenticationFilter filter <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> MyAuthenticationFilter<span style="color:#000;font-weight:bold">();</span>
+        filter<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAuthenticationSuccessHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AuthenticationSuccessHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">onAuthenticationSuccess</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">,</span> Authentication authentication<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                PrintWriter out <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                JSONObject jsonObject <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> JSONObject<span style="color:#000;font-weight:bold">();</span>
+                jsonObject<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;登录成功!&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>jsonObject<span style="color:#000;font-weight:bold">));</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">});</span>
+        filter<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAuthenticationFailureHandler</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> AuthenticationFailureHandler<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+            <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">onAuthenticationFailure</span><span style="color:#000;font-weight:bold">(</span>HttpServletRequest request<span style="color:#000;font-weight:bold">,</span> HttpServletResponse response<span style="color:#000;font-weight:bold">,</span> AuthenticationException exception<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException<span style="color:#000;font-weight:bold">,</span> ServletException <span style="color:#000;font-weight:bold">{</span>
+                response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setContentType</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;application/json;charset=utf-8&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                PrintWriter out <span style="color:#000;font-weight:bold">=</span> response<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getWriter</span><span style="color:#000;font-weight:bold">();</span>
+                JSONObject jsonObject <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> JSONObject<span style="color:#000;font-weight:bold">();</span>
+                jsonObject<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">put</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;msg&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;登录失败!&#34;</span><span style="color:#000;font-weight:bold">);</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">write</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">().</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>jsonObject<span style="color:#000;font-weight:bold">));</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">flush</span><span style="color:#000;font-weight:bold">();</span>
+                out<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">});</span>
+        filter<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAuthenticationManager</span><span style="color:#000;font-weight:bold">(</span>authenticationManagerBean<span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#000;font-weight:bold">return</span> filter<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>将自定义的 MyAuthenticationFilter 类加入进来即可，接下来就可以使用 JSON 进行登录了。</p>
+<p>最后将其他的类和配置文件贴到博客中：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#000080">&lt;parent&gt;</span>
+    <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+    <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-parent<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;version&gt;</span>2.1.8.RELEASE<span style="color:#000080">&lt;/version&gt;</span>
+<span style="color:#000080">&lt;/parent&gt;</span>
+
+<span style="color:#000080">&lt;dependencies&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-security<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-web<span style="color:#000080">&lt;/artifactId&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-starter-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.security<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>spring-security-test<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;scope&gt;</span>test<span style="color:#000080">&lt;/scope&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+    <span style="color:#998;font-style:italic">&lt;!-- https://mvnrepository.com/artifact/com.alibaba/fastjson --&gt;</span>
+    <span style="color:#000080">&lt;dependency&gt;</span>
+        <span style="color:#000080">&lt;groupId&gt;</span>com.alibaba<span style="color:#000080">&lt;/groupId&gt;</span>
+        <span style="color:#000080">&lt;artifactId&gt;</span>fastjson<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;version&gt;</span>1.2.62<span style="color:#000080">&lt;/version&gt;</span>
+    <span style="color:#000080">&lt;/dependency&gt;</span>
+<span style="color:#000080">&lt;/dependencies&gt;</span>
+
+<span style="color:#000080">&lt;build&gt;</span>
+    <span style="color:#000080">&lt;plugins&gt;</span>
+        <span style="color:#000080">&lt;plugin&gt;</span>
+            <span style="color:#000080">&lt;groupId&gt;</span>org.springframework.boot<span style="color:#000080">&lt;/groupId&gt;</span>
+            <span style="color:#000080">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span style="color:#000080">&lt;/artifactId&gt;</span>
+        <span style="color:#000080">&lt;/plugin&gt;</span>
+    <span style="color:#000080">&lt;/plugins&gt;</span>
+<span style="color:#000080">&lt;/build&gt;</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname SecurityJsonApplication
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/18 17:26
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@SpringBootApplication</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">SecurityJsonApplication</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        SpringApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">run</span><span style="color:#000;font-weight:bold">(</span>SecurityJsonApplication<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">,</span> args<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#000080">spring</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">  </span><span style="color:#000080">security</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">    </span><span style="color:#000080">user</span>:<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">name</span>:<span style="color:#bbb"> </span>chan<span style="color:#bbb">
+</span><span style="color:#bbb">      </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#099">123</span><span style="color:#bbb">
+</span></code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * @Classname HelloController
+</span><span style="color:#998;font-style:italic"> * @Description TODO
+</span><span style="color:#998;font-style:italic"> * @Date 2020/7/18 17:42
+</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#3c5d5d;font-weight:bold">@RestController</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">HelloController</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#3c5d5d;font-weight:bold">@GetMapping</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/hello&#34;</span><span style="color:#000;font-weight:bold">)</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">hello</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;hello security&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h3 id="运行结果">运行结果</h3>
+<h4 id="没登录的时候">没登录的时候：</h4>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/6969ab14/1.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/6969ab14/1.png" />
+        </a>
+    </p>
+<h4 id="使用json的方式登录">使用json的方式登录：</h4>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/6969ab14/2.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/6969ab14/2.png" />
+        </a>
+    </p>
+<h4 id="登录成功">登录成功：</h4>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/6969ab14/3.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/6969ab14/3.png" />
+        </a>
+    </p>
+<p>我们只是在security的基础上增加了json校验登录的可执行方案，但是原来的key-value的登录方案依然行得通，我们清除cookie之后再次测试，以k-v的方式验证登录依然是可行的。如下：</p>
+<p>
+        <a data-fancybox="gallery" href="https://erdochan.gitee.io/posts/6969ab14/4.png">
+            <img class="mx-auto" alt="" src="https://erdochan.gitee.io/posts/6969ab14/4.png" />
+        </a>
+    </p>
+<blockquote>
+<p>项目源码地址： <a href="https://gitee.com/erdochan/security-json">https://gitee.com/erdochan/security-json</a></p>
+</blockquote>
+<h2 id="三说点题外话objectmapper">三、说点题外话ObjectMapper</h2>
+<p>属于Jackson的，Spring Boot中默认自带的。</p>
+<h3 id="常用方法">常用方法:</h3>
+<ol>
+<li>readValue()</li>
+<li>writeValueAsString()</li>
+</ol>
+<p>Jackson主要是用来把对象转换成为一个Json字符串返回到前端，或者把Json字符串转化为对象。现在大部分数据交换都是以Json来传输的。加上现在ES的使用越来越多，该类还是很重要的。在本篇博客中的案例，是通过request获取input流，这里前端（也就是我在用PostMan测试的时候）传过来的是一个JSON字符串，然后通过ObjectMapper的readValue()，将JSON转换成Map对象，进而实现相关的操作。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Person</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> Date date<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">Person</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">Person</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> id<span style="color:#000;font-weight:bold">,</span> String name<span style="color:#000;font-weight:bold">,</span> Date date<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">name</span> <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">date</span> <span style="color:#000;font-weight:bold">=</span> date<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">getId</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setId</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> id<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">id</span> <span style="color:#000;font-weight:bold">=</span> id<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">getName</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setName</span><span style="color:#000;font-weight:bold">(</span>String name<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">name</span> <span style="color:#000;font-weight:bold">=</span> name<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> Date <span style="color:#900;font-weight:bold">getDate</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> date<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">setDate</span><span style="color:#000;font-weight:bold">(</span>Date date<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">date</span> <span style="color:#000;font-weight:bold">=</span> date<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
+    <span style="color:#000;font-weight:bold">public</span> String <span style="color:#900;font-weight:bold">toString</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#d14">&#34;Person{&#34;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;id=&#34;</span> <span style="color:#000;font-weight:bold">+</span> id <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, name=&#39;&#34;</span> <span style="color:#000;font-weight:bold">+</span> name <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#39;\&#39;&#39;</span> <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#34;, date=&#34;</span> <span style="color:#000;font-weight:bold">+</span> date <span style="color:#000;font-weight:bold">+</span>
+                <span style="color:#d14">&#39;}&#39;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic"> * ObjectMapper
+</span><span style="color:#998;font-style:italic"> * 主要是用来把对象转换成为一个json字符串返回到前端
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * 将string串转化为对象
+</span><span style="color:#998;font-style:italic"> * mapper.readValue(jsonString, Person.class);
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * 将对象转化为json格式的字符串。
+</span><span style="color:#998;font-style:italic"> * mapper.writeValueAsString(person);
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * Include.ALWAYS  是序列化对象的所有属性(默认)
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * Include.NON_NULL 只有不为null的字段才被序列化,属性为NULL 不序列化
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * Include.NON_EMPTY 如果为null或者 空字符串和空集合都不会被序列化
+</span><span style="color:#998;font-style:italic"> *
+</span><span style="color:#998;font-style:italic"> * Include.NON_DEFAULT 属性为默认值不序列化
+</span><span style="color:#998;font-style:italic"> */</span>
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">App</span> <span style="color:#000;font-weight:bold">{</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> IOException <span style="color:#000;font-weight:bold">{</span>
+        ObjectMapper mapper <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ObjectMapper<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#998;font-style:italic">//序列化的时候序列对象的所有属性
+</span><span style="color:#998;font-style:italic"></span>        mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setSerializationInclusion</span><span style="color:#000;font-weight:bold">(</span>JsonSerialize<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Inclusion</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ALWAYS</span><span style="color:#000;font-weight:bold">);</span>
+
+        Person person <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Person<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;张山&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#000;font-weight:bold">new</span> Date<span style="color:#000;font-weight:bold">());</span>
+
+        <span style="color:#998;font-style:italic">//把一个对象转化为json字符串
+</span><span style="color:#998;font-style:italic"></span>        String personJson <span style="color:#000;font-weight:bold">=</span> mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>person<span style="color:#000;font-weight:bold">);</span>
+
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>personJson<span style="color:#000;font-weight:bold">);</span>
+
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;------------------------------------------&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#998;font-style:italic">//取消时间的转化格式,默认是时间戳,可以取消,同时需要设置要表现的时间格式
+</span><span style="color:#998;font-style:italic"></span>        mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">configure</span><span style="color:#000;font-weight:bold">(</span>SerializationConfig<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Feature</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">WRITE_DATES_AS_TIMESTAMPS</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+        mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setDateFormat</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">new</span> SimpleDateFormat<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;yyyy-MM-dd HH:mm:ss&#34;</span><span style="color:#000;font-weight:bold">));</span>
+
+        Person person1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> Person<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">,</span><span style="color:#d14">&#34;张山&#34;</span><span style="color:#000;font-weight:bold">,</span><span style="color:#000;font-weight:bold">new</span> Date<span style="color:#000;font-weight:bold">());</span>
+        <span style="color:#998;font-style:italic">//把一个对象转化为json字符串
+</span><span style="color:#998;font-style:italic"></span>        String personJson1 <span style="color:#000;font-weight:bold">=</span> mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">writeValueAsString</span><span style="color:#000;font-weight:bold">(</span>person1<span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>personJson1<span style="color:#000;font-weight:bold">);</span>
+
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;------------------------------------------&#34;</span><span style="color:#000;font-weight:bold">);</span>
+
+        <span style="color:#998;font-style:italic">//把json字符串转化为Person对象
+</span><span style="color:#998;font-style:italic"></span>        String jsonString <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;{\&#34;id\&#34;:2,\&#34;name\&#34;:\&#34;李四\&#34;, \&#34;date\&#34;:1560166271801}&#34;</span><span style="color:#000;font-weight:bold">;</span>
+        Person person2 <span style="color:#000;font-weight:bold">=</span> mapper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">readValue</span><span style="color:#000;font-weight:bold">(</span>jsonString<span style="color:#000;font-weight:bold">,</span> Person<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">class</span><span style="color:#000;font-weight:bold">);</span>
+        System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span>person2<span style="color:#000;font-weight:bold">);</span>
+
+
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><h3 id="运行结果-1">运行结果：</h3>
+<pre><code>{&quot;id&quot;:1,&quot;name&quot;:&quot;张山&quot;,&quot;date&quot;:1560167332711}
+------------------------------------------
+{&quot;id&quot;:1,&quot;name&quot;:&quot;张山&quot;,&quot;date&quot;:&quot;2019-06-10 19:48:52&quot;}
+------------------------------------------
+Person{id=2, name='李四', date=Mon Jun 10 19:31:11 CST 2019}
+</code></pre>
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2020/12/22/security-json.html">https://chanservy.github.io/2020/12/22/security-json.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2020/12/22/security-oauth2.html">Spring Security结合OAuth2</a></li>
+        
+        <li><a href="/2020/12/22/security-by-db.html">Security基于数据库动态配置权限</a></li>
+        
+        <li><a href="/2020/12/22/security-tianjiayanzhengma.html">Spring Security添加验证码</a></li>
+        
+        <li><a href="/2020/12/22/boot-zhenghe-security.html">Spring Boot整合Spring Security</a></li>
+        
+        <li><a href="/2020/12/22/websocket-zaixianliaotian.html">WebSocket在线聊天</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Spring-Security'>Spring Security</a></li>
+                
+                <li><a href='/tags/JSON'>JSON</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/2pcand3pc.html" title="分布式事务之2PC和3PC方案">分布式事务之2PC和3PC方案</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/mysql-interview.html" title="数据库事务有哪些隔离级别?">数据库事务有哪些隔离级别?</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/16/nacos-cluster.html" title="Nacos集群部署以及RPC框架选型">Nacos集群部署以及RPC框架选型</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (29)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (16)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
