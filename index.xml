@@ -6,7 +6,16 @@
     <description>Recent content on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 24 May 2021 22:20:34 +0000</lastBuildDate><atom:link href="https://chanservy.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 16 Jun 2021 22:30:45 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>为何使用MQ以及它的优缺点</title>
+      <link>https://chanservy.github.io/2021/06/16/whymq.html</link>
+      <pubDate>Wed, 16 Jun 2021 22:30:45 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/16/whymq.html</guid>
+      <description>1. 面试题 为什么使用消息队列？ 消息队列有什么优点和缺点？ Kafka、ActiveMQ、RabbitMQ、RocketMQ 都有什么区别，以及适合哪些场景？ 2. 面试官心理分析 其实面试官主要是想看看： 第一，你知不知道你们系统里为什么要用消息队列这个东西？不少候选人，说自己项目里用了 Redi</description>
+    </item>
+    
     <item>
       <title>分布式事务之可靠消息最终一致性方案</title>
       <link>https://chanservy.github.io/2021/05/16/reliable-message-consistency.html</link>
