@@ -6,14 +6,23 @@
     <description>Recent content on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 16 Jun 2021 22:30:45 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 17 Jun 2021 12:59:17 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>如何保证消息队列的高可用?</title>
+      <link>https://chanservy.github.io/2021/06/17/high-availability-of-message-queues.html</link>
+      <pubDate>Thu, 17 Jun 2021 12:59:17 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/17/high-availability-of-message-queues.html</guid>
+      <description>学习石杉老师的课程笔记 如何保证消息队列的高可用？ 如何保证消息队列的高可用？关于 MQ 的知识，高可用是必问的。上篇博客提到，MQ 会导致系统可用性降低。所以只要你用了 MQ，接下来的一些要点肯定就是围绕着 MQ 的那些缺点怎么来解决了。 面试题剖析 这个问题这么问是很好的，因为不能问你 Kafka 的高可用性怎</description>
+    </item>
+    
     <item>
       <title>为何使用MQ以及它的优缺点</title>
       <link>https://chanservy.github.io/2021/06/16/whymq.html</link>
       <pubDate>Wed, 16 Jun 2021 22:30:45 +0800</pubDate>
       
       <guid>https://chanservy.github.io/2021/06/16/whymq.html</guid>
-      <description>1. 面试题 为什么使用消息队列？ 消息队列有什么优点和缺点？ Kafka、ActiveMQ、RabbitMQ、RocketMQ 都有什么区别，以及适合哪些场景？ 2. 面试官心理分析 其实面试官主要是想看看： 第一，你知不知道你们系统里为什么要用消息队列这个东西？不少候选人，说自己项目里用了 Redi</description>
+      <description>学习石杉老师的课程笔记 1. 面试题 为什么使用消息队列？ 消息队列有什么优点和缺点？ Kafka、ActiveMQ、RabbitMQ、RocketMQ 都有什么区别，以及适合哪些场景？ 2. 面试官心理分析 其实面试官主要是想看看： 第一，你知不知道你们系统里为什么要用消息队列这个东西？不少候选人，说</description>
     </item>
     
     <item>
