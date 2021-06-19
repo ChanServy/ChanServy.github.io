@@ -6,7 +6,25 @@
     <description>Recent content in Posts on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 18 Jun 2021 18:14:18 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 19 Jun 2021 18:31:09 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Es的分布式架构原理</title>
+      <link>https://chanservy.github.io/2021/06/19/es-architecture.html</link>
+      <pubDate>Sat, 19 Jun 2021 18:31:09 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/19/es-architecture.html</guid>
+      <description>学习石杉老师的课程的笔记 lucene 和 es 的前世今生 lucene 是最先进、功能最强大的搜索库。如果直接基于 lucene 开发，非常复杂，即便写一些简单的功能，也要写大量的 Java 代码，需要深入理解原理。 elasticsearch 基于 lucene，隐藏了 lucene 的复杂性，提供了简单易用的 restful api / Java api 接口（另外还有其他语言的 api 接口）。 分布式的文档存储引擎</description>
+    </item>
+    
+    <item>
+      <title>关于消息队列的一些其他问题</title>
+      <link>https://chanservy.github.io/2021/06/19/mq-other-problems.html</link>
+      <pubDate>Sat, 19 Jun 2021 17:26:24 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/19/mq-other-problems.html</guid>
+      <description>&lt;p&gt;前言：前面几片博客说了几种消息队列的问题，这篇博客稍微总结一下，在说一下其他的几种面试可能问到的问题，依然是学习石杉老师的课的笔记。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Spring Boot整合RabbitMQ实现生产者消息确认</title>
       <link>https://chanservy.github.io/2021/04/09/mq-confirm.html</link>
