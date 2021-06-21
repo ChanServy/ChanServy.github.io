@@ -81,6 +81,83 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;project xmlns=&#34;http://maven.apache.org/POM/4.0.0&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34; xsi:schemaLocation=&#34;http://maven.apache.org/POM/4.0.0……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/order-service.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/cart-service.html" title="购物车业务">购物车业务</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：记一次项目中实现购物车业务的流程。 1.购物车功能分析 1.1.需求 需求描述： 用户可以在登录状态下将商品添加到购物车 放入数据库 放入redis（采用） 用户可以在未登录状态下将商品添加到购物车 放入localstorage 用户可以使用购物车一起结算下单 用户可以查询自己的购物车 用户可以……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/cart-service.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/auth-center.html" title="授权中心">授权中心</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/JWT'>JWT</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：记一次项目中实现授权中心的流程。 1.无状态登录原理 1.1.什么是有状态？ 有状态服务，即服务端需要记录每次会话的客户端信息，从而识别客户端身份，根据用户身份进行请求的处理，典型的设计如tomcat中的session。 例如登录：用户登录后，我们把登录者的信息保存在服务端sess……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/auth-center.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/04/09/register-step.html" title="项目中的注册流程">项目中的注册流程</a>
             </h1>
         </header>
@@ -253,81 +330,6 @@
     
     
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html" title="电商项目中商品的分析和数据库设计">电商项目中商品的分析和数据库设计</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            电商项目中商品的分析和数据库设计 前言：众所周知，电商网站品类复杂多样，比如京东、淘宝、拼多多等等，诸如这些全品类的电商网站，商品的种类繁多，每一件商品，其属性又有差别。那么设计如此大型的电商网站，我们该如何设计商品信息的展示呢？本文大部分以京东官网的截图为例说明思路。 一、SPU和……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html">阅读全文</a></p>
-    </article>
-    
-    
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html" title="Centos下安装FastDFS并添加Nginx模块">Centos下安装FastDFS并添加Nginx模块</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：Centos下安装FastDFS并添加Nginx模块。 1.1 上传 根目录只有一个，那就是/，主目录是当前用户的HOME目录，添加用户的时候指定的。 一般用户缺省的HOME目录是/home/xxx (xxx是用户名)，root用户的缺省HOME目录是/root，也就是~。 将文件上传到l……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/load-fastDFS-with-nginx-on-centos.html">阅读全文</a></p>
-    </article>
-    
-    
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html" title="跨域问题">跨域问题</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：微服务项目中，由于微服务众多，并且有不止一个环境，因此难免会有跨域的问题，这篇博客聊一聊跨域的问题。 一、跨域问题 1、什么是跨域 跨域是指跨域名的访问，以下情况都属于跨域： 跨域原因说明 示例 域名不同 www.jd.com 与 www.taobao.com 域名相同，端口不同 www.jd.com:8080 与 www.jd.com:8081 二级域名不同 item.jd.com 与 miaosha.jd.com 如果域名和端口都相同，但是请求路径……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html">阅读全文</a></p>
-    </article>
-    
-    
-    
 
 
 
@@ -439,6 +441,18 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/06/21/why-cache.html" title="项目中为何需要用缓存？">项目中为何需要用缓存？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html" title="Es在数据量很大的情况下如何提高查询效率？">Es在数据量很大的情况下如何提高查询效率？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/20/es-write-query.html" title="Es读写数据的工作原理">Es读写数据的工作原理</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/06/19/es-architecture.html" title="Es的分布式架构原理">Es的分布式架构原理</a>
     </li>
     
@@ -464,18 +478,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/06/17/high-availability-of-message-queues.html" title="如何保证消息队列的高可用?">如何保证消息队列的高可用?</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/06/16/whymq.html" title="为何使用MQ以及它的优缺点">为何使用MQ以及它的优缺点</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html" title="分布式事务之可靠消息最终一致性方案">分布式事务之可靠消息最终一致性方案</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/05/16/tcc.html" title="分布式事务之TCC方案">分布式事务之TCC方案</a>
     </li>
     
 </ul>
@@ -518,7 +520,7 @@
         <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
 <ul class="widget-list">
     
-    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (1)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (4)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
     
@@ -556,9 +558,11 @@
     
     <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (2)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (10)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (24)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (13)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (23)</a></li>
     
 </ul>
     </section>
@@ -670,6 +674,8 @@
     <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
     
     <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
     
     <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
     

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>缓存 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/</link>
+    <description>Recent content in 缓存 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Jun 2021 20:19:45 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>项目中为何需要用缓存？</title>
+      <link>https://chanservy.github.io/2021/06/21/why-cache.html</link>
+      <pubDate>Mon, 21 Jun 2021 20:19:45 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/21/why-cache.html</guid>
+      <description>学习石杉老师的课程笔记 项目中缓存是如何使用的？ 这个，需要结合自己项目的业务来。 为什么要用缓存？ 用缓存，主要有两个用途：高性能、高并发。 高性能 假设这么个场景，你有个操作，一个请求过来，吭哧吭哧你各种乱七八糟操作 mysql，半天查出来一个结果，耗时 600ms。但是这个结果可能接下来几</description>
+    </item>
+    
+  </channel>
+</rss>

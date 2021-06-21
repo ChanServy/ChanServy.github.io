@@ -6,7 +6,34 @@
     <description>Recent content in 面试 on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 19 Jun 2021 18:31:09 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 21 Jun 2021 20:19:45 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>项目中为何需要用缓存？</title>
+      <link>https://chanservy.github.io/2021/06/21/why-cache.html</link>
+      <pubDate>Mon, 21 Jun 2021 20:19:45 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/21/why-cache.html</guid>
+      <description>学习石杉老师的课程笔记 项目中缓存是如何使用的？ 这个，需要结合自己项目的业务来。 为什么要用缓存？ 用缓存，主要有两个用途：高性能、高并发。 高性能 假设这么个场景，你有个操作，一个请求过来，吭哧吭哧你各种乱七八糟操作 mysql，半天查出来一个结果，耗时 600ms。但是这个结果可能接下来几</description>
+    </item>
+    
+    <item>
+      <title>Es在数据量很大的情况下如何提高查询效率？</title>
+      <link>https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html</link>
+      <pubDate>Mon, 21 Jun 2021 16:40:15 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html</guid>
+      <description>学习石杉老师的课程的笔记 进入博客正题之前，先总结一下关于 es 的一系列问题，都是前面几篇博客说过的： es 是如何实现分布式的？es 的分布式架构原理？ es 的写入数据和查询数据的工作原理？ es 在数据量巨大的时候，如何提高查询性能？ es 生产集群的部署架构是？举个例子？每个索引的数据量大概？每个索引大</description>
+    </item>
+    
+    <item>
+      <title>Es读写数据的工作原理</title>
+      <link>https://chanservy.github.io/2021/06/20/es-write-query.html</link>
+      <pubDate>Sun, 20 Jun 2021 17:26:42 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/20/es-write-query.html</guid>
+      <description>学习石杉老师的课程的笔记 es 写数据过程 客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）。 coordinating node 对 document 进行路由，将请求转发给对应的 node（有 primary shard）。 实际的 node 上的 primary shard 处理请求，然后将数据同步到 replica shard。 coordinating node 如果发现 primary shard 和所有 replica shard 都搞定之后，就返回响应结果给客户端</description>
+    </item>
+    
     <item>
       <title>Es的分布式架构原理</title>
       <link>https://chanservy.github.io/2021/06/19/es-architecture.html</link>
