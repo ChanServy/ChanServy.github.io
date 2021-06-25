@@ -6,7 +6,34 @@
     <description>Recent content in 面试 on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 21 Jun 2021 20:19:45 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 25 Jun 2021 22:42:03 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis的过期策略？</title>
+      <link>https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html</link>
+      <pubDate>Fri, 25 Jun 2021 22:42:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html</guid>
+      <description>前言：redis 的过期策略都有哪些？内存淘汰机制都有哪些？手写一下 LRU 代码实现？ 常见的有两个问题： 往 redis 写入的数据怎么没了？ 啥叫缓存？用内存当缓存。内存是无限的吗，内存是很宝贵而且是有限的，磁盘是廉价而且是大量的。可能一台机器就几十个 G 的内存，但是可以有几个 T 的硬盘空间。redis 主</description>
+    </item>
+    
+    <item>
+      <title>Redis都有哪些数据类型？</title>
+      <link>https://chanservy.github.io/2021/06/25/redis-data-types.html</link>
+      <pubDate>Fri, 25 Jun 2021 22:24:30 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/25/redis-data-types.html</guid>
+      <description>前言：redis 都有哪些数据类型？分别在哪些场景下使用比较合适？ redis 主要有以下几种数据类型： string hash list set sorted set string 这是最简单的类型，就是普通的 set 和 get，做简单的 KV 缓存。 set college szu hash 这个是类似 map 的一种结构，这个一般就是可以将结构化的数据，比如一个对象（前提是这个对象没嵌套其他的对象）给缓存在 redis</description>
+    </item>
+    
+    <item>
+      <title>为何单线程的redis能支撑高并发？</title>
+      <link>https://chanservy.github.io/2021/06/25/redis-single-thread-model.html</link>
+      <pubDate>Fri, 25 Jun 2021 21:41:28 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/25/redis-single-thread-model.html</guid>
+      <description>前言：redis 和 memcached 有什么区别？redis 的线程模型是什么？为什么 redis 单线程却能支撑高并发？其实这些都是 redis 最基本的问题，redis 最基本的内部原理和特点就是 redis 实际上是个单线程工作模型。 redis 和 memcached 有啥区别？ redis 支持复杂的数据结构 redis 相比 memcached 来说，拥有更多的数据结构，能支持更丰富的数据操作。如果</description>
+    </item>
+    
     <item>
       <title>项目中为何需要用缓存？</title>
       <link>https://chanservy.github.io/2021/06/21/why-cache.html</link>

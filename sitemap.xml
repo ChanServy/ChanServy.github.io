@@ -4,17 +4,57 @@
   
   <url>
     <loc>https://chanservy.github.io/categories/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://chanservy.github.io/post/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/tags/Redis/</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/categories/Redis/</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://chanservy.github.io/tags/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</loc>
+    <lastmod>2021-06-25T22:42:03+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/2021/06/25/redis-data-types.html</loc>
+    <lastmod>2021-06-25T22:24:30+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/2021/06/25/redis-single-thread-model.html</loc>
+    <lastmod>2021-06-25T21:41:28+08:00</lastmod>
   </url>
   
   <url>
@@ -24,21 +64,6 @@
   
   <url>
     <loc>https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://chanservy.github.io/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/</loc>
-    <lastmod>2021-06-21T20:19:45+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</loc>
     <lastmod>2021-06-21T20:19:45+08:00</lastmod>
   </url>
   
@@ -78,12 +103,12 @@
   </url>
   
   <url>
-    <loc>https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</loc>
+    <loc>https://chanservy.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</loc>
     <lastmod>2021-06-19T17:26:24+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</loc>
+    <loc>https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</loc>
     <lastmod>2021-06-19T17:26:24+08:00</lastmod>
   </url>
   
@@ -108,7 +133,12 @@
   </url>
   
   <url>
-    <loc>https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</loc>
+    <loc>https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</loc>
+    <lastmod>2021-06-18T18:14:18+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</loc>
     <lastmod>2021-06-18T18:14:18+08:00</lastmod>
   </url>
   
@@ -295,11 +325,6 @@
   <url>
     <loc>https://chanservy.github.io/2021/04/09/register-step.html</loc>
     <lastmod>2021-04-09T17:23:04+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://chanservy.github.io/tags/Redis/</loc>
-    <lastmod>2021-04-09T17:06:51+08:00</lastmod>
   </url>
   
   <url>
@@ -700,11 +725,6 @@
   <url>
     <loc>https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/</loc>
     <lastmod>2020-12-21T13:04:41+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://chanservy.github.io/categories/Redis/</loc>
-    <lastmod>2020-12-21T13:00:21+08:00</lastmod>
   </url>
   
   <url>
