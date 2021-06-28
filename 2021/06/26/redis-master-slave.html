@@ -9,20 +9,20 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Redis的过期策略？ | 迩东陈的博客</title>
-    <meta property="og:title" content="Redis的过期策略？ - 迩东陈的博客">
+    <title>Redis主从架构 | 迩东陈的博客</title>
+    <meta property="og:title" content="Redis主从架构 - 迩东陈的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2021-06-25T22:42:03&#43;08:00'>
+    <meta property="article:published_time" content='2021-06-26T21:02:33&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2021-06-25T22:42:03&#43;08:00'>
+    <meta property="article:modified_time" content='2021-06-26T21:02:33&#43;08:00'>
         
     <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
-    <meta name="description" content="Redis的过期策略？">
+    <meta name="description" content="Redis主从架构">
         
     <meta name="author" content="迩东陈">
-    <meta property="og:url" content="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">
+    <meta property="og:url" content="https://chanservy.github.io/2021/06/26/redis-master-slave.html">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -145,9 +145,26 @@
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#redis-过期策略">redis 过期策略</a></li>
-    <li><a href="#内存淘汰机制">内存淘汰机制</a></li>
-    <li><a href="#手写一个-lru-算法">手写一个 LRU 算法</a></li>
+    <li><a href="#1redis-主从架构">1、Redis 主从架构</a></li>
+    <li><a href="#2redis-replication-的核心机制">2、redis replication 的核心机制</a></li>
+    <li><a href="#3redis-主从复制的核心原理">3、redis 主从复制的核心原理</a></li>
+    <li><a href="#4redis-主从复制的高级特点">4、redis 主从复制的高级特点</a>
+      <ul>
+        <li><a href="#41-主从复制的断点续传">4.1 主从复制的断点续传</a></li>
+        <li><a href="#42-可无磁盘化复制">4.2 可无磁盘化复制</a></li>
+        <li><a href="#43-过期-key-处理">4.3 过期 key 处理</a></li>
+      </ul>
+    </li>
+    <li><a href="#5redis-主从复制的完整流程细节">5、redis 主从复制的完整流程细节</a>
+      <ul>
+        <li><a href="#51-全量复制">5.1 全量复制</a></li>
+        <li><a href="#52-增量复制">5.2 增量复制</a></li>
+        <li><a href="#53-heartbeat">5.3 heartbeat</a></li>
+        <li><a href="#54-异步复制">5.4 异步复制</a></li>
+      </ul>
+    </li>
+    <li><a href="#6redis-如何才能做到高可用">6、redis 如何才能做到高可用</a></li>
+    <li><a href="#7redis-主从复制总结">7、redis 主从复制总结</a></li>
   </ul>
 </nav>
     </div>
@@ -181,10 +198,10 @@
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">Redis的过期策略？</h1>
+            <h1 class="post-title">Redis主从架构</h1>
         </header>
         <date class="post-meta meta-date">
-            2021年6月25日
+            2021年6月26日
         </date>
         
         <div class="post-meta">
@@ -193,6 +210,8 @@
             <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
             
             <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%9E%B6%E6%9E%84'>架构</a></span>
             
         </div>
         
@@ -204,68 +223,100 @@
         
         
         <div class="post-content">
-            <p>前言：redis 的过期策略都有哪些？内存淘汰机制都有哪些？手写一下 LRU 代码实现？</p>
-<p>常见的有两个问题：</p>
+            <h2 id="1redis-主从架构">1、Redis 主从架构</h2>
+<p>单机的 redis，能够承载的 QPS 大概就在上万到几万不等。对于缓存来说，一般都是用来支撑<strong>读高并发</strong>的。因此架构做成主从(master-slave)架构，一主多从，主负责写，并且将数据复制到其它的 slave 节点，从节点负责读。所有的<strong>读请求全部走从节点</strong>。这样也可以很轻松实现水平扩容，<strong>支撑读高并发</strong>。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/1.png">
+            <img class="mx-auto" alt="redis-master-slave" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/1.png" />
+        </a>
+    </p>
+<p>redis replication -&gt; 主从架构 -&gt; 读写分离 -&gt; 水平扩容支撑读高并发</p>
+<h2 id="2redis-replication-的核心机制">2、redis replication 的核心机制</h2>
 <ul>
-<li>往 redis 写入的数据怎么没了？</li>
+<li>redis 采用<strong>异步方式</strong>复制数据到 slave 节点，不过 redis2.8 开始，slave node 会周期性地确认自己每次复制的数据量；</li>
+<li>一个 master node 是可以配置多个 slave node 的；</li>
+<li>slave node 也可以连接其他的 slave node；</li>
+<li>slave node 做复制的时候，不会 block master node 的正常工作（不会耽误写请求）；</li>
+<li>slave node 在做复制的时候，也不会 block 对自己的查询操作，它会用旧的数据集来提供服务；但是复制完成的时候，需要删除旧数据集，加载新数据集，这个时候就会暂时暂停对外服务了；</li>
+<li>slave node 主要用来进行横向扩容，做读写分离，扩容的 slave node 可以提高读的吞吐量。</li>
 </ul>
-<p>啥叫缓存？用内存当缓存。内存是无限的吗，内存是很宝贵而且是有限的，磁盘是廉价而且是大量的。可能一台机器就几十个 G 的内存，但是可以有几个 T 的硬盘空间。redis 主要是基于内存来进行高性能、高并发的读写操作的。</p>
-<p>那既然内存是有限的，比如 redis 就只能用 10G，你要是往里面写了 20G 的数据，会咋办？当然会干掉 10G 的数据，然后就保留 10G 的数据了。那干掉哪些数据？保留哪些数据？当然是干掉不常用的数据，保留常用的数据了。触发了内存淘汰机制。</p>
-<ul>
-<li>数据明明过期了，怎么还占用着内存？</li>
-</ul>
-<p>这是由 redis 的过期策略来决定。定期删除时随机抽取的设置了过期时间的那些 key 可能有一部分暂时并没有过期，当然过期的会被删除掉，但是并不是所有的过期的 key 都会被抽取到，没抽取到的过期的 key 如果没有被查询，那就不能触发惰性删除，因此可能会出现数据明明过期了但是内存依然被占用着这种情况。</p>
-<h2 id="redis-过期策略">redis 过期策略</h2>
-<p>redis 过期策略是：<strong>定期删除+惰性删除</strong>。</p>
-<p>所谓<strong>定期删除</strong>，指的是 redis 默认是每隔 100ms 就随机<code>抽取一些设置了过期时间的 key，检查其是否过期，如果过期就删除</code>。</p>
-<p>假设 redis 里放了 10w 个 key，都设置了过期时间，你每隔几百毫秒，就检查 10w 个 key，那 redis 基本上就死了，cpu 负载会很高的，消耗在你的检查过期 key 上了。注意，这里可不是每隔 100ms 就遍历所有的设置过期时间的 key，那样就是一场性能上的<strong>灾难</strong>。实际上 redis 是每隔 100ms <strong>随机抽取</strong>一些 key 来检查和删除的。</p>
-<p>但是问题是，定期删除可能会导致很多过期 key 到了时间并没有被删除掉，那咋整呢？所以就是惰性删除了。这就是说，在你获取某个 key 的时候，redis 会检查一下 ，这个 key 如果设置了过期时间那么是否过期了？如果过期了此时就会删除，不会给你返回任何东西。</p>
+<p>注意，如果采用了主从架构，那么建议必须<strong>开启</strong> master node 的<a href="https://gitee.com/shishan100/Java-Interview-Advanced/blob/master/docs/high-concurrency/redis-persistence.md">持久化</a>，不建议用 slave node 作为 master node 的数据热备，因为如果你关掉 master 的持久化，可能在 master 宕机重启的时候数据是空的，是没有本地数据可以恢复的，然后 master 会认为自己的数据就是空的，然后可能一经过复制， slave node 的数据也丢了。</p>
+<p>另外，master 的各种备份方案，也需要做。万一本地的所有文件丢失了，从备份中挑选一份 rdb 去恢复 master，这样才能<strong>确保启动的时候，是有数据的</strong>，即使采用了高可用机制，slave node 可以自动接管 master node，但也可能 sentinel（哨兵） 还没检测到 master failure，master node 就自动重启了，还是可能导致上面所有的 slave node 数据被清空。</p>
+<h2 id="3redis-主从复制的核心原理">3、redis 主从复制的核心原理</h2>
+<p>当启动一个 slave node 的时候，它会发送一个 <code>PSYNC</code> 命令给 master node。</p>
+<p>如果这是 slave node 初次连接到 master node，那么会触发一次 <code>full resynchronization</code> 全量复制。此时 master 会启动一个后台线程，开始生成一份 <code>RDB</code> 快照文件到本地磁盘，同时还会将从客户端 client 新收到的所有写命令缓存在内存中。<code>RDB</code> 文件生成完毕后， master 会将这个 <code>RDB</code> 发送给 slave，slave 会先<strong>写入本地磁盘，然后再从本地磁盘加载到内存</strong>中，接着 master 会将内存中缓存的写命令发送到 slave，slave 也会同步这些数据。slave node 如果跟 master node 有网络故障，断开了连接，会自动重连，连接之后 master node 仅会复制给 slave 部分缺少的数据。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/2.png">
+            <img class="mx-auto" alt="redis-master-slave-replication" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/2.png" />
+        </a>
+    </p>
+<h2 id="4redis-主从复制的高级特点">4、redis 主从复制的高级特点</h2>
+<h3 id="41-主从复制的断点续传">4.1 主从复制的断点续传</h3>
+<p>从 redis2.8 开始，就支持主从复制的断点续传，如果主从复制过程中，网络连接断掉了，那么可以接着上次复制的地方，继续复制下去，而不是从头开始复制一份。</p>
+<p>master node 会在内存中维护一个 backlog，master 和 slave 都会保存一个 replica offset 还有一个 master run id，offset 就是保存在 backlog 中的。如果 master 和 slave 网络连接断掉了，slave 会让 master 从上次 replica offset 开始继续复制，如果没有找到对应的 offset，那么就会执行一次 <code>full resynchronization</code>。</p>
 <blockquote>
-<p>获取 key 的时候，如果此时 key 已经过期，就删除，不会返回任何东西。</p>
+<p>如果根据 host+ip 定位 master node，是不靠谱的，如果 master node 重启或者数据出现了变化，那么 slave node 应该根据不同的 run id 区分。</p>
 </blockquote>
-<p>但是实际上这还是有问题的，如果定期删除漏掉了很多过期 key，然后你也没及时去查，也就没走惰性删除，此时会怎么样？如果大量过期 key 堆积在内存里，导致 redis 内存块耗尽了，咋整？</p>
-<p>答案是：<strong>走内存淘汰机制</strong>。</p>
-<h2 id="内存淘汰机制">内存淘汰机制</h2>
-<p>redis 内存淘汰机制有以下几个：</p>
+<h3 id="42-可无磁盘化复制">4.2 可无磁盘化复制</h3>
+<p>master 在内存中直接创建 <code>RDB</code>，然后发送给 slave，不会在自己本地落地磁盘了。只需要在配置文件中开启 <code>repl-diskless-sync yes</code> 即可。redis 的配置文件中 repl-diskless-sync 参数默认是 no，就是磁盘化复制。</p>
+<pre><code>repl-diskless-sync yes
+
+# 等待 5s 后再开始复制，因为要等更多 slave 重新连接过来
+repl-diskless-sync-delay 5
+</code></pre><ol>
+<li>磁盘化复制：Redis 的 master 会新创建一个进程，将 RDB 创建到本地磁盘，再从本地磁盘将 RDB 文件发送到所有的 slave 上面去。</li>
+<li>无磁盘化复制：Redis 的 master 会新创建一个进程，将 RDB 直接创建到内存中，直接写到 slave 的 socket 里面去，不涉及磁盘。</li>
+</ol>
+<h3 id="43-过期-key-处理">4.3 过期 key 处理</h3>
+<p>slave 不会过期 key，只会等待 master 过期 key。如果 master 过期了一个 key，或者通过 LRU 淘汰了一个 key，那么会模拟一条 del 命令发送给 slave。</p>
+<h2 id="5redis-主从复制的完整流程细节">5、redis 主从复制的完整流程细节</h2>
+<p>slave node 启动时，会在自己本地保存 master node 的信息，包括 master node 的<code>host</code>和<code>ip</code>，但是复制流程没开始。</p>
+<p>slave node 内部有个定时任务，每秒检查是否有新的 master node 要连接和复制，如果发现，就跟 master node 建立 socket 网络连接。然后 slave node 发送 <code>ping</code> 命令给 master node。如果 master 设置了 requirepass，那么 slave node 必须发送 masterauth 的口令过去进行认证。master node <strong>第一次执行全量复制</strong>，将所有数据发给 slave node。而在后续，master node 持续将写命令，异步复制给 slave node。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/3.png">
+            <img class="mx-auto" alt="redis-master-slave-replication-detail" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-master-slave/3.png" />
+        </a>
+    </p>
+<h3 id="51-全量复制">5.1 全量复制</h3>
 <ul>
-<li>noeviction: 当内存不足以容纳新写入数据时，新写入操作会报错，这个一般没人用吧，实在是太恶心了。</li>
-<li><strong>allkeys-lru</strong>：当内存不足以容纳新写入数据时，在<strong>键空间</strong>中，移除最近最少使用的 key（这个是<strong>最常用</strong>的）。</li>
-<li>allkeys-random：当内存不足以容纳新写入数据时，在<strong>键空间</strong>中，随机移除某个 key，这个一般没人用吧，为啥要随机，肯定是把最近最少使用的 key 给干掉啊。</li>
-<li>volatile-lru：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，移除最近最少使用的 key（这个一般不太合适）。</li>
-<li>volatile-random：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，<strong>随机移除</strong>某个 key。</li>
-<li>volatile-ttl：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，有<strong>更早过期时间</strong>的 key 优先移除。</li>
+<li>master 执行 bgsave ，在本地生成一份 rdb 快照文件。</li>
+<li>master node 将 rdb 快照文件发送给 slave node，如果 rdb 复制时间超过 60秒（repl-timeout），那么 slave node 就会认为复制失败，可以适当调大这个参数(对于千兆网卡的机器，一般每秒传输 100MB，6G 文件，很可能超过 60s)</li>
+<li>master node 在生成 rdb 时，会将所有新的写命令缓存在内存中，在 slave node 保存了 rdb 之后，再将新的写命令复制给 slave node。</li>
+<li>如果在复制期间，内存缓冲区持续消耗超过 64MB，或者一次性超过 256MB，那么停止复制，复制失败。</li>
 </ul>
-<h2 id="手写一个-lru-算法">手写一个 LRU 算法</h2>
-<p>你可以现场手写最原始的 LRU 算法，那个代码量太大了，似乎不太现实。</p>
-<p>不求自己纯手工从底层开始打造出自己的 LRU，但是起码要知道如何利用已有的 JDK 数据结构实现一个 Java 版的 LRU。</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LRUCache</span><span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">extends</span> LinkedHashMap<span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
-    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> CACHE_SIZE<span style="color:#000;font-weight:bold">;</span>
+<pre><code>client-output-buffer-limit slave 256MB 64MB 60
+</code></pre><ul>
+<li>slave node 接收到 rdb 之后，清空自己的旧数据，然后重新加载 rdb 到自己的内存中，同时<strong>基于旧的数据版本</strong>对外提供服务。</li>
+<li>如果 slave node 开启了 AOF，那么会立即执行 BGREWRITEAOF，重写 AOF。</li>
+</ul>
+<h3 id="52-增量复制">5.2 增量复制</h3>
+<ul>
+<li>如果全量复制过程中，master-slave 网络连接断掉，那么 slave 重新连接 master 时，会触发增量复制。</li>
+<li>master 直接从自己的 backlog 中获取部分丢失的数据，发送给 slave node，默认 backlog 就是 1MB。</li>
+<li>master 就是根据 slave 发送的 psync 中的 offset 来从 backlog 中获取数据的。</li>
+</ul>
+<h3 id="53-heartbeat">5.3 heartbeat</h3>
+<p>主从节点互相都会发送 heartbeat 信息。</p>
+<p>master 默认每隔 10秒 发送一次 heartbeat，slave node 每隔 1秒 发送一个 heartbeat。</p>
+<h3 id="54-异步复制">5.4 异步复制</h3>
+<p>master 每次接收到写命令之后，先在内部写入数据，然后异步发送给 slave node。</p>
+<h2 id="6redis-如何才能做到高可用">6、redis 如何才能做到高可用</h2>
+<p>如果系统在 365 天内，有 99.99% 的时间，都是可以哗哗对外提供服务的，那么就说系统是高可用的。</p>
+<p>一个 slave 挂掉了，是不会影响可用性的，还有其它的 slave 在提供相同数据下的相同的对外的查询服务。</p>
+<p>但是，如果 master node 死掉了，会怎么样？没法写数据了，写缓存的时候，全部失效了。slave node 还有什么用呢，没有 master 给它们复制数据了，系统相当于不可用了。</p>
+<p>redis 的高可用架构，叫做 <code>failover</code> <strong>故障转移</strong>，也可以叫做主备切换。</p>
+<p>master node 在故障时，自动检测，并且将某个 slave node 自动切换为 master node 的过程，叫做主备切换。这个过程，实现了 redis 的主从架构下的高可用。那主备切换就是基于 redis 的哨兵模式来实现的。</p>
+<p>下一篇博客会详细说明 redis 基于哨兵的高可用性。</p>
+<h2 id="7redis-主从复制总结">7、redis 主从复制总结</h2>
+<p>当读高并发的时候，就需要建立主从架构 master 和 slave，首先，当建立了第一次的从节点之后，从节点 slave 会 ping 一下 master 看是否能 ping 的通，然后如果 ping 通了，就证明 slave 创建成功，然后由于第一次建立 slave ，因此 master 会执行 full resynchronization ，全量复制，此时 master 会启动一个后台线程（ master 将执行 bgsave ），开始生成一份 <code>RDB</code> 快照文件到本地磁盘，同时还会将从客户端 client 新收到的所有写命令缓存在内存中。<code>RDB</code> 文件生成完毕后， master 会将这个 <code>RDB</code> 发送给 slave，slave 会先<strong>写入本地磁盘，然后再从本地磁盘加载到内存</strong>中，接着 master 会将内存中缓存的写命令发送到 slave，slave 也会同步这些数据。但是当由于网络原因导致了 slave 与 master 断开连接了，之后 slave 重新连接到 master 的时候，master 就会将断开连接之前没复制完的部分数据同步到 slave 中（此过程叫增量复制，通过 backlog 和 replica offset）。数据完全同步后，master 中再有写命令更新数据之后就直接进行 master 和 slave 之间的异步复制了，其实这个复制是很简单的，就是当第一次 slave 和 master 建立连接或者 slave 断开连接再次重新连接的时候需要麻烦一些。</p>
 
-    <span style="color:#998;font-style:italic">/**
-</span><span style="color:#998;font-style:italic">     * 传递进来的参数是最多能缓存多少数据
-</span><span style="color:#998;font-style:italic">     *
-</span><span style="color:#998;font-style:italic">     * @param cacheSize 缓存大小
-</span><span style="color:#998;font-style:italic">     */</span>
-    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LRUCache</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> cacheSize<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        <span style="color:#998;font-style:italic">// 这块就是设置一个 hashmap 的初始大小，最后的 true 表示让 linkedHashMap 按照访问顺序来进行排序，最近访问的放在头部，最老访问的放在尾部。
-</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">((</span><span style="color:#458;font-weight:bold">int</span><span style="color:#000;font-weight:bold">)</span> Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ceil</span><span style="color:#000;font-weight:bold">(</span>cacheSize <span style="color:#000;font-weight:bold">/</span> 0<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">75</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">,</span> 0<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">75f</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
-        CACHE_SIZE <span style="color:#000;font-weight:bold">=</span> cacheSize<span style="color:#000;font-weight:bold">;</span>
-    <span style="color:#000;font-weight:bold">}</span>
-
-    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
-    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">removeEldestEntry</span><span style="color:#000;font-weight:bold">(</span>Map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Entry</span><span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> eldest<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        <span style="color:#998;font-style:italic">// 当 map中的数据量大于指定的缓存个数的时候，就自动删除最老的数据。
-</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> size<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&gt;</span> CACHE_SIZE<span style="color:#000;font-weight:bold">;</span>
-    <span style="color:#000;font-weight:bold">}</span>
-<span style="color:#000;font-weight:bold">}</span>
-</code></pre></div>
         </div>
 
         
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/06/26/redis-master-slave.html">https://chanservy.github.io/2021/06/26/redis-master-slave.html</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
     </ul>
 </div>
@@ -279,6 +330,8 @@
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/2021/06/25/redis-expiration-policies-and-lru.html">Redis的过期策略？</a></li>
+        
         <li><a href="/2021/06/25/redis-data-types.html">Redis都有哪些数据类型？</a></li>
         
         <li><a href="/2021/06/25/redis-single-thread-model.html">为何单线程的redis能支撑高并发？</a></li>
@@ -286,8 +339,6 @@
         <li><a href="/2021/06/21/why-cache.html">项目中为何需要用缓存？</a></li>
         
         <li><a href="/2021/06/21/es-better-query-with-big-data.html">Es在数据量很大的情况下如何提高查询效率？</a></li>
-        
-        <li><a href="/2021/06/20/es-write-query.html">Es读写数据的工作原理</a></li>
         
     </ul>
 </div>
@@ -300,6 +351,8 @@
                 <li><a href='/tags/Redis'>Redis</a></li>
                 
                 <li><a href='/tags/%E9%9D%A2%E8%AF%95'>面试</a></li>
+                
+                <li><a href='/tags/%E6%9E%B6%E6%9E%84'>架构</a></li>
                 
             </ul>
             

@@ -9,20 +9,20 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Redis的过期策略？ | 迩东陈的博客</title>
-    <meta property="og:title" content="Redis的过期策略？ - 迩东陈的博客">
+    <title>Redis哨兵集群实现高可用 | 迩东陈的博客</title>
+    <meta property="og:title" content="Redis哨兵集群实现高可用 - 迩东陈的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2021-06-25T22:42:03&#43;08:00'>
+    <meta property="article:published_time" content='2021-06-28T21:46:08&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2021-06-25T22:42:03&#43;08:00'>
+    <meta property="article:modified_time" content='2021-06-28T21:46:08&#43;08:00'>
         
     <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
-    <meta name="description" content="Redis的过期策略？">
+    <meta name="description" content="Redis哨兵集群实现高可用">
         
     <meta name="author" content="迩东陈">
-    <meta property="og:url" content="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">
+    <meta property="og:url" content="https://chanservy.github.io/2021/06/28/redis-sentinel.html">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -145,9 +145,22 @@
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#redis-过期策略">redis 过期策略</a></li>
-    <li><a href="#内存淘汰机制">内存淘汰机制</a></li>
-    <li><a href="#手写一个-lru-算法">手写一个 LRU 算法</a></li>
+    <li><a href="#1哨兵的介绍">1*、哨兵的介绍</a></li>
+    <li><a href="#2哨兵的核心知识">2*、哨兵的核心知识</a></li>
+    <li><a href="#3redis-哨兵主备切换的数据丢失问题">3*、redis 哨兵主备切换的数据丢失问题</a>
+      <ul>
+        <li><a href="#31-两种情况会导致数据丢失">3.1 两种情况会导致数据丢失</a></li>
+        <li><a href="#32-数据丢失问题的解决方案">3.2 数据丢失问题的解决方案</a></li>
+      </ul>
+    </li>
+    <li><a href="#4sdown-和-odown-转换机制">4、sdown 和 odown 转换机制</a></li>
+    <li><a href="#5哨兵集群的自动发现机制">5、哨兵集群的自动发现机制</a></li>
+    <li><a href="#6slave-配置的自动纠正">6、slave 配置的自动纠正</a></li>
+    <li><a href="#7slave-master-选举算法">7*、slave-&gt;master 选举算法</a></li>
+    <li><a href="#8quorum-和-majority">8*、quorum 和 majority</a></li>
+    <li><a href="#9configuration-epoch">9、configuration epoch</a></li>
+    <li><a href="#10configuration-传播">10、configuration 传播</a></li>
+    <li><a href="#11总结">11、总结</a></li>
   </ul>
 </nav>
     </div>
@@ -181,10 +194,10 @@
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">Redis的过期策略？</h1>
+            <h1 class="post-title">Redis哨兵集群实现高可用</h1>
         </header>
         <date class="post-meta meta-date">
-            2021年6月25日
+            2021年6月28日
         </date>
         
         <div class="post-meta">
@@ -193,6 +206,8 @@
             <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
             
             <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%9E%B6%E6%9E%84'>架构</a></span>
             
         </div>
         
@@ -204,68 +219,140 @@
         
         
         <div class="post-content">
-            <p>前言：redis 的过期策略都有哪些？内存淘汰机制都有哪些？手写一下 LRU 代码实现？</p>
-<p>常见的有两个问题：</p>
-<ul>
-<li>往 redis 写入的数据怎么没了？</li>
-</ul>
-<p>啥叫缓存？用内存当缓存。内存是无限的吗，内存是很宝贵而且是有限的，磁盘是廉价而且是大量的。可能一台机器就几十个 G 的内存，但是可以有几个 T 的硬盘空间。redis 主要是基于内存来进行高性能、高并发的读写操作的。</p>
-<p>那既然内存是有限的，比如 redis 就只能用 10G，你要是往里面写了 20G 的数据，会咋办？当然会干掉 10G 的数据，然后就保留 10G 的数据了。那干掉哪些数据？保留哪些数据？当然是干掉不常用的数据，保留常用的数据了。触发了内存淘汰机制。</p>
-<ul>
-<li>数据明明过期了，怎么还占用着内存？</li>
-</ul>
-<p>这是由 redis 的过期策略来决定。定期删除时随机抽取的设置了过期时间的那些 key 可能有一部分暂时并没有过期，当然过期的会被删除掉，但是并不是所有的过期的 key 都会被抽取到，没抽取到的过期的 key 如果没有被查询，那就不能触发惰性删除，因此可能会出现数据明明过期了但是内存依然被占用着这种情况。</p>
-<h2 id="redis-过期策略">redis 过期策略</h2>
-<p>redis 过期策略是：<strong>定期删除+惰性删除</strong>。</p>
-<p>所谓<strong>定期删除</strong>，指的是 redis 默认是每隔 100ms 就随机<code>抽取一些设置了过期时间的 key，检查其是否过期，如果过期就删除</code>。</p>
-<p>假设 redis 里放了 10w 个 key，都设置了过期时间，你每隔几百毫秒，就检查 10w 个 key，那 redis 基本上就死了，cpu 负载会很高的，消耗在你的检查过期 key 上了。注意，这里可不是每隔 100ms 就遍历所有的设置过期时间的 key，那样就是一场性能上的<strong>灾难</strong>。实际上 redis 是每隔 100ms <strong>随机抽取</strong>一些 key 来检查和删除的。</p>
-<p>但是问题是，定期删除可能会导致很多过期 key 到了时间并没有被删除掉，那咋整呢？所以就是惰性删除了。这就是说，在你获取某个 key 的时候，redis 会检查一下 ，这个 key 如果设置了过期时间那么是否过期了？如果过期了此时就会删除，不会给你返回任何东西。</p>
-<blockquote>
-<p>获取 key 的时候，如果此时 key 已经过期，就删除，不会返回任何东西。</p>
+            <blockquote>
+<p>redis 的不可用，主要体现在 master 上面，因为我们说过 redis 的主从架构，master 写 slave 读，然后 master 将数据异步的发给 slave，然后 slave 同步数据，那如果 master 挂掉了会怎样？没法写数据了，写缓存的时候全部失效了，那么 slave node 还有什么用呢？都没有 master node 给它们复制数据了，系统就相当于不可用了，相反，一个 slave node 挂掉了是不会影响可用性的，那缓存如果可用性不高，突然挂了，大量的流量并发来了，会直接涌入 mysql，mysql 宕机，整个系统垮掉。。。因此，缓存的可用性极其重要，那主备切换就保证了高可用，而哨兵模式的监控就实现了主备切换。这个在 master node 故障时，自动检测，并且将某个 slave node 自动切换为 master node 的过程，叫做主备切换。</p>
 </blockquote>
-<p>但是实际上这还是有问题的，如果定期删除漏掉了很多过期 key，然后你也没及时去查，也就没走惰性删除，此时会怎么样？如果大量过期 key 堆积在内存里，导致 redis 内存块耗尽了，咋整？</p>
-<p>答案是：<strong>走内存淘汰机制</strong>。</p>
-<h2 id="内存淘汰机制">内存淘汰机制</h2>
-<p>redis 内存淘汰机制有以下几个：</p>
+<h2 id="1哨兵的介绍">1*、哨兵的介绍</h2>
+<p>sentinel，中文名是哨兵。哨兵是 redis 集群机构中非常重要的一个组件，主要有以下功能：</p>
 <ul>
-<li>noeviction: 当内存不足以容纳新写入数据时，新写入操作会报错，这个一般没人用吧，实在是太恶心了。</li>
-<li><strong>allkeys-lru</strong>：当内存不足以容纳新写入数据时，在<strong>键空间</strong>中，移除最近最少使用的 key（这个是<strong>最常用</strong>的）。</li>
-<li>allkeys-random：当内存不足以容纳新写入数据时，在<strong>键空间</strong>中，随机移除某个 key，这个一般没人用吧，为啥要随机，肯定是把最近最少使用的 key 给干掉啊。</li>
-<li>volatile-lru：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，移除最近最少使用的 key（这个一般不太合适）。</li>
-<li>volatile-random：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，<strong>随机移除</strong>某个 key。</li>
-<li>volatile-ttl：当内存不足以容纳新写入数据时，在<strong>设置了过期时间的键空间</strong>中，有<strong>更早过期时间</strong>的 key 优先移除。</li>
+<li><strong>集群监控：负责监控 redis master 和 slave 进程是否正常工作。</strong></li>
+<li>消息通知：如果某个 redis 实例有故障，那么哨兵负责发送消息作为报警通知给管理员。</li>
+<li><strong>故障转移：如果 master node 挂掉了，会自动转移到 slave node 上。</strong></li>
+<li><strong>配置中心：如果故障转移发生了，通知 client 客户端新的 master 地址。</strong></li>
 </ul>
-<h2 id="手写一个-lru-算法">手写一个 LRU 算法</h2>
-<p>你可以现场手写最原始的 LRU 算法，那个代码量太大了，似乎不太现实。</p>
-<p>不求自己纯手工从底层开始打造出自己的 LRU，但是起码要知道如何利用已有的 JDK 数据结构实现一个 Java 版的 LRU。</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LRUCache</span><span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">extends</span> LinkedHashMap<span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> <span style="color:#000;font-weight:bold">{</span>
-    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">int</span> CACHE_SIZE<span style="color:#000;font-weight:bold">;</span>
+<p>哨兵用于实现 redis 集群的高可用，本身也是分布式的，作为一个哨兵集群去运行，互相协同工作。</p>
+<ul>
+<li>故障转移时，判断一个 master node 是否宕机了，需要大部分的哨兵都同意才行，涉及到了分布式选举的问题。</li>
+<li>即使部分哨兵节点挂掉了，哨兵集群还是能正常工作的，因为如果一个作为高可用机制重要组成部分的故障转移系统本身是单点的，那就很坑爹了。</li>
+</ul>
+<h2 id="2哨兵的核心知识">2*、哨兵的核心知识</h2>
+<ul>
+<li><strong>哨兵至少需要 3 个实例</strong>，来保证自己的健壮性。</li>
+<li>哨兵 + redis 主从的部署架构，是<strong>不保证数据零丢失</strong>的，只能保证 redis 集群的高可用性。</li>
+<li>对于哨兵 + redis 主从这种复杂的部署架构，尽量在测试环境和生产环境，都进行充足的测试和演练。</li>
+</ul>
+<p>哨兵集群必须部署 2 个以上节点，如果哨兵集群仅仅部署了 2 个哨兵实例，quorum = 1。</p>
+<pre><code>+----+         +----+
+| M1 |---------| R1 |
+| S1 |         | S2 |
++----+         +----+
+</code></pre><p>配置 <code>quorum=1</code>，如果 master 宕机， <code>s1 和 s2 中只要有 1 个哨兵认为 master 宕机了</code>，就可以进行主备切换，同时 s1 和 s2 会选举出一个哨兵来执行故障转移。但是同时这个时候，也需要<code>满足 majority，也就是大多数哨兵都是运行的</code>。</p>
+<pre><code>2 个哨兵，majority=2
+3 个哨兵，majority=2
+4 个哨兵，majority=2
+5 个哨兵，majority=3
+...
+</code></pre><p>如果此时仅仅是 M1 进程宕机了，哨兵 s1 正常运行，那么故障转移是 OK 的。但是如果是整个 M1 和 S1 运行的机器宕机了，那么哨兵只有 1 个，此时就没有 majority 来允许执行故障转移，虽然另外一台机器上还有一个 R1，但是故障转移不会执行。</p>
+<p>经典的 3 节点哨兵集群是这样的：</p>
+<pre><code>       +----+
+       | M1 |
+       | S1 |
+       +----+
+          |
++----+    |    +----+
+| R2 |----+----| R3 |
+| S2 |         | S3 |
++----+         +----+
+</code></pre><p>配置 <code>quorum=2</code>，如果 M1 所在机器宕机了，那么三个哨兵还剩下 2 个，S2 和 S3 可以一致认为 master 宕机了，然后选举出一个来执行故障转移，同时 3 个哨兵的 majority 是 2，所以还剩下的 2 个哨兵运行着，就可以允许执行故障转移。</p>
+<h2 id="3redis-哨兵主备切换的数据丢失问题">3*、redis 哨兵主备切换的数据丢失问题</h2>
+<p>首先要知道，哨兵模式保证了 redis 的高可用性，但是并不能保证数据的零丢失。</p>
+<h3 id="31-两种情况会导致数据丢失">3.1 两种情况会导致数据丢失</h3>
+<p>主备切换的过程，可能会导致数据丢失：</p>
+<ul>
+<li>异步复制导致的数据丢失</li>
+</ul>
+<p>因为 master-&gt;slave 的复制是异步的，所以可能有部分数据还没复制到 slave，master 就宕机了，然后这个时候，哨兵模式起作用了，可显着它能耐了，检测到 master 宕机了，直接主备切换故障转移，选举了一个 slave node 将它变成为 master node 了，此时这部分数据就丢失了。因为刚刚有部分数据没复制过来，这个新的 master node 上面缺数据。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-sentinel/1.png">
+            <img class="mx-auto" alt="async-replication-data-lose-case" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-sentinel/1.png" />
+        </a>
+    </p>
+<ul>
+<li>脑裂导致的数据丢失</li>
+</ul>
+<p>脑裂，也就是说，某个 master 所在机器突然<strong>脱离了正常的网络</strong>，跟其他 slave 机器不能连接，但是实际上 master 还运行着。此时哨兵可能就会<strong>认为</strong> master 宕机了，然后开启选举，将其他 slave 切换成了 master。这个时候，集群里就会有两个 master ，也就是所谓的<strong>脑裂</strong>。</p>
+<p>此时虽然某个 slave 被切换成了 master，但是可能 sentinel 还没来得及通知客户端，client 还没来得及切换到新的 master，还继续向旧 master 写数据。因此网络修复后，旧 master 再次恢复的时候，会被作为一个 slave 挂到新的 master 上去，自己的数据会清空，重新从新的 master 复制数据。而新的 master 并没有后来 client 写入的数据，因此，这部分数据也就丢失了。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-sentinel/2.png">
+            <img class="mx-auto" alt="redis-cluster-split-brain" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-sentinel/2.png" />
+        </a>
+    </p>
+<h3 id="32-数据丢失问题的解决方案">3.2 数据丢失问题的解决方案</h3>
+<p>进行如下配置：</p>
+<pre><code>min-slaves-to-write 1
+min-slaves-max-lag 10
+</code></pre><p>表示，要求至少有 1 个 slave，数据复制和同步的延迟不能超过 10 秒。你想啊，如果这块不做控制，那么如果说 slave 数据的复制和同步的延时很高，可能好久之前写入到 master 中的数据还没有同步过来呢，就是说 slave 相比 master 差了很多的数据，那 master 一宕机，重新选举某个 slave 成为新的 master 的话，那么后果不堪设想，数据差太多了。</p>
+<p>这样设置的话，如果说一旦所有的 slave，数据复制和同步的延迟都超过了 10 秒钟，那么这个时候，master 就不会再接收 client 的任何请求了，一般来说，会在 client 做降级，先写到本地的磁盘中，另外，在 client 接收外部请求的时候，再做降级，做限流，减慢请求涌入的速度。或者 client 可能会采取将数据临时灌入 kafka 消息队列，写一个定时任务，每隔十分钟去队列中取一次，尝试重新发回 master。</p>
+<ul>
+<li>减少异步复制数据的丢失</li>
+</ul>
+<p>有了 <code>min-slaves-max-lag</code> 这个配置，就可以确保说，一旦 slave 复制数据和 ack 延时太长，就认为可能 master 宕机后会损失很多的数据，那么就拒绝写请求，这样可以把 master 宕机时由于部分数据未同步到 slave 导致的数据丢失降低的可控范围内。</p>
+<ul>
+<li>减少脑裂的数据丢失</li>
+</ul>
+<p>如果一个 master 出现了脑裂，跟其他 slave 丢了连接，那么上面两个配置可以确保说，如果自己不能继续给指定数量的 slave 发送数据，而且 slave 超过 10 秒没有给自己 ack 消息，那么就直接拒绝客户端的写请求。因此在脑裂场景下，最多就丢失 10 秒的数据。</p>
+<h2 id="4sdown-和-odown-转换机制">4、sdown 和 odown 转换机制</h2>
+<ul>
+<li>sdown 是主观宕机，就一个哨兵如果自己觉得一个 master 宕机了，那么就是主观宕机</li>
+<li>odown 是客观宕机，如果 quorum 数量的哨兵都觉得一个 master 宕机了，那么就是客观宕机</li>
+</ul>
+<p>sdown 达成的条件很简单，如果一个哨兵 ping 一个 master，超过了 <code>is-master-down-after-milliseconds</code> 指定的毫秒数之后，就主观认为 master 宕机了；如果一个哨兵在指定时间内，收到了 quorum 数量的其它哨兵也认为那个 master 是 sdown 的，那么就认为是 odown 了。</p>
+<h2 id="5哨兵集群的自动发现机制">5、哨兵集群的自动发现机制</h2>
+<p>哨兵互相之间的发现，是通过 redis 的 <code>pub/sub</code> 系统实现的，每个哨兵都会往 <code>__sentinel__:hello</code> 这个 channel 里发送一个消息，这时候所有其他哨兵都可以消费到这个消息，并感知到其他的哨兵的存在。</p>
+<p>每隔两秒钟，每个哨兵都会往自己监控的某个 master+slaves 对应的 <code>__sentinel__:hello</code> channel 里<strong>发送一个消息</strong>，内容是自己的 host、ip 和 runid 还有对这个 master 的监控配置。</p>
+<p>每个哨兵也会去<strong>监听</strong>自己监控的每个 master+slaves 对应的 <code>__sentinel__:hello</code> channel，然后去感知到同样在监听这个 master+slaves 的其他哨兵的存在。</p>
+<p>每个哨兵还会跟其他哨兵交换对 <code>master</code> 的监控配置，互相进行监控配置的同步。</p>
+<h2 id="6slave-配置的自动纠正">6、slave 配置的自动纠正</h2>
+<p>哨兵会负责自动纠正 slave 的一些配置，比如 slave 如果要成为潜在的 master 候选人，哨兵会确保 slave 复制现有 master 的数据；如果 slave 连接到了一个错误的 master 上，比如故障转移之后，那么哨兵会确保它们连接到正确的 master 上。</p>
+<h2 id="7slave-master-选举算法">7*、slave-&gt;master 选举算法</h2>
+<p>如果一个 master 被认为 odown 了，而且 majority 数量的哨兵都允许主备切换，那么某个哨兵就会执行主备切换操作，此时首先要选举一个 slave 来，会考虑 slave 的一些信息：</p>
+<ul>
+<li>跟 master 断开连接的时长</li>
+<li>slave 优先级</li>
+<li>复制 offset</li>
+<li>run id</li>
+</ul>
+<p>如果一个 slave 跟 master 断开连接的时间已经超过了 <code>down-after-milliseconds</code> 的 10 倍，外加 master 宕机的时长，那么 slave 就被认为不适合选举为 master。</p>
+<pre><code>(down-after-milliseconds * 10) + milliseconds_since_master_is_in_SDOWN_state
+</code></pre><p>接下来会对 slave 进行排序：</p>
+<ul>
+<li>按照 slave 优先级进行排序，slave priority 越低，优先级就越高。</li>
+<li>如果 slave priority 相同，那么看 replica offset，哪个 slave 复制了越多的数据，offset 越靠后，优先级就越高。</li>
+<li>如果上面两个条件都相同，那么选择一个 run id 比较小的那个 slave。</li>
+</ul>
+<h2 id="8quorum-和-majority">8*、quorum 和 majority</h2>
+<p>每次一个哨兵要做主备切换，首先需要 quorum 数量的哨兵认为 odown，然后选举出一个哨兵来做切换，这个哨兵还需要得到 majority 哨兵的授权，才能正式执行切换。</p>
+<p>如果 quorum &lt; majority，比如 5 个哨兵，majority 就是 3，quorum 设置为 2，那么就 3 个哨兵授权就可以执行切换（我的理解：就是 5 个哨兵，majority 就是 3 的情况，只需要五个哨兵里面活着的哨兵数量 &gt;= 3，就可以满足 majority 的授权数量）。</p>
+<p>但是如果 quorum &gt;= majority，那么必须 quorum 数量的哨兵都授权，比如 5 个哨兵，quorum 是 5，那么必须 5 个哨兵都同意授权，才能执行切换。</p>
+<h2 id="9configuration-epoch">9、configuration epoch</h2>
+<p>哨兵会对一套 redis master+slaves 进行监控，有相应的监控的配置。</p>
+<p>执行切换的那个哨兵，会从要切换到的新 master（salve-&gt;master）那里得到一个 configuration epoch，这就是一个 version 号，每次切换的 version 号都必须是唯一的。</p>
+<p>如果第一个选举出的哨兵切换失败了，那么其他哨兵，会等待 failover-timeout 时间，然后接替继续执行切换，此时会重新获取一个新的 configuration epoch，作为新的 version 号。</p>
+<h2 id="10configuration-传播">10、configuration 传播</h2>
+<p>哨兵完成切换之后，会在自己本地更新生成最新的 master 配置，然后同步给其他的哨兵，就是通过之前说的 <code>pub/sub</code> 消息机制。</p>
+<p>这里之前的 version 号就很重要了，因为各种消息都是通过一个 channel 去发布和监听的，所以一个哨兵完成一次新的切换之后，新的 master 配置是跟着新的 version 号的。其他的哨兵都是根据版本号的大小来更新自己的 master 配置的。</p>
+<h2 id="11总结">11、总结</h2>
+<p>redis 高并发：主从架构，一主多从，一般来说，很多项目其实就足够用了，单主用来写入数据，单机的几万 QPS ，多从用来查数据，多个从实例可以提供每秒 10 万的 QPS。</p>
+<p>redis 高并发的同时，还需要容纳大量的数据，一主多从，每个实例都容纳了完整的数据，如果说 redis 主就 10g 的内存量，那么最多只能容纳 10g 的数据量，如果数据量过大，甚至几百 g，那就需要使用 redis 集群。用了 redis master 集群之后，可以提供可能每秒几十万的读写并发。</p>
+<p>redis 高可用：主从架构部署，再加上哨兵集群就可以啦。就可以实现自动进行主备切换。</p>
 
-    <span style="color:#998;font-style:italic">/**
-</span><span style="color:#998;font-style:italic">     * 传递进来的参数是最多能缓存多少数据
-</span><span style="color:#998;font-style:italic">     *
-</span><span style="color:#998;font-style:italic">     * @param cacheSize 缓存大小
-</span><span style="color:#998;font-style:italic">     */</span>
-    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LRUCache</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> cacheSize<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        <span style="color:#998;font-style:italic">// 这块就是设置一个 hashmap 的初始大小，最后的 true 表示让 linkedHashMap 按照访问顺序来进行排序，最近访问的放在头部，最老访问的放在尾部。
-</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">((</span><span style="color:#458;font-weight:bold">int</span><span style="color:#000;font-weight:bold">)</span> Math<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">ceil</span><span style="color:#000;font-weight:bold">(</span>cacheSize <span style="color:#000;font-weight:bold">/</span> 0<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">75</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">+</span> 1<span style="color:#000;font-weight:bold">,</span> 0<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">75f</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
-        CACHE_SIZE <span style="color:#000;font-weight:bold">=</span> cacheSize<span style="color:#000;font-weight:bold">;</span>
-    <span style="color:#000;font-weight:bold">}</span>
-
-    <span style="color:#3c5d5d;font-weight:bold">@Override</span>
-    <span style="color:#000;font-weight:bold">protected</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">removeEldestEntry</span><span style="color:#000;font-weight:bold">(</span>Map<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Entry</span><span style="color:#000;font-weight:bold">&lt;</span>K<span style="color:#000;font-weight:bold">,</span> V<span style="color:#000;font-weight:bold">&gt;</span> eldest<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
-        <span style="color:#998;font-style:italic">// 当 map中的数据量大于指定的缓存个数的时候，就自动删除最老的数据。
-</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> size<span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">&gt;</span> CACHE_SIZE<span style="color:#000;font-weight:bold">;</span>
-    <span style="color:#000;font-weight:bold">}</span>
-<span style="color:#000;font-weight:bold">}</span>
-</code></pre></div>
         </div>
 
         
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/06/28/redis-sentinel.html">https://chanservy.github.io/2021/06/28/redis-sentinel.html</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
     </ul>
 </div>
@@ -279,15 +366,15 @@
     <h2>See Also</h2>
     <ul class="listing">
         
+        <li><a href="/2021/06/26/redis-master-slave.html">Redis主从架构</a></li>
+        
+        <li><a href="/2021/06/25/redis-expiration-policies-and-lru.html">Redis的过期策略？</a></li>
+        
         <li><a href="/2021/06/25/redis-data-types.html">Redis都有哪些数据类型？</a></li>
         
         <li><a href="/2021/06/25/redis-single-thread-model.html">为何单线程的redis能支撑高并发？</a></li>
         
         <li><a href="/2021/06/21/why-cache.html">项目中为何需要用缓存？</a></li>
-        
-        <li><a href="/2021/06/21/es-better-query-with-big-data.html">Es在数据量很大的情况下如何提高查询效率？</a></li>
-        
-        <li><a href="/2021/06/20/es-write-query.html">Es读写数据的工作原理</a></li>
         
     </ul>
 </div>
@@ -300,6 +387,8 @@
                 <li><a href='/tags/Redis'>Redis</a></li>
                 
                 <li><a href='/tags/%E9%9D%A2%E8%AF%95'>面试</a></li>
+                
+                <li><a href='/tags/%E6%9E%B6%E6%9E%84'>架构</a></li>
                 
             </ul>
             
