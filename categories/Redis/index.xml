@@ -6,7 +6,16 @@
     <description>Recent content in Redis on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Tue, 29 Jun 2021 11:25:23 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Redis/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 30 Jun 2021 17:28:40 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Redis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis的集群模式</title>
+      <link>https://chanservy.github.io/2021/06/30/redis-cluster.html</link>
+      <pubDate>Wed, 30 Jun 2021 17:28:40 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/06/30/redis-cluster.html</guid>
+      <description>redis 集群模式的工作原理能说一下么？在集群模式下，redis 的 key 是如何寻址的？分布式寻址都有哪些算法？了解一致性 hash 算法吗？ 在前几年，redis 如果要搞几个节点，每个节点存储一部分的数据，得借助一些中间件来实现，比如说有 codis，或者 twemproxy，都有。有一些 redis 中间件，你读写 redis</description>
+    </item>
+    
     <item>
       <title>Redis的持久化机制</title>
       <link>https://chanservy.github.io/2021/06/29/redis-chijiuhua.html</link>

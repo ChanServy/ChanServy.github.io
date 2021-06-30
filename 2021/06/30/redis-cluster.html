@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Redis的集群模式 | 迩东陈的博客</title>
+    <meta property="og:title" content="Redis的集群模式 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-06-30T17:28:40&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-06-30T17:28:40&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="Redis的集群模式">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/06/30/redis-cluster.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1redis-cluster-介绍">1、redis cluster 介绍</a></li>
+    <li><a href="#2节点间的内部通信机制">2、节点间的内部通信机制</a>
+      <ul>
+        <li><a href="#21-基本通信原理">2.1 基本通信原理</a></li>
+        <li><a href="#22-gossip-协议">2.2 gossip 协议</a></li>
+        <li><a href="#23-ping-消息深入">2.3 ping 消息深入</a></li>
+      </ul>
+    </li>
+    <li><a href="#3分布式寻址算法">3、分布式寻址算法</a>
+      <ul>
+        <li><a href="#31-hash-算法">3.1 hash 算法</a></li>
+        <li><a href="#32-一致性-hash-算法">3.2 一致性 hash 算法</a></li>
+        <li><a href="#33-redis-cluster-的-hash-slot-算法">3.3 redis cluster 的 hash slot 算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#4redis-cluster-的高可用与主备切换原理">4、redis cluster 的高可用与主备切换原理</a>
+      <ul>
+        <li><a href="#41-判断节点宕机">4.1 判断节点宕机</a></li>
+        <li><a href="#42-从节点过滤">4.2 从节点过滤</a></li>
+        <li><a href="#43-从节点选举">4.3 从节点选举</a></li>
+        <li><a href="#44-与哨兵比较">4.4 与哨兵比较</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">Redis的集群模式</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年6月30日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E6%9E%B6%E6%9E%84'>架构</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <blockquote>
+<p>redis 集群模式的工作原理能说一下么？在集群模式下，redis 的 key 是如何寻址的？分布式寻址都有哪些算法？了解一致性 hash 算法吗？</p>
+</blockquote>
+<p>在前几年，redis 如果要搞几个节点，每个节点存储一部分的数据，得<strong>借助一些中间件</strong>来实现，比如说有 <code>codis</code>，或者 <code>twemproxy</code>，都有。有一些 redis 中间件，你读写 redis 中间件，redis 中间件负责将你的数据分布式存储在多台机器上的 redis 实例中。</p>
+<p>这两年，redis 不断在发展，redis 也不断有新的版本，现在的 redis 集群模式，可以做到在多台机器上，部署多个 redis 实例，每个实例存储一部分的数据，同时每个 redis 主实例可以挂 redis 从实例，自动确保说，如果 redis 主实例挂了，会自动切换到 redis 从实例上来。</p>
+<p>现在 redis 的新版本，大家都是用 redis cluster 的，也就是 redis 原生支持的 redis 集群模式。</p>
+<p>如果你的数据量很少，主要是承载高并发高性能的场景，比如你的缓存一般就几个 G，单机就足够了，可以使用 replication，一个 master 多个 slaves，要几个 slave 跟你要求的读吞吐量有关，然后自己搭建一个 sentinel 集群去保证 redis 主从架构的高可用性。读写分离的架构，单 master 负责写，多 slaves 负责读。</p>
+<p>redis cluster，主要是针对<strong>海量数据+高并发+高可用</strong>的场景。redis cluster 支撑 N 个 redis master node，每个 master node 都可以挂载多个 slave node。这样整个 redis 就可以横向扩容了。如果你要支撑更大数据量的缓存，那就横向扩容更多的 master 节点，所有的 master node 一起就能存放更多的数据了，分布是思想。</p>
+<h2 id="1redis-cluster-介绍">1、redis cluster 介绍</h2>
+<ul>
+<li>自动将数据进行分片，每个 master 上放一部分数据</li>
+<li>提供内置的高可用支持，部分 master 不可用时，还是可以继续工作的</li>
+</ul>
+<p>在 redis cluster 架构下，每个 redis 要放开两个端口号，比如一个是 6379，另外一个就是 加1w 的端口号，比如 16379。</p>
+<p>16379 端口号是用来进行节点间通信的，也就是 cluster bus 的东西，cluster bus 的通信，用来进行故障检测、配置更新、故障转移授权。cluster bus 用了另外一种二进制的协议，<code>gossip</code> 协议，用于节点间进行高效的数据交换，占用更少的网络带宽和处理时间。</p>
+<h2 id="2节点间的内部通信机制">2、节点间的内部通信机制</h2>
+<h3 id="21-基本通信原理">2.1 基本通信原理</h3>
+<p>集群元数据的维护有两种方式：集中式、Gossip 协议。redis cluster 节点间采用 gossip 协议进行通信。</p>
+<p><strong>集中式</strong>是将集群元数据（节点信息、故障等等）几种存储在某个节点上。集中式元数据集中存储的一个典型代表，就是大数据领域的 <code>storm</code>。它是分布式的大数据实时计算引擎，是集中式的元数据存储的结构，底层基于 zookeeper（分布式协调的中间件）对所有元数据进行存储维护。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/1.png">
+            <img class="mx-auto" alt="zookeeper-centralized-storage" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/1.png" />
+        </a>
+    </p>
+<p>redis 维护集群元数据采用另一个方式， <code>gossip</code> 协议，所有节点都持有一份元数据，不同的节点如果出现了元数据的变更，就不断将元数据发送给其它的节点，让其它节点也进行元数据的变更。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/2.png">
+            <img class="mx-auto" alt="redis-gossip" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/2.png" />
+        </a>
+    </p>
+<p><strong>集中式</strong>的<strong>好处</strong>在于，元数据的读取和更新，时效性非常好，一旦元数据出现了变更，就立即更新到集中式的存储中，其它节点读取的时候就可以感知到；<strong>不好</strong>在于，所有的元数据的更新压力全部集中在一个地方，可能会导致元数据的存储有压力。</p>
+<p><strong>gossip</strong> 好处在于，元数据的更新比较分散，不是集中在一个地方，更新请求会陆陆续续打到所有节点上去更新，降低了压力；不好在于，元数据的更新有延时，可能导致集群中的一些操作会有一些滞后。</p>
+<ul>
+<li>10000 端口：每个节点都有一个专门用于节点间通信的端口，就是自己提供服务的端口号+10000，比如 7001，那么用于节点间通信的就是 17001 端口。每个节点每隔一段时间都会往另外几个节点发送 <code>ping</code> 消息，同时其它几个节点接收到 <code>ping</code> 之后返回 <code>pong</code>。</li>
+<li>交换的信息：信息包括故障信息，节点的增加和删除，hash slot 信息等等。</li>
+</ul>
+<h3 id="22-gossip-协议">2.2 gossip 协议</h3>
+<p>gossip 协议包含多种消息，包含 <code>ping</code>,<code>pong</code>,<code>meet</code>,<code>fail</code> 等等。</p>
+<ul>
+<li>meet：某个节点发送 meet 给新加入的节点，让新节点加入集群中，然后新节点就会开始与其它节点进行通信。</li>
+</ul>
+<pre><code>redis-trib.rb add-node
+</code></pre><p>其实内部就是发送了一个 gossip meet 消息给新加入的节点，通知那个节点去加入我们的集群。</p>
+<ul>
+<li>ping：每个节点都会频繁给其它节点发送 ping，其中包含自己的状态还有自己维护的集群元数据，互相通过 ping 交换元数据。</li>
+<li>pong：返回 ping 和 meeet，包含自己的状态和其它信息，也用于信息广播和更新。</li>
+<li>fail：某个节点判断另一个节点 fail 之后，就发送 fail 给其它节点，通知其它节点说，某个节点宕机啦。</li>
+</ul>
+<h3 id="23-ping-消息深入">2.3 ping 消息深入</h3>
+<p>ping 时要携带一些元数据，如果很频繁，可能会加重网络负担。</p>
+<p>每个节点每秒会执行 10 次 ping，每次会选择 5 个最久没有通信的其它节点。当然如果发现某个节点通信延时达到了 <code>cluster_node_timeout / 2</code>，那么立即发送 ping，避免数据交换延时过长，落后的时间太长了。比如说，两个节点之间都 10 分钟没有交换数据了，那么整个集群处于严重的元数据不一致的情况，就会有问题。所以 <code>cluster_node_timeout</code> 可以调节，如果调得比较大，那么会降低 ping 的频率。</p>
+<p>每次 ping，会带上自己节点的信息，还有就是带上 1/10 其它节点的信息，发送出去，进行交换。至少包含 <code>3</code> 个其它节点的信息，最多包含 <code>总节点数减 2</code> 个其它节点的信息。</p>
+<h2 id="3分布式寻址算法">3、分布式寻址算法</h2>
+<ul>
+<li>hash 算法（大量缓存重建）</li>
+<li>一致性 hash 算法（自动缓存迁移）+ 虚拟节点（自动负载均衡）</li>
+<li>redis cluster 的 hash slot 算法</li>
+</ul>
+<h3 id="31-hash-算法">3.1 hash 算法</h3>
+<p>来了一个 key，首先计算 hash 值，然后对节点数取模。然后根据取模的结果打在不同的 master 节点上。一旦某一个 master 节点宕机，所有请求过来，都会基于最新的剩余 master 节点数去取模，尝试去取数据。你想啊，原来是对 3 取模，挂了一个节点之后，对 2 取模，这个时候，就完全错位了，这会导致<strong>大部分的请求过来，全部无法拿到有效的缓存</strong>，导致大量的流量涌入数据库。导致数据库垮了。。。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/3.png">
+            <img class="mx-auto" alt="hash" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/3.png" />
+        </a>
+    </p>
+<h3 id="32-一致性-hash-算法">3.2 一致性 hash 算法</h3>
+<p>一致性 hash 算法将整个 hash 值空间组织成一个虚拟的圆环，整个空间按顺时针方向组织，下一步将各个 master 节点（使用服务器的 ip 或主机名）进行 hash。这样就能确定每个节点在其哈希环上的位置。</p>
+<p>来了一个 key，首先计算 hash 值，并确定此数据在环上的位置，从此位置沿环<strong>顺时针“行走”</strong>，遇到的第一个 master 节点就是 key 所在位置。</p>
+<p>在一致性哈希算法中，如果一个节点挂了，受影响的数据仅仅是此节点到环空间前一个节点（沿着逆时针方向行走遇到的第一个节点）之间的数据，其它不受影响。比如环上一共有三个节点，那么一个节点挂了，可能会损失 1/3 的数据，但是不会像 hash 算法那样，一个节点挂了，损失了一个节点的数据，但是全部的数据都不可用。增加一个节点也同理。</p>
+<p>燃鹅，一致性哈希算法在节点太少时，容易因为节点分布不均匀而造成<strong>缓存热点</strong>的问题。为了解决这种热点问题，一致性 hash 算法引入了虚拟节点机制，即对每一个节点计算多个 hash，每个计算结果位置都放置一个虚拟节点。这样就实现了数据的均匀分布，负载均衡。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/4.png">
+            <img class="mx-auto" alt="consistent-hashing-algorithm" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/4.png" />
+        </a>
+    </p>
+<h3 id="33-redis-cluster-的-hash-slot-算法">3.3 redis cluster 的 hash slot 算法</h3>
+<p>redis cluster 有固定的 <code>16384</code> 个 hash slot，对每个 <code>key</code> 计算 <code>CRC16</code> 值，然后对 <code>16384</code> 取模，可以获取 key 对应的 hash slot。</p>
+<p>redis cluster 中每个 master 都会持有部分 slot，比如有 3 个 master，那么可能每个 master 持有 5000 多个 hash slot。hash slot 让 node 的增加和移除很简单，增加一个 master，就将其他 master 的 hash slot 移动部分过去，减少一个 master，就将它的 hash slot 移动到其他 master 上去。移动 hash slot 的成本是非常低的。客户端的 api，可以对指定的数据，让他们走同一个 hash slot，通过 <code>hash tag</code> 来实现。</p>
+<p>任何一台机器宕机，另外两个节点，不影响的。因为 key 找的是 hash slot，不是机器。下图中，三个节点，比如有一个 master 节点宕机了，那么 key 找的是 hash slot ，hash slot 是固定的 16384 个，每个 key 计算 CRC16 值之后，对 16384 取模，得到的结果不会像 hash 算法那样错位，因为针对的取模的值是固定的 16384。一个 master 节点挂了不会影响其他数据的查询，同时一个 master 节点宕机了，它的 hash slot 会被移动到其他 master 上去，因此在移动完成之前，可能会有 1/3 的数据会失效，等到宕机的 master 节点上的 hash slot 全部转移到其它的 master 节点完成后，那么数据的可用率会恢复 100%，保证 key 到来寻址之后都会找到数据。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/5.png">
+            <img class="mx-auto" alt="hash-slot" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-cluster/5.png" />
+        </a>
+    </p>
+<h2 id="4redis-cluster-的高可用与主备切换原理">4、redis cluster 的高可用与主备切换原理</h2>
+<p>redis cluster 的高可用的原理，几乎跟哨兵是类似的。</p>
+<h3 id="41-判断节点宕机">4.1 判断节点宕机</h3>
+<p>如果一个节点认为另外一个节点宕机，那么就是 <code>pfail</code>，<strong>主观宕机</strong>。如果多个节点都认为另外一个节点宕机了，那么就是 <code>fail</code>，<strong>客观宕机</strong>，跟哨兵的原理几乎一样，sdown，odown。</p>
+<p>在 <code>cluster-node-timeout</code> 内，某个节点一直没有返回 <code>pong</code>，那么就被认为 <code>pfail</code>。</p>
+<p>如果一个节点认为某个节点 <code>pfail</code> 了，那么会在 <code>gossip ping</code> 消息中，<code>ping</code> 给其他节点，如果<strong>超过半数</strong>的节点都认为 <code>pfail</code> 了，那么就会变成 <code>fail</code>。</p>
+<h3 id="42-从节点过滤">4.2 从节点过滤</h3>
+<p>对宕机的 master node，从其所有的 slave node 中，选择一个切换成 master node。</p>
+<p>检查每个 slave node 与 master node 断开连接的时间，如果超过了 <code>cluster-node-timeout * cluster-slave-validity-factor</code>，那么就<strong>没有资格</strong>切换成 <code>master</code>。</p>
+<h3 id="43-从节点选举">4.3 从节点选举</h3>
+<p>每个从节点，都根据自己对 master 复制数据的 offset，来设置一个选举时间，offset 越大（复制数据越多）的从节点，选举时间越靠前，优先进行选举。</p>
+<p>所有的 master node 开始 slave 选举投票，给要进行选举的 slave 进行投票，如果大部分 master node<code>（N/2 + 1）</code>都投票给了某个从节点，那么选举通过，那个从节点可以切换成 master。</p>
+<p>从节点执行主备切换，从节点切换为主节点。</p>
+<h3 id="44-与哨兵比较">4.4 与哨兵比较</h3>
+<p>整个流程跟哨兵相比，非常类似，所以说，redis cluster 功能强大，直接集成了 replication 和 sentinel 的功能。</p>
+<blockquote>
+<p>小便签：</p>
+<p>redis cluster：</p>
+<p>支持 N 个 redis master node ，每个 master node 都可以挂载多个 slave node。</p>
+<p>读写分离的架构，对于每个 master 来说，写就写到 master，然后读就从这个 master 对应的 slave 去读。</p>
+<p>高可用，因为每个 master 节点都有 slave 节点，那么如果 master 挂掉，redis cluster 的这套机制，就会自动将某个 slave 节点切换成为 master 节点。</p>
+<p>redis cluster（多 master + 读写分离 + 高可用），redis cluster 包含了 replication 和 sentinel 的优点和特性。我们只要基于 redis cluster 去搭建 redis 的集群即可，不需要手工去搭建 replication + 主从架构 + 读写分离 + 哨兵集群 + 高可用了。</p>
+<p>redis cluster VS replication + sentinel</p>
+<p>如果数据量很少或者说不是很大，主要是需要承载高并发读和高性能的场景，比如说缓存一般也就几个 G，单机的 master 就足够了。replication，一个 master，多个 slave，需要几个 slave 和需要的读吞吐量有关系，然后自己搭建一个 sentinel 集群（哨兵集群），去保证 redis 的主从架构的高可用性就可以了。</p>
+<p>redis cluster，主要是针对海量数据 + 高并发 + 高可用的场景，海量数据，就建议用 redis cluster。</p>
+</blockquote>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/06/30/redis-cluster.html">https://chanservy.github.io/2021/06/30/redis-cluster.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/06/28/redis-sentinel.html">Redis哨兵集群实现高可用</a></li>
+        
+        <li><a href="/2021/06/26/redis-master-slave.html">Redis主从架构</a></li>
+        
+        <li><a href="/2021/06/29/redis-chijiuhua.html">Redis的持久化机制</a></li>
+        
+        <li><a href="/2021/06/25/redis-expiration-policies-and-lru.html">Redis的过期策略？</a></li>
+        
+        <li><a href="/2021/06/25/redis-data-types.html">Redis都有哪些数据类型？</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Redis'>Redis</a></li>
+                
+                <li><a href='/tags/%E9%9D%A2%E8%AF%95'>面试</a></li>
+                
+                <li><a href='/tags/%E6%9E%B6%E6%9E%84'>架构</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/29/redis-chijiuhua.html" title="Redis的持久化机制">Redis的持久化机制</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/28/redis-sentinel.html" title="Redis哨兵集群实现高可用">Redis哨兵集群实现高可用</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/26/redis-master-slave.html" title="Redis主从架构">Redis主从架构</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html" title="Redis的过期策略？">Redis的过期策略？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/25/redis-data-types.html" title="Redis都有哪些数据类型？">Redis都有哪些数据类型？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/25/redis-single-thread-model.html" title="为何单线程的redis能支撑高并发？">为何单线程的redis能支撑高并发？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/21/why-cache.html" title="项目中为何需要用缓存？">项目中为何需要用缓存？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html" title="Es在数据量很大的情况下如何提高查询效率？">Es在数据量很大的情况下如何提高查询效率？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/20/es-write-query.html" title="Es读写数据的工作原理">Es读写数据的工作原理</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (4)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (9)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (30)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (8)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (20)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (17)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
