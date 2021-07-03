@@ -9,20 +9,20 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>跨域问题 | 迩东陈的博客</title>
-    <meta property="og:title" content="跨域问题 - 迩东陈的博客">
+    <title>如何保证缓存与数据库的双写一致性 | 迩东陈的博客</title>
+    <meta property="og:title" content="如何保证缓存与数据库的双写一致性 - 迩东陈的博客">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2021-04-09T14:57:14&#43;08:00'>
+    <meta property="article:published_time" content='2021-07-02T16:35:58&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2021-04-09T14:57:14&#43;08:00'>
+    <meta property="article:modified_time" content='2021-07-02T16:35:58&#43;08:00'>
         
     <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
-    <meta name="description" content="跨域问题">
+    <meta name="description" content="如何保证缓存与数据库的双写一致性">
         
     <meta name="author" content="迩东陈">
-    <meta property="og:url" content="https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html">
+    <meta property="og:url" content="https://chanservy.github.io/2021/07/03/redis-db-double-write.html">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -145,21 +145,9 @@
     <div class="post-toc-content">
         <nav id="TableOfContents">
   <ul>
-    <li><a href="#一跨域问题">一、跨域问题</a>
-      <ul>
-        <li><a href="#1什么是跨域">1、什么是跨域</a></li>
-        <li><a href="#2为什么有跨域问题">2、为什么有跨域问题？</a></li>
-        <li><a href="#3解决跨域问题的方案">3、解决跨域问题的方案</a></li>
-      </ul>
-    </li>
-    <li><a href="#二cors-解决跨域">二、cors 解决跨域</a>
-      <ul>
-        <li><a href="#1什么是-cors">1、什么是 cors</a></li>
-        <li><a href="#2原理有点复杂">2、原理有点复杂</a></li>
-        <li><a href="#3实现非常简单">3、实现非常简单</a></li>
-        <li><a href="#4测试">4、测试</a></li>
-      </ul>
-    </li>
+    <li><a href="#cache-aside-pattern">Cache Aside Pattern</a></li>
+    <li><a href="#最初级的缓存不一致问题及解决方案">最初级的缓存不一致问题及解决方案</a></li>
+    <li><a href="#比较复杂的数据不一致问题分析">比较复杂的数据不一致问题分析</a></li>
   </ul>
 </nav>
     </div>
@@ -193,16 +181,18 @@
 </script>
     <article class="post">
         <header>
-            <h1 class="post-title">跨域问题</h1>
+            <h1 class="post-title">如何保证缓存与数据库的双写一致性</h1>
         </header>
         <date class="post-meta meta-date">
-            2021年4月9日
+            2021年7月2日
         </date>
         
         <div class="post-meta">
             <span>|</span>
             
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
             
         </div>
         
@@ -214,242 +204,76 @@
         
         
         <div class="post-content">
-            <p>前言：微服务项目中，由于微服务众多，并且有不止一个环境，因此难免会有跨域的问题，这篇博客聊一聊跨域的问题。</p>
-<h2 id="一跨域问题">一、跨域问题</h2>
-<h3 id="1什么是跨域">1、什么是跨域</h3>
-<p>跨域是指跨域名的访问，以下情况都属于跨域：</p>
-<table>
-<thead>
-<tr>
-<th>跨域原因说明</th>
-<th>示例</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>域名不同</td>
-<td><code>www.jd.com</code> 与 <code>www.taobao.com</code></td>
-</tr>
-<tr>
-<td>域名相同，端口不同</td>
-<td><code>www.jd.com:8080</code> 与 <code>www.jd.com:8081</code></td>
-</tr>
-<tr>
-<td>二级域名不同</td>
-<td><code>item.jd.com</code> 与 <code>miaosha.jd.com</code></td>
-</tr>
-</tbody>
-</table>
-<p>如果<strong>域名和端口都相同，但是请求路径不同</strong>，不属于跨域，如：</p>
-<pre><code>www.jd.com/item
-www.jd.com/goods
-</code></pre><p>因此，如果我们的前端项目在<code>manage.leyou.com</code>上，页面中的接口地址域名是<code>api.leyou.com</code>，这属于二级域名不同，跨域了。</p>
-<h3 id="2为什么有跨域问题">2、为什么有跨域问题？</h3>
-<p>跨域不一定会有跨域问题。</p>
-<p>因为跨域问题是浏览器对于 ajax 请求的一种安全限制：<strong>一个页面发起的ajax请求，只能是与当前页同域名的路径</strong>，这能有效的阻止跨站攻击。</p>
-<p>因此：<strong>跨域问题 是针对 ajax 的一种限制</strong>。</p>
-<p>但是这却给我们的开发带来了不便，而且在实际生成环境中，肯定会有很多台服务器之间交互，地址和端口都可能不同，怎么办？</p>
-<h3 id="3解决跨域问题的方案">3、解决跨域问题的方案</h3>
-<p>目前比较常用的跨域解决方案有3种：</p>
-<ul>
-<li>
-<p>Jsonp</p>
-<p>最早的解决方案，利用script标签可以跨域的原理实现。</p>
-<p>限制：</p>
-<ul>
-<li>需要服务的支持</li>
-<li>只能发起 GET 请求</li>
-</ul>
-</li>
-<li>
-<p>nginx 反向代理</p>
-<p>思路是：利用 nginx 反向代理把跨域为不跨域，支持各种请求方式</p>
-<p>缺点：需要在 nginx 进行额外配置，语义不清晰</p>
-</li>
-<li>
-<p>CORS</p>
-<p>规范化的跨域请求解决方案，安全可靠。</p>
-<p>优势：</p>
-<ul>
-<li>在服务端进行控制是否允许跨域，可自定义规则</li>
-<li>支持各种请求方式</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>会产生额外的请求</li>
-</ul>
-</li>
-</ul>
-<p>我们这里说的是 cors 的跨域方案。</p>
-<h2 id="二cors-解决跨域">二、cors 解决跨域</h2>
-<h3 id="1什么是-cors">1、什么是 cors</h3>
-<p>CORS是一个 W3C标准，全称是&quot;跨域资源共享&quot;（Cross-origin resource sharing）。</p>
-<p>它允许浏览器向跨源服务器，发出<a href="http://www.ruanyifeng.com/blog/2012/09/xmlhttprequest_level_2.html"><code>XMLHttpRequest</code></a>请求，从而克服了AJAX只能<a href="http://www.ruanyifeng.com/blog/2016/04/same-origin-policy.html">同源</a>使用的限制。</p>
-<p>CORS需要浏览器和服务器同时支持。目前，所有浏览器都支持该功能，IE浏览器不能低于IE10。</p>
-<ul>
-<li>
-<p>浏览器端：</p>
-<p>目前，所有浏览器都支持该功能（IE10以下不行）。整个CORS通信过程，都是浏览器自动完成，不需要用户参与。</p>
-</li>
-<li>
-<p>服务端：</p>
-<p>CORS通信与AJAX没有任何差别，因此你不需要改变以前的业务逻辑。只不过，浏览器会在请求中携带一些头信息，我们需要以此判断是否运行其跨域，然后在响应头中加入一些信息即可。这一般通过过滤器完成即可。</p>
-</li>
-</ul>
-<h3 id="2原理有点复杂">2、原理有点复杂</h3>
-<p>浏览器会将 ajax 请求分为两类，其处理方案略有差异：简单请求、特殊请求。</p>
-<h4 id="21-简单请求">2.1 简单请求</h4>
-<p>只要同时满足以下两大条件，就属于简单请求。</p>
-<p>（1) 请求方法是以下三种方法之一：</p>
-<ul>
-<li>HEAD</li>
-<li>GET</li>
-<li>POST</li>
-</ul>
-<p>（2）HTTP的头信息不超出以下几种字段：</p>
-<ul>
-<li>Accept</li>
-<li>Accept-Language</li>
-<li>Content-Language</li>
-<li>Last-Event-ID</li>
-<li>Content-Type：只限于三个值<code>application/x-www-form-urlencoded</code>、<code>multipart/form-data</code>、<code>text/plain</code></li>
-</ul>
-<p>当浏览器发现的 ajax 请求是简单请求时，会在请求头中携带一个字段：<code>Origin</code>。</p>
-<p>
-        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/1.png">
-            <img class="mx-auto" alt="img" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/1.png" />
-        </a>
-    </p>
-<p>Origin中会指出当前请求属于哪个域（协议+域名+端口）。服务端会根据这个值决定是否允许其跨域。</p>
-<p>如果服务器允许跨域，需要在返回的响应头中携带下面信息：</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#a61717;background-color:#e3d2d2">Access-Control-Allow-Origin: http://manage.leyou.com
-</span><span style="color:#a61717;background-color:#e3d2d2">Access-Control-Allow-Credentials: true
-</span><span style="color:#a61717;background-color:#e3d2d2">Content-Type: text/html; charset=utf-8
-</span></code></pre></div><ul>
-<li>Access-Control-Allow-Origin：可接受的域，是一个具体域名或者*，代表任意</li>
-<li>Access-Control-Allow-Credentials：是否允许携带cookie，默认情况下， cors 不会携带 cookie ，除非这个值是 true</li>
-</ul>
-<p>注意：</p>
-<p>如果跨域请求要想操作 cookie ，需要满足3个条件：</p>
-<ul>
-<li>服务的响应头中需要携带 Access-Control-Allow-Credentials 并且为true。</li>
-<li>浏览器发起 ajax 需要指定 withCredentials 为 true。</li>
-<li>响应头中的 Access-Control-Allow-Origin 一定不能为*，必须是指定的域名。</li>
-</ul>
-<h4 id="22-特殊请求">2.2 特殊请求</h4>
-<p>不符合简单请求的条件，会被浏览器判定为特殊请求,，例如请求方式为PUT。</p>
-<blockquote>
-<p>预检请求</p>
+            <blockquote>
+<p>如何保证缓存与数据库的双写一致性？</p>
 </blockquote>
-<p>特殊请求会在正式通信之前，增加一次HTTP查询请求，称为&quot;预检&quot;请求（preflight）。</p>
-<p>浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单之中，以及可以使用哪些HTTP动词和头信息字段。只有得到肯定答复，浏览器才会发出正式的<code>XMLHttpRequest</code>请求，否则就报错。</p>
-<p>一个“预检”请求的样板：</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#900;font-weight:bold">OPTIONS</span> <span style="color:#555">/cors</span> <span style="color:#000;font-weight:bold">HTTP</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">1.1</span>
-Origin<span style="color:#000;font-weight:bold">:</span> http://manage.leyou.com
-Access-Control-Request-Method<span style="color:#000;font-weight:bold">:</span> PUT
-Access-Control-Request-Headers<span style="color:#000;font-weight:bold">:</span> X-Custom-Header
-Host<span style="color:#000;font-weight:bold">:</span> api.leyou.com
-Accept-Language<span style="color:#000;font-weight:bold">:</span> en-US
-Connection<span style="color:#000;font-weight:bold">:</span> keep-alive
-User-Agent<span style="color:#000;font-weight:bold">:</span> Mozilla/5.0...
-</code></pre></div><p>与简单请求相比，除了Origin以外，又多了两个头：</p>
+<p>你只要用缓存，就可能会涉及到缓存与数据库双存储双写，你只要是双写，就一定会有数据一致性的问题，那么你如何解决一致性问题？</p>
+<p>一般来说，如果允许缓存可以稍微的跟数据库偶尔有不一致的情况，也就是说如果你的系统<strong>不是严格要求</strong> “缓存+数据库” 必须保持一致性的话，最好不要做这个方案，即：<strong>读请求和写请求串行化</strong>，串到一个<strong>内存队列</strong>里去。</p>
+<p>串行化可以保证一定不会出现不一致的情况，但是它也会导致系统的吞吐量大幅度降低，用比正常情况下多几倍的机器去支撑线上的一个请求。</p>
+<h2 id="cache-aside-pattern">Cache Aside Pattern</h2>
+<p>最经典的缓存+数据库读写的模式，就是 Cache Aside Pattern。</p>
 <ul>
-<li>Access-Control-Request-Method：接下来会用到的请求方式，比如PUT</li>
-<li>Access-Control-Request-Headers：会额外用到的头信息</li>
+<li>读的时候，先读缓存，缓存没有的话，就读数据库，然后取出数据后放入缓存，同时返回响应。</li>
+<li>更新的时候，先删除缓存，然后再更新数据库。</li>
 </ul>
+<p><strong>为什么是删除缓存，而不是更新缓存？</strong></p>
+<p>原因很简单，很多时候，在复杂点的缓存场景，缓存不单单是数据库中直接取出来的值。</p>
+<p>比如可能更新了某个表的一个字段，然后其对应的缓存，是需要查询另外两个表的数据并进行运算，才能计算出缓存最新的值的。</p>
+<p>另外更新缓存的代价有时候是很高的。是不是说，每次修改数据库的时候，都一定要将其对应的缓存更新一份？也许有的场景是这样，但是对于<strong>比较复杂的缓存数据计算的场景</strong>，就不是这样了。如果你频繁修改一个缓存涉及的多个表，缓存也频繁更新。但是问题在于，<strong>这个缓存到底会不会被频繁访问到？</strong></p>
+<p>举个栗子，一个缓存涉及的表的字段，在 1 分钟内就修改了 20 次，或者是 100 次，那么缓存更新 20 次、100 次；但是这个缓存在 1 分钟内只被读取了 1 次，有<strong>大量的冷数据</strong>。实际上，如果你只是删除缓存的话，那么在 1 分钟内，这个缓存不过就重新计算一次而已，开销大幅度降低。<strong>用到缓存才去算缓存。</strong></p>
+<p>其实删除缓存，而不是更新缓存，就是一个 lazy 计算的思想，不要每次都重新做复杂的计算，不管它会不会用到，而是让它到需要被使用的时候再重新计算。像 mybatis，hibernate，都有懒加载思想。查询一个部门，部门带了一个员工的 list，没有必要说每次查询部门，都里面的 1000 个员工的数据也同时查出来啊。80% 的情况，查这个部门，就只是要访问这个部门的信息就可以了。先查部门，同时要访问里面的员工，那么这个时候只有在你要访问里面的员工的时候，才会去数据库里面查询 1000 个员工。</p>
+<h2 id="最初级的缓存不一致问题及解决方案">最初级的缓存不一致问题及解决方案</h2>
+<p>问题：先更新数据库，再删除缓存。如果删除缓存失败了，那么会导致数据库中是新数据，缓存中是旧数据，数据就出现了不一致。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-db-double-write/1.png">
+            <img class="mx-auto" alt="redis-junior-inconsistent" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-db-double-write/1.png" />
+        </a>
+    </p>
+<p>解决思路：先删除缓存，再更新数据库。如果数据库更新失败了，那么数据库中是旧数据，缓存中是空的，那么数据不会不一致。因为读的时候缓存没有，所以去读了数据库中的旧数据，然后更新到缓存中。这样至少不会出现数据不一致的问题。</p>
+<h2 id="比较复杂的数据不一致问题分析">比较复杂的数据不一致问题分析</h2>
+<p>数据发生了变更，先删除了缓存，然后要去修改数据库，此时还没修改。一个请求过来，去读缓存，发现缓存空了，去查询数据库，<strong>查到了修改前的旧数据</strong>，放到了缓存中。随后数据变更的程序完成了数据库的修改。完了，数据库和缓存中的数据不一样了&hellip;</p>
+<p><strong>为什么上亿流量高并发场景下，缓存会出现这个问题？</strong></p>
+<p>只有在<code>对一个数据在并发的进行读写</code>的时候，才可能会出现这种问题。其实如果说你的并发量很低的话，特别是读并发很低，每天访问量就 1 万次，那么很少的情况下，会出现刚才描述的那种不一致的场景。但是问题是，如果每天的是上亿的流量，每秒并发读是几万，每秒只要有数据更新的请求，就<strong>可能会出现上述的数据库+缓存不一致的情况</strong>。</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-db-double-write/4.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/redis-db-double-write/4.png" />
+        </a>
+    </p>
+<p><strong>解决方案如下：</strong></p>
+<p>更新数据的时候，根据<strong>数据的唯一标识</strong>，比如商品的 id ，对这个 id 进行 hash 取值，然后得到的值再对内存队列的数量进行取模，这样针对每个商品操作都可以路由到某一个内存队列中，也就是 hash 算法。将这个 id 的商品更新操作路由之后，发送到一个 jvm 内部队列中。读取这个 id 的商品的数据的时候，如果发现数据不在缓存中，那么将重新读取数据+更新缓存的操作，根据唯一标识路由之后，也发送同一个 jvm 内部队列中。</p>
+<p>一个队列对应一个工作线程，每个工作线程<strong>串行</strong>拿到对应的操作，然后一条一条的执行。这样的话，一个数据变更的操作，先删除缓存，然后再去更新数据库，但是还没完成更新。此时如果一个读请求过来，没有读到缓存，那么可以先将查询数据库并更新缓存的请求发送到队列中，此时会在队列中积压，然后同步等待数据更新完成之后再进行查询。</p>
+<p>这里有一个<strong>优化点</strong>，一个队列中，其实<strong>多个查询请求（包含查库+更新缓存）串在一起是没意义的</strong>，因此可以做过滤，如果发现队列中已经有一个查询的请求了，那么就不用再放个查询请求操作进去了，直接等待前面的更新操作请求和查询请求完成即可。</p>
+<p>待那个队列对应的工作线程完成了上一个操作的数据库的修改之后，才会去执行下一个操作，也就是查库+缓存更新的操作，此时会从数据库中读取最新的值，然后写入缓存中。</p>
+<p>如果请求还在等待时间范围内，不断轮询发现缓存中可以取到值了，那么就直接返回；如果请求等待的时间超过一定时长，那么这一次直接从数据库中读取当前的旧值。</p>
 <blockquote>
-<p>预检请求的响应</p>
+<p>高并发的场景下，该解决方案要注意的问题：</p>
 </blockquote>
-<p>服务的收到预检请求，如果许可跨域，会发出响应：</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-http" data-lang="http"><span style="color:#000;font-weight:bold">HTTP</span><span style="color:#000;font-weight:bold">/</span><span style="color:#099">1.1</span> <span style="color:#099">200</span> <span style="color:#900;font-weight:bold">OK</span>
-Date<span style="color:#000;font-weight:bold">:</span> Mon, 01 Dec 2008 01:15:39 GMT
-Server<span style="color:#000;font-weight:bold">:</span> Apache/2.0.61 (Unix)
-Access-Control-Allow-Origin<span style="color:#000;font-weight:bold">:</span> http://manage.leyou.com
-Access-Control-Allow-Credentials<span style="color:#000;font-weight:bold">:</span> true
-Access-Control-Allow-Methods<span style="color:#000;font-weight:bold">:</span> GET, POST, PUT
-Access-Control-Allow-Headers<span style="color:#000;font-weight:bold">:</span> X-Custom-Header
-Access-Control-Max-Age<span style="color:#000;font-weight:bold">:</span> 1728000
-Content-Type<span style="color:#000;font-weight:bold">:</span> text/html; charset=utf-8
-Content-Encoding<span style="color:#000;font-weight:bold">:</span> gzip
-Content-Length<span style="color:#000;font-weight:bold">:</span> 0
-Keep-Alive<span style="color:#000;font-weight:bold">:</span> timeout=2, max=100
-Connection<span style="color:#000;font-weight:bold">:</span> Keep-Alive
-Content-Type<span style="color:#000;font-weight:bold">:</span> text/plain
-</code></pre></div><p>除了<code>Access-Control-Allow-Origin</code>和<code>Access-Control-Allow-Credentials</code>以外，这里又额外多出3个头：</p>
 <ul>
-<li>Access-Control-Allow-Methods：允许访问的方式</li>
-<li>Access-Control-Allow-Headers：允许携带的头</li>
-<li>Access-Control-Max-Age：本次许可的有效时长，单位是秒，<strong>过期之前的 ajax 请求就无需再次进行预检了</strong>。</li>
+<li>1、读请求长时阻塞</li>
 </ul>
-<p>如果浏览器得到上述响应，则认定为可以跨域，后续就跟简单请求的处理是一样的了。</p>
-<h3 id="3实现非常简单">3、实现非常简单</h3>
-<p>虽然原理比较复杂，但是前面说过：</p>
+<p>由于读请求进行了非常轻度的异步化，所以一定要注意读超时的问题，每个读请求必须在超时时间范围内返回。</p>
+<p>该解决方案，最大的风险点在于说，<strong>可能数据更新很频繁</strong>，导致队列中积压了大量更新操作在里面，然后<strong>读请求会发生大量的超时</strong>，最后导致大量的请求直接走数据库。务必通过一些模拟真实的测试，看看更新数据的频率是怎样的。</p>
+<p>另外一点，因为一个队列中，可能会积压针对多个数据项的更新操作，因此需要根据自己的业务情况进行测试，可能需要<strong>部署多个服务</strong>，每个服务分摊一些数据的更新操作。如果一个内存队列里居然会挤压 100 个商品的库存修改操作，每隔库存修改操作要耗费 10ms 去完成，那么最后一个商品的读请求，可能等待 10 * 100 = 1000ms = 1s 后，才能得到数据，这个时候就导致<strong>读请求的长时阻塞</strong>。</p>
+<p>一定要做根据实际业务系统的运行情况，去进行一些压力测试，和模拟线上环境，去看看最繁忙的时候，内存队列可能会挤压多少更新操作，可能会导致最后一个更新操作对应的读请求，会 hang 多少时间，如果读请求在 200ms 返回，如果你计算过后，哪怕是最繁忙的时候，积压 10 个更新操作，最多等待 200ms，那还可以的。</p>
+<p><strong>如果一个内存队列中可能积压的更新操作特别多</strong>，那么你就要<strong>加机器</strong>，让每个机器上部署的服务实例处理更少的数据，那么每个内存队列中积压的更新操作就会越少。</p>
+<p>其实根据之前的项目经验，一般来说，数据的写频率是很低的，因此实际上正常来说，在队列中积压的更新操作应该是很少的。像这种针对读高并发、读缓存架构的项目，一般来说写请求是非常少的，每秒的 QPS 能到几百就不错了。</p>
+<p>我们来<strong>实际粗略测算一下</strong>。</p>
+<p>如果一秒有 500 的写操作，如果分成 5 个时间片，每 200ms 就 100 个写操作，放到 20 个内存队列中，每个内存队列，可能就积压 5 个写操作。每个写操作性能测试后，一般是在 20ms 左右就完成，那么针对每个内存队列的数据的读请求，也就最多 hang 一会儿，200ms 以内肯定能返回了。</p>
+<p>经过刚才简单的测算，我们知道，单机支撑的写 QPS 在几百是没问题的，如果写 QPS 扩大了 10 倍，那么就扩容机器，扩容 10 倍的机器，每个机器 20 个队列。</p>
 <ul>
-<li>浏览器端都由浏览器自动完成，我们无需操心。</li>
-<li>服务端可以通过拦截器统一实现，不必每次都去进行跨域判定的编写。</li>
+<li>2、读请求并发量过高</li>
 </ul>
-<p>事实上，SpringMVC 已经帮我们写好了 CORS 的跨域过滤器：<code>CorsFilter</code> ，内部已经实现了刚才所说的判定逻辑，我们直接用就好了。</p>
-<p>在网关模块，我这里是<code>ly-api-gateway</code>中编写一个配置类，并且注册<code>CorsFilter</code>：</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">package</span> <span style="color:#555">com.leyou.gateway.config</span><span style="color:#000;font-weight:bold">;</span>
-
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Bean</span><span style="color:#000;font-weight:bold">;</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.context.annotation.Configuration</span><span style="color:#000;font-weight:bold">;</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.web.cors.CorsConfiguration</span><span style="color:#000;font-weight:bold">;</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.web.cors.UrlBasedCorsConfigurationSource</span><span style="color:#000;font-weight:bold">;</span>
-<span style="color:#000;font-weight:bold">import</span> <span style="color:#555">org.springframework.web.filter.CorsFilter</span><span style="color:#000;font-weight:bold">;</span>
-
-<span style="color:#998;font-style:italic">/**
-</span><span style="color:#998;font-style:italic"> * @Classname GlobalCorsConfig
-</span><span style="color:#998;font-style:italic"> * @Description TODO
-</span><span style="color:#998;font-style:italic"> * @Date 2021/2/4 16:06
-</span><span style="color:#998;font-style:italic"> * @Created by ChenSiYu
-</span><span style="color:#998;font-style:italic"> */</span>
-<span style="color:#3c5d5d;font-weight:bold">@Configuration</span>
-<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">GlobalCorsConfig</span> <span style="color:#000;font-weight:bold">{</span>
-    <span style="color:#3c5d5d;font-weight:bold">@Bean</span>
-    <span style="color:#000;font-weight:bold">public</span> CorsFilter <span style="color:#900;font-weight:bold">corsFilter</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-        <span style="color:#998;font-style:italic">//1.添加CORS配置信息
-</span><span style="color:#998;font-style:italic"></span>        CorsConfiguration config <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CorsConfiguration<span style="color:#000;font-weight:bold">();</span>
-        <span style="color:#998;font-style:italic">//1) 允许的域,不要写*,否则cookie就无法使用了
-</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedOrigin</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;http://manage.leyou.com&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        <span style="color:#998;font-style:italic">//2) 是否发送Cookie信息
-</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setAllowCredentials</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
-        <span style="color:#998;font-style:italic">//3) 允许的请求方式
-</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;OPTIONS&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;HEAD&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;GET&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;PUT&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;POST&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;DELETE&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedMethod</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;PATCH&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        <span style="color:#998;font-style:italic">//4) 允许的头信息
-</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">addAllowedHeader</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;*&#34;</span><span style="color:#000;font-weight:bold">);</span>
-        <span style="color:#998;font-style:italic">//5) 有效时长
-</span><span style="color:#998;font-style:italic"></span>        config<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setMaxAge</span><span style="color:#000;font-weight:bold">(</span>3600L<span style="color:#000;font-weight:bold">);</span>
-
-        <span style="color:#998;font-style:italic">//2.添加映射路径，我们拦截一切请求
-</span><span style="color:#998;font-style:italic"></span>        UrlBasedCorsConfigurationSource configSource <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> UrlBasedCorsConfigurationSource<span style="color:#000;font-weight:bold">();</span>
-        configSource<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">registerCorsConfiguration</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;/**&#34;</span><span style="color:#000;font-weight:bold">,</span> config<span style="color:#000;font-weight:bold">);</span>
-
-        <span style="color:#998;font-style:italic">//3.返回新的CorsFilter.
-</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> CorsFilter<span style="color:#000;font-weight:bold">(</span>configSource<span style="color:#000;font-weight:bold">);</span>
-    <span style="color:#000;font-weight:bold">}</span>
-<span style="color:#000;font-weight:bold">}</span>
-</code></pre></div><h3 id="4测试">4、测试</h3>
-<p>上传图片时测试的。</p>
-<p>
-        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/2.png">
-            <img class="mx-auto" alt="预检请求" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/2.png" />
-        </a>
-    </p>
-<p>预检请求</p>
-<p>
-        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/3.png">
-            <img class="mx-auto" alt="正式请求" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2/kuayu/3.png" />
-        </a>
-    </p>
-<p>正式请求</p>
-<p>200！</p>
+<p>这里还必须做好压力测试，确保恰巧碰上上述情况的时候，还有一个风险，就是突然间大量读请求会在几十毫秒的延时 hang 在服务上，看服务能不能扛的住，需要多少机器才能扛住最大的极限情况的峰值。</p>
+<p>但是因为并不是所有的数据都在同一时间更新，缓存也不会同一时间失效，所以每次可能也就是少数数据的缓存失效了，然后那些数据对应的读请求过来，并发量应该也不会特别大。</p>
+<ul>
+<li>3、多服务实例部署的请求路由</li>
+</ul>
+<p>可能这个服务部署了多个实例，那么必须<strong>保证</strong>说，执行数据更新操作，以及执行缓存更新操作的请求，都通过 Nginx 服务器<strong>路由到相同的服务实例上</strong>。</p>
+<p>比如说，对同一个商品的读写请求，全部都路由到同一台机器上。可以自己去做服务间的按照某个请求参数的 hash 路由，也可以用 Nginx 的 hash 路由功能等等。</p>
+<ul>
+<li>4、热点商品的路由问题，导致请求的倾斜</li>
+</ul>
+<p>万一针对某个商品的读写请求特别高，全部都打到相同的机器的相同的队列里面去了，可能会造成某台机器的压力过大。就是说，因为只有在商品数据更新的时候才会清空缓存，然后才可能会导致读写并发带来的缓存数据库双写不一致的问题，所以其实要根据业务系统去看，如果更新频率不是太高的话，这个问题的影响并不是特别大，但是的确可能某些机器的负载会高一些。</p>
 
         </div>
 
@@ -457,7 +281,7 @@ Content-Type<span style="color:#000;font-weight:bold">:</span> text/plain
 <div class="post-archive">
     <ul class="post-copyright">
         <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
-        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html">https://chanservy.github.io/2021/04/08/blog-of-kuayuwenti.html</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html">https://chanservy.github.io/2021/07/03/redis-db-double-write.html</a></li>
         <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
     </ul>
 </div>
@@ -471,15 +295,15 @@ Content-Type<span style="color:#000;font-weight:bold">:</span> text/plain
     <h2>See Also</h2>
     <ul class="listing">
         
-        <li><a href="/2020/02/05/upload-image.html">微服务项目中的图片上传</a></li>
+        <li><a href="/2021/07/02/redis-problems.html">Redis的雪崩穿透等问题</a></li>
         
-        <li><a href="/2021/02/05/arrive-local-project-by-webname.html">使用域名访问本地项目</a></li>
+        <li><a href="/2021/06/30/redis-cluster.html">Redis的集群模式</a></li>
         
-        <li><a href="/2021/02/05/error-common-deal.html">异常统一处理方案</a></li>
+        <li><a href="/2021/06/29/redis-chijiuhua.html">Redis的持久化机制</a></li>
         
-        <li><a href="/2020/12/21/cors-deal-kuayu.html">CORS解决跨域问题</a></li>
+        <li><a href="/2021/06/28/redis-sentinel.html">Redis哨兵集群实现高可用</a></li>
         
-        <li><a href="/about/">About Me</a></li>
+        <li><a href="/2021/06/26/redis-master-slave.html">Redis主从架构</a></li>
         
     </ul>
 </div>
@@ -489,9 +313,9 @@ Content-Type<span style="color:#000;font-weight:bold">:</span> text/plain
             
             <ul class="clearfix">
                 
-                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                <li><a href='/tags/Redis'>Redis</a></li>
                 
-                <li><a href='/tags/%E8%B7%A8%E5%9F%9F'>跨域</a></li>
+                <li><a href='/tags/%E9%9D%A2%E8%AF%95'>面试</a></li>
                 
             </ul>
             
