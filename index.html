@@ -79,6 +79,31 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/02/redis-problems.html" title="Redis的雪崩穿透等问题">Redis的雪崩穿透等问题</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月2日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            了解什么是 redis 的雪崩、穿透和击穿还有倾斜？redis 崩溃之后会怎么样？系统该如何应对这种情况？如何处理 redis 的穿透以及雪崩等问题？ 这些问题很重要，尤其是缓存雪崩和穿透，是缓存最大的两个问题，要么不出现，一旦出现就是致命性的问题。 1、缓存雪崩 对于系统 A，假设每天高峰期的时候每秒 5000 个请求，……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/07/02/redis-problems.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
             </h1>
         </header>
@@ -307,31 +332,6 @@
         <p class="readmore"><a href="https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html">阅读全文</a></p>
     </article>
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/20/es-write-query.html" title="Es读写数据的工作原理">Es读写数据的工作原理</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月20日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Elasticsearch'>Elasticsearch</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            学习石杉老师的课程的笔记 es 写数据过程 客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）。 coordinating node 对 document 进行路由，将请求转发给对应的 node（有 primary shard）。 实际的 node 上的 primary shard 处理请求，然后将数据同步到 replica shard。 coordinating node 如果发现 primary shard 和所有 replica shard 都搞定之后，就返回响应结果给客户端……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/06/20/es-write-query.html">阅读全文</a></p>
-    </article>
-    
     
 
 
@@ -444,6 +444,10 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/02/redis-problems.html" title="Redis的雪崩穿透等问题">Redis的雪崩穿透等问题</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
     </li>
     
@@ -477,10 +481,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/06/21/es-better-query-with-big-data.html" title="Es在数据量很大的情况下如何提高查询效率？">Es在数据量很大的情况下如何提高查询效率？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/06/20/es-write-query.html" title="Es读写数据的工作原理">Es读写数据的工作原理</a>
     </li>
     
 </ul>
@@ -537,7 +537,7 @@
     
     <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (9)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (10)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
     
@@ -563,7 +563,7 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (20)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (21)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (17)</a></li>
     
