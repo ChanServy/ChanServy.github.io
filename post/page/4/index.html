@@ -81,6 +81,31 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;project xmlns=&#34;http://maven.apache.org/POM/4.0.0&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34; xsi:schemaLocation=&#34;http://maven.apache.org/POM/4.0.0……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/order-service.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/04/09/cart-service.html" title="购物车业务">购物车业务</a>
             </h1>
         </header>
@@ -305,31 +330,6 @@
     
     
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html" title="电商项目中商品的分析和数据库设计">电商项目中商品的分析和数据库设计</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            电商项目中商品的分析和数据库设计 前言：众所周知，电商网站品类复杂多样，比如京东、淘宝、拼多多等等，诸如这些全品类的电商网站，商品的种类繁多，每一件商品，其属性又有差别。那么设计如此大型的电商网站，我们该如何设计商品信息的展示呢？本文大部分以京东官网的截图为例说明思路。 一、SPU和……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html">阅读全文</a></p>
-    </article>
-    
-    
-    
 
 
 
@@ -445,6 +445,10 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html" title="如何保证缓存与数据库的双写一致性">如何保证缓存与数据库的双写一致性</a>
     </li>
     
@@ -478,10 +482,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/06/25/redis-single-thread-model.html" title="为何单线程的redis能支撑高并发？">为何单线程的redis能支撑高并发？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/06/21/why-cache.html" title="项目中为何需要用缓存？">项目中为何需要用缓存？</a>
     </li>
     
 </ul>
@@ -538,7 +538,7 @@
     
     <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (11)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (12)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
     
@@ -564,7 +564,7 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (22)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (23)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (17)</a></li>
     
