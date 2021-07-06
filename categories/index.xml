@@ -6,22 +6,31 @@
     <description>Recent content in Categories on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Mon, 05 Jul 2021 18:11:28 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 06 Jul 2021 20:30:39 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Redis</title>
-      <link>https://chanservy.github.io/categories/Redis/</link>
-      <pubDate>Mon, 05 Jul 2021 18:11:28 +0800</pubDate>
+      <title>Dubbo</title>
+      <link>https://chanservy.github.io/categories/Dubbo/</link>
+      <pubDate>Tue, 06 Jul 2021 20:30:39 +0800</pubDate>
       
-      <guid>https://chanservy.github.io/categories/Redis/</guid>
+      <guid>https://chanservy.github.io/categories/Dubbo/</guid>
       <description></description>
     </item>
     
     <item>
       <title>面试</title>
       <link>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</link>
-      <pubDate>Mon, 05 Jul 2021 18:11:28 +0800</pubDate>
+      <pubDate>Tue, 06 Jul 2021 20:30:39 +0800</pubDate>
       
       <guid>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Redis</title>
+      <link>https://chanservy.github.io/categories/Redis/</link>
+      <pubDate>Mon, 05 Jul 2021 18:11:28 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/categories/Redis/</guid>
       <description></description>
     </item>
     
