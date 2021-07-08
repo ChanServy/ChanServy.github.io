@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>分布式锁的两种实现 | 迩东陈的博客</title>
+    <meta property="og:title" content="分布式锁的两种实现 - 迩东陈的博客">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2021-07-08T18:44:14&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2021-07-08T18:44:14&#43;08:00'>
+        
+    <meta name="Keywords" content="Java,Java语言,Java语言笔记,迩东陈,博客,项目经验,微服务,分布式架构,公众号,小程序">
+    <meta name="description" content="分布式锁的两种实现">
+        
+    <meta name="author" content="迩东陈">
+    <meta property="og:url" content="https://chanservy.github.io/2021/07/08/fenbushi-lock.html">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+        <link href="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+    
+    
+    
+    
+        <link rel="stylesheet" href='/css/douban.css'>
+    
+        <link rel="stylesheet" href='/css/other.css'>
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://chanservy.github.io">
+                        迩东陈的博客
+                    </a>
+                
+                <p class="description">欢迎你来到这儿，这是我的私人小栈，一个分享技术偶尔聊聊生活的地方。</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://chanservy.github.io">首页</a>
+                    
+                    <a  href="https://chanservy.github.io/tools/" title="工具">工具</a>
+                    
+                    <a  href="https://chanservy.github.io/archives/" title="归档">归档</a>
+                    
+                    <a  href="https://chanservy.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    <style type="text/css">
+    .post-toc {
+        position: fixed;
+        width: 200px;
+        margin-left: -210px;
+        padding: 5px 10px;
+        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.98);
+        background-clip: padding-box;
+        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
+        word-wrap: break-word;
+        white-space: nowrap;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        z-index: 999;
+        cursor: pointer;
+        max-height: 70%;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .post-toc .post-toc-title {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .post-toc .post-toc-content {
+        font-size: 15px;
+    }
+
+    .post-toc .post-toc-content>nav>ul {
+        margin: 10px 0;
+    }
+
+    .post-toc .post-toc-content ul {
+        padding-left: 20px;
+        list-style: square;
+        margin: 0.5em;
+        line-height: 1.8em;
+    }
+
+    .post-toc .post-toc-content ul ul {
+        padding-left: 15px;
+        display: none;
+    }
+
+    @media print,
+    screen and (max-width:1057px) {
+        .post-toc {
+            display: none;
+        }
+    }
+</style>
+<div class="post-toc" style="position: absolute; top: 188px;">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#redis-分布式锁">redis 分布式锁</a>
+      <ul>
+        <li><a href="#redis-最普通的分布式锁">redis 最普通的分布式锁</a></li>
+        <li><a href="#redlock-算法">RedLock 算法</a></li>
+        <li><a href="#redis-实现案例">Redis 实现案例</a></li>
+      </ul>
+    </li>
+    <li><a href="#zk-分布式锁">zk 分布式锁</a></li>
+    <li><a href="#redis-分布式锁和-zk-分布式锁的对比">redis 分布式锁和 zk 分布式锁的对比</a></li>
+  </ul>
+</nav>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var postToc = $(".post-toc");
+        if (postToc.length) {
+            var leftPos = $("#main").offset().left;
+            if(leftPos<220){
+                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
+            }
+
+            var t = postToc.offset().top - 20,
+                a = {
+                    start: {
+                        position: "absolute",
+                        top: t
+                    },
+                    process: {
+                        position: "fixed",
+                        top: 20
+                    },
+                };
+            $(window).scroll(function () {
+                var e = $(window).scrollTop();
+                e < t ? postToc.css(a.start) : postToc.css(a.process)
+            })
+        }
+    })
+</script>
+    <article class="post">
+        <header>
+            <h1 class="post-title">分布式锁的两种实现</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月8日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Zookeeper'>Zookeeper</a></span>
+            
+            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    阅读</span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <blockquote>
+<p>一般实现分布式锁都有哪些方式？使用 redis 如何设计分布式锁？使用 zk 来设计分布式锁可以吗？这两种分布式锁的实现方式哪种效率比较高？</p>
+<p>分布式项目中，对于同一个资源进行并发写操作的时候，会用到分布式锁。</p>
+</blockquote>
+<h2 id="redis-分布式锁">redis 分布式锁</h2>
+<p>官方叫做 <code>RedLock</code> 算法，是 redis 官方支持的分布式锁算法。</p>
+<p>这个分布式锁有 3 个重要的考量点：</p>
+<ul>
+<li>互斥（只能有一个客户端获取锁）</li>
+<li>不能死锁</li>
+<li>容错（只要大部分 redis 节点创建了这把锁就可以）</li>
+</ul>
+<h3 id="redis-最普通的分布式锁">redis 最普通的分布式锁</h3>
+<p>第一个最普通的实现方式，就是在 redis 里使用 <code>setnx</code> 命令创建一个 key，这样就算加锁。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">SET resource_name my_random_value NX PX <span style="color:#099">30000</span>
+</code></pre></div><p>执行这个命令就 ok。</p>
+<ul>
+<li><code>NX</code>：表示只有 <code>key</code> 不存在的时候才会设置成功。（如果此时 redis 中存在这个 key，那么设置失败，返回 <code>nil</code>）</li>
+<li><code>PX 30000</code>：意思是 30s 后锁自动释放。别人创建的时候如果发现已经有了就不能加锁了。</li>
+</ul>
+<p>释放锁就是删除 key ，但是一般可以用 <code>lua</code> 脚本删除，判断 value 一样才删除：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">-- 删除锁的时候，找到 key 对应的 value，跟自己传过去的 value 做比较，如果是一样的才删除。
+<span style="color:#000;font-weight:bold">if</span> redis.call<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;get&#34;</span>,KEYS<span style="color:#000;font-weight:bold">[</span>1<span style="color:#000;font-weight:bold">])</span> <span style="color:#000;font-weight:bold">==</span> ARGV<span style="color:#000;font-weight:bold">[</span>1<span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">then</span>
+    <span style="color:#000;font-weight:bold">return</span> redis.call<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;del&#34;</span>,KEYS<span style="color:#000;font-weight:bold">[</span>1<span style="color:#000;font-weight:bold">])</span>
+<span style="color:#000;font-weight:bold">else</span>
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#099">0</span>
+end
+</code></pre></div><p>为啥要用 <code>random_value</code> 随机值呢？因为如果某个客户端获取到了锁，但是阻塞了很长时间才执行完，比如说超过了 30s，此时可能已经自动释放锁了，此时可能别的客户端已经获取到了这个锁，要是你这个时候直接删除 key 的话会有问题，所以得用随机值加上面的 <code>lua</code> 脚本来释放锁。</p>
+<p>但是这样是肯定不行的。因为如果是普通的 redis 单实例，那就是单点故障。或者是 redis 普通主从，那 redis 主从异步复制，如果主节点挂了（key 就没有了），key 还没同步到从节点，此时从节点切换为主节点，别人就可以 set key，从而拿到锁。</p>
+<h3 id="redlock-算法">RedLock 算法</h3>
+<p>这个场景是假设有一个 redis cluster，有 5 个 redis master 实例。然后执行如下步骤获取一把锁：</p>
+<ol>
+<li>获取当前时间戳，单位是毫秒；</li>
+<li>跟上面类似，轮流尝试在每个 master 节点上创建锁，过期时间较短，一般就几十毫秒；</li>
+<li>尝试在<strong>大多数节点</strong>上建立一个锁，比如 5 个节点就要求是 3 个节点 <code>n / 2 + 1</code>；</li>
+<li>客户端计算建立好锁的时间，如果建立锁的时间小于超时时间，就算建立成功了；</li>
+<li>要是锁建立失败了，那么就依次之前建立过的锁删除；</li>
+<li>只要别人建立了一把分布式锁，你就得<strong>不断轮询去尝试获取锁</strong>。</li>
+</ol>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/zookeeper/6.png">
+            <img class="mx-auto" alt="redis-redlock" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/zookeeper/6.png" />
+        </a>
+    </p>
+<p><a href="https://redis.io/">Redis 官方</a>给出了以上两种基于 Redis 实现分布式锁的方法，详细说明可以查看：https://redis.io/topics/distlock 。</p>
+<h3 id="redis-实现案例">Redis 实现案例</h3>
+<blockquote>
+<p>此部分出处：https://www.jianshu.com/p/bb8c6c3113dd</p>
+</blockquote>
+<p>我们先举个例子，比如现在我要更新产品的信息，产品的唯一键就是 productId</p>
+<h4 id="简单实现-1">简单实现 1</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">lock</span><span style="color:#000;font-weight:bold">(</span>String key<span style="color:#000;font-weight:bold">,</span> V v<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">int</span> expireTime<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#458;font-weight:bold">int</span> retry <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#998;font-style:italic">//获取锁失败最多尝试10次
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(</span>retry <span style="color:#000;font-weight:bold">&lt;</span> failRetryTimes<span style="color:#000;font-weight:bold">){</span>
+            <span style="color:#998;font-style:italic">//获取锁
+</span><span style="color:#998;font-style:italic"></span>            Boolean result <span style="color:#000;font-weight:bold">=</span> redis<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">setNx</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">,</span> v<span style="color:#000;font-weight:bold">,</span> expireTime<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>result<span style="color:#000;font-weight:bold">){</span>
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#998;font-style:italic">//获取锁失败间隔一段时间重试
+</span><span style="color:#998;font-style:italic"></span>                TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MILLISECONDS</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sleep</span><span style="color:#000;font-weight:bold">(</span>sleepInterval<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                Thread<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">currentThread</span><span style="color:#000;font-weight:bold">().</span><span style="color:#008080">interrupt</span><span style="color:#000;font-weight:bold">();</span>
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">unlock</span><span style="color:#000;font-weight:bold">(</span>String key<span style="color:#000;font-weight:bold">){</span>
+        <span style="color:#000;font-weight:bold">return</span> redis<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>key<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">main</span><span style="color:#000;font-weight:bold">(</span>String<span style="color:#000;font-weight:bold">[]</span> args<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        Integer productId <span style="color:#000;font-weight:bold">=</span> 324324<span style="color:#000;font-weight:bold">;</span>
+        RedisLock<span style="color:#000;font-weight:bold">&lt;</span>Integer<span style="color:#000;font-weight:bold">&gt;</span> redisLock <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> RedisLock<span style="color:#000;font-weight:bold">&lt;</span>Integer<span style="color:#000;font-weight:bold">&gt;();</span>
+        redisLock<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">lock</span><span style="color:#000;font-weight:bold">(</span>productId<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">,</span> productId<span style="color:#000;font-weight:bold">,</span> 1000<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>这是一个简单的实现，存在的问题：</p>
+<ol>
+<li>可能会导致当前线程的锁误被其他线程释放，比如 a 线程获取到了锁正在执行，但是由于内部流程处理超时或者 gc 导致锁过期，这个时候b线程获取到了锁，a 和 b 线程处理的是同一个 productId，b还在处理的过程中，这个时候 a 处理完了，a 去释放锁，可能就会导致 a 把 b 获取的锁释放了。</li>
+<li>不能实现可重入</li>
+<li>客户端如果第一次已经设置成功，但是由于超时返回失败，此后客户端尝试会一直失败</li>
+</ol>
+<p>针对以上问题我们改进下：</p>
+<ol>
+<li>v 传 requestId，然后我们在释放锁的时候判断一下，如果是当前 requestId，那就可以释放，否则不允许释放</li>
+<li>加入 count 的锁计数，在获取锁的时候查询一次，如果是当前线程已经持有的锁，那锁技术加 1，直接返回 true</li>
+</ol>
+<h4 id="简单实现-2">简单实现 2</h4>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> volatile <span style="color:#458;font-weight:bold">int</span> count = <span style="color:#099">0</span>;
+<span style="color:#000;font-weight:bold">public</span> boolean <span style="color:#000;font-weight:bold">lock</span>(String key, V v, <span style="color:#458;font-weight:bold">int</span> expireTime){
+    <span style="color:#458;font-weight:bold">int</span> retry = <span style="color:#099">0</span>;
+    <span style="color:#998;font-style:italic">//获取锁失败最多尝试10次
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">while</span> (retry &lt; failRetryTimes){
+        <span style="color:#998;font-style:italic">//1.先获取锁,如果是当前线程已经持有，则直接返回
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#998;font-style:italic">//2.防止后面设置锁超时，其实是设置成功，而网络超时导致客户端返回失败，所以获取锁之前需要查询一下
+</span><span style="color:#998;font-style:italic"></span>        V <span style="color:#000;font-weight:bold">value</span> = redis.<span style="color:#000;font-weight:bold">get</span>(key);
+        <span style="color:#998;font-style:italic">//如果当前锁存在，并且属于当前线程持有，则锁计数+1，直接返回
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">null</span> != <span style="color:#000;font-weight:bold">value</span> &amp;&amp; <span style="color:#000;font-weight:bold">value</span>.<span style="color:#000;font-weight:bold">equals</span>(v)){
+            count ++;
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span>;
+        }
+
+        <span style="color:#998;font-style:italic">//如果锁已经被持有了，那需要等待锁的释放
+</span><span style="color:#998;font-style:italic"></span>        <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">value</span> == <span style="color:#000;font-weight:bold">null</span> || count &lt;= <span style="color:#099">0</span>){
+            <span style="color:#998;font-style:italic">//获取锁
+</span><span style="color:#998;font-style:italic"></span>            Boolean result = redis.setNx(key, v, expireTime);
+            <span style="color:#000;font-weight:bold">if</span> (result){
+                count = <span style="color:#099">1</span>;
+                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span>;
+            }
+        }
+
+        <span style="color:#000;font-weight:bold">try</span> {
+            <span style="color:#998;font-style:italic">//获取锁失败间隔一段时间重试
+</span><span style="color:#998;font-style:italic"></span>            TimeUnit.MILLISECONDS.sleep(sleepInterval);
+        } <span style="color:#000;font-weight:bold">catch</span> (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span>;
+        }
+
+    }
+
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span>;
+}
+<span style="color:#000;font-weight:bold">public</span> boolean unlock(String key, String requestId){
+    String <span style="color:#000;font-weight:bold">value</span> = redis.<span style="color:#000;font-weight:bold">get</span>(key);
+    <span style="color:#000;font-weight:bold">if</span> (Strings.isNullOrEmpty(<span style="color:#000;font-weight:bold">value</span>)){
+        count = <span style="color:#099">0</span>;
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span>;
+    }
+    <span style="color:#998;font-style:italic">//判断当前锁的持有者是否是当前线程，如果是的话释放锁，不是的话返回false
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">if</span> (<span style="color:#000;font-weight:bold">value</span>.<span style="color:#000;font-weight:bold">equals</span>(requestId)){
+        <span style="color:#000;font-weight:bold">if</span> (count &gt; <span style="color:#099">1</span>){
+            count -- ;
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span>;
+        }
+        
+        boolean delete = redis.delete(key);
+        <span style="color:#000;font-weight:bold">if</span> (delete){
+            count = <span style="color:#099">0</span>;
+        }
+        <span style="color:#000;font-weight:bold">return</span> delete;
+    }
+
+    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span>;
+}
+<span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">void</span> main(String[] args) {
+    Integer productId = <span style="color:#099">324324</span>;
+    RedisLock&lt;String&gt; redisLock = <span style="color:#000;font-weight:bold">new</span> RedisLock&lt;String&gt;();
+    String requestId = UUID.randomUUID().toString();
+    redisLock.<span style="color:#000;font-weight:bold">lock</span>(productId+<span style="color:#d14">&#34;&#34;</span>, requestId, <span style="color:#099">1000</span>);
+}
+</code></pre></div><p>这种实现基本解决了误释放和可重入的问题，这里说明几点：</p>
+<ol>
+<li>引入 count 实现重入的话，看业务需要，并且在释放锁的时候，其实也可以直接就把锁删除了，一次释放搞定，不需要在通过 count 数量释放多次，看业务需要吧</li>
+<li>关于要考虑设置锁超时，所以需要在设置锁的时候查询一次，可能会有性能的考量，看具体业务吧</li>
+<li>目前获取锁失败的等待时间是在代码里面设置的，可以提出来，修改下等待的逻辑即可</li>
+</ol>
+<h2 id="zk-分布式锁">zk 分布式锁</h2>
+<p>下图：</p>
+<p>
+        <a data-fancybox="gallery" href="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/zookeeper/5.png">
+            <img class="mx-auto" alt="" src="https://cdn.jsdelivr.net/gh/ChanServy/CDN2@master/zookeeper/5.png" />
+        </a>
+    </p>
+<p>zookeeper 可以保证只有一个人可以获取到这个锁。可能有个人先获取到了 zk 锁，执行了一些逻辑，然后释放锁，获取锁的时候，是根据一个唯一标识比如说 orderId ，尝试在 zookeeper 中创建一个临时的节点，如果这个订单编号的临时节点之前并不存在，那么就创建成功了，那么其实这个锁就属于你了，这个时候在你执行完逻辑释放锁之前，其他人尝试创建这个订单编号的 zk 临时节点是创建不了的，会报错（尝试获取锁是获取不到的），如果没有获取到这个锁，那么对这个节点也就是锁注册一个监听器，就 ok 了。一旦临时节点被删除，那么 zk 就会通知别人这个节点被干掉了，相当于是锁释放掉了，感知到锁被人释放之后，再次重新尝试获取锁，也就是创建这个订单编号的临时节点。</p>
+<p>zk 分布式锁，其实可以做的比较简单，就是某个节点尝试创建临时 znode，此时创建成功了就获取了这个锁；这个时候别的客户端来创建锁会失败，只能<strong>注册个监听器</strong>监听这个锁。释放锁就是删除这个 znode，一旦释放掉就会通知客户端，然后有一个等待着的客户端就可以再次重新加锁。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ZooKeeperSession</span> <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> CountDownLatch connectedSemaphore <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CountDownLatch<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">);</span>
+
+    <span style="color:#000;font-weight:bold">private</span> ZooKeeper zookeeper<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> CountDownLatch latch<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">ZooKeeperSession</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">zookeeper</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ZooKeeper<span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;192.168.31.187:2181,192.168.31.19:2181,192.168.31.227:2181&#34;</span><span style="color:#000;font-weight:bold">,</span> 50000<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">new</span> ZooKeeperWatcher<span style="color:#000;font-weight:bold">());</span>
+            <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                connectedSemaphore<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">await</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;ZooKeeper session established......&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 获取分布式锁
+</span><span style="color:#998;font-style:italic">     * 
+</span><span style="color:#998;font-style:italic">     * @param productId
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> Boolean <span style="color:#900;font-weight:bold">acquireDistributedLock</span><span style="color:#000;font-weight:bold">(</span>Long productId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        String path <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;/product-lock-&#34;</span> <span style="color:#000;font-weight:bold">+</span> productId<span style="color:#000;font-weight:bold">;</span>
+
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            zookeeper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">create</span><span style="color:#000;font-weight:bold">(</span>path<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getBytes</span><span style="color:#000;font-weight:bold">(),</span> Ids<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OPEN_ACL_UNSAFE</span><span style="color:#000;font-weight:bold">,</span> CreateMode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">EPHEMERAL</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">while</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#998;font-style:italic">// 相当于是给node注册一个监听器，去看看这个监听器是否存在
+</span><span style="color:#998;font-style:italic"></span>                    Stat stat <span style="color:#000;font-weight:bold">=</span> zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exists</span><span style="color:#000;font-weight:bold">(</span>path<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+
+                    <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>stat <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CountDownLatch<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">);</span>
+                        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">await</span><span style="color:#000;font-weight:bold">(</span>waitTime<span style="color:#000;font-weight:bold">,</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MILLISECONDS</span><span style="color:#000;font-weight:bold">);</span>
+                        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+                    <span style="color:#000;font-weight:bold">}</span>
+                    zookeeper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">create</span><span style="color:#000;font-weight:bold">(</span>path<span style="color:#000;font-weight:bold">,</span> <span style="color:#d14">&#34;&#34;</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getBytes</span><span style="color:#000;font-weight:bold">(),</span> Ids<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OPEN_ACL_UNSAFE</span><span style="color:#000;font-weight:bold">,</span> CreateMode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">EPHEMERAL</span><span style="color:#000;font-weight:bold">);</span>
+                    <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+                <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception ee<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                    <span style="color:#000;font-weight:bold">continue</span><span style="color:#000;font-weight:bold">;</span>
+                <span style="color:#000;font-weight:bold">}</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 释放掉一个分布式锁
+</span><span style="color:#998;font-style:italic">     * 
+</span><span style="color:#998;font-style:italic">     * @param productId
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">releaseDistributedLock</span><span style="color:#000;font-weight:bold">(</span>Long productId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        String path <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;/product-lock-&#34;</span> <span style="color:#000;font-weight:bold">+</span> productId<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            zookeeper<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>path<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">);</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;release the lock for product[id=&#34;</span> <span style="color:#000;font-weight:bold">+</span> productId <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;]......&#34;</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 建立zk session的watcher
+</span><span style="color:#998;font-style:italic">     * 
+</span><span style="color:#998;font-style:italic">     * @author bingo
+</span><span style="color:#998;font-style:italic">     * @since 2018/11/29
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ZooKeeperWatcher</span> <span style="color:#000;font-weight:bold">implements</span> Watcher <span style="color:#000;font-weight:bold">{</span>
+
+        <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">process</span><span style="color:#000;font-weight:bold">(</span>WatchedEvent event<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;Receive watched event: &#34;</span> <span style="color:#000;font-weight:bold">+</span> event<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getState</span><span style="color:#000;font-weight:bold">());</span>
+
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>KeeperState<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SyncConnected</span> <span style="color:#000;font-weight:bold">==</span> event<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getState</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+                connectedSemaphore<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">countDown</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">countDown</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 封装单例的静态内部类
+</span><span style="color:#998;font-style:italic">     * 
+</span><span style="color:#998;font-style:italic">     * @author bingo
+</span><span style="color:#998;font-style:italic">     * @since 2018/11/29
+</span><span style="color:#998;font-style:italic">     *
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">Singleton</span> <span style="color:#000;font-weight:bold">{</span>
+
+        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> ZooKeeperSession instance<span style="color:#000;font-weight:bold">;</span>
+
+        <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">{</span>
+            instance <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ZooKeeperSession<span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> ZooKeeperSession <span style="color:#900;font-weight:bold">getInstance</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">return</span> instance<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 获取单例
+</span><span style="color:#998;font-style:italic">     * 
+</span><span style="color:#998;font-style:italic">     * @return
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> ZooKeeperSession <span style="color:#900;font-weight:bold">getInstance</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">return</span> Singleton<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getInstance</span><span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">/**
+</span><span style="color:#998;font-style:italic">     * 初始化单例的便捷方法
+</span><span style="color:#998;font-style:italic">     */</span>
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">init</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        getInstance<span style="color:#000;font-weight:bold">();</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>也可以采用另一种方式，创建临时顺序节点：</p>
+<p>如果有一把锁，被多个人给竞争，此时多个人会排队，第一个拿到锁的人会执行，然后释放锁；后面的每个人都会去监听<strong>排在自己前面</strong>的那个人创建的 node 上，一旦某个人释放了锁，排在自己后面的人就会被 zookeeper 给通知，一旦被通知了之后，就 ok 了，自己就获取到了锁，就可以执行代码了。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">ZooKeeperDistributedLock</span> <span style="color:#000;font-weight:bold">implements</span> Watcher <span style="color:#000;font-weight:bold">{</span>
+
+    <span style="color:#000;font-weight:bold">private</span> ZooKeeper zk<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String locksRoot <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;/locks&#34;</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String productId<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String waitNode<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> String lockNode<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> CountDownLatch latch<span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">private</span> CountDownLatch connectedLatch <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CountDownLatch<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">);</span>
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">int</span> sessionTimeout <span style="color:#000;font-weight:bold">=</span> 30000<span style="color:#000;font-weight:bold">;</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">ZooKeeperDistributedLock</span><span style="color:#000;font-weight:bold">(</span>String productId<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">productId</span> <span style="color:#000;font-weight:bold">=</span> productId<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            String address <span style="color:#000;font-weight:bold">=</span> <span style="color:#d14">&#34;192.168.31.187:2181,192.168.31.19:2181,192.168.31.227:2181&#34;</span><span style="color:#000;font-weight:bold">;</span>
+            zk <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> ZooKeeper<span style="color:#000;font-weight:bold">(</span>address<span style="color:#000;font-weight:bold">,</span> sessionTimeout<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">);</span>
+            connectedLatch<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">await</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>IOException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>KeeperException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// 建立zk的session会话
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">process</span><span style="color:#000;font-weight:bold">(</span>WatchedEvent event<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>event<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getState</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">==</span> KeeperState<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">SyncConnected</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            connectedLatch<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">countDown</span><span style="color:#000;font-weight:bold">();</span>
+            <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">countDown</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+    
+	<span style="color:#998;font-style:italic">// 获取分布式锁
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">acquireDistributedLock</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">tryLock</span><span style="color:#000;font-weight:bold">())</span> <span style="color:#000;font-weight:bold">{</span>
+                <span style="color:#000;font-weight:bold">return</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">else</span> <span style="color:#000;font-weight:bold">{</span>
+                waitForLock<span style="color:#000;font-weight:bold">(</span>waitNode<span style="color:#000;font-weight:bold">,</span> sessionTimeout<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>KeeperException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">tryLock</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+ 		    <span style="color:#998;font-style:italic">// 传入进去的locksRoot + “/” + productId
+</span><span style="color:#998;font-style:italic"></span>		    <span style="color:#998;font-style:italic">// 假设productId代表了一个商品id，比如说1
+</span><span style="color:#998;font-style:italic"></span>		    <span style="color:#998;font-style:italic">// locksRoot = locks
+</span><span style="color:#998;font-style:italic"></span>		    <span style="color:#998;font-style:italic">// /locks/10000000000，/locks/10000000001，/locks/10000000002
+</span><span style="color:#998;font-style:italic"></span>            lockNode <span style="color:#000;font-weight:bold">=</span> zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">create</span><span style="color:#000;font-weight:bold">(</span>locksRoot <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;/&#34;</span> <span style="color:#000;font-weight:bold">+</span> productId<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">new</span> <span style="color:#458;font-weight:bold">byte</span><span style="color:#000;font-weight:bold">[</span>0<span style="color:#000;font-weight:bold">],</span> ZooDefs<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">Ids</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">OPEN_ACL_UNSAFE</span><span style="color:#000;font-weight:bold">,</span> CreateMode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">EPHEMERAL_SEQUENTIAL</span><span style="color:#000;font-weight:bold">);</span>
+   
+            <span style="color:#998;font-style:italic">// 看看刚创建的节点是不是最小的节点
+</span><span style="color:#998;font-style:italic"></span>	 	    <span style="color:#998;font-style:italic">// locks：10000000000，10000000001，10000000002
+</span><span style="color:#998;font-style:italic"></span>            List<span style="color:#000;font-weight:bold">&lt;</span>String<span style="color:#000;font-weight:bold">&gt;</span> locks <span style="color:#000;font-weight:bold">=</span> zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">getChildren</span><span style="color:#000;font-weight:bold">(</span>locksRoot<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">);</span>
+            Collections<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">sort</span><span style="color:#000;font-weight:bold">(</span>locks<span style="color:#000;font-weight:bold">);</span>
+	
+            <span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>lockNode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>locksRoot<span style="color:#000;font-weight:bold">+</span><span style="color:#d14">&#34;/&#34;</span><span style="color:#000;font-weight:bold">+</span> locks<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>0<span style="color:#000;font-weight:bold">))){</span>
+                <span style="color:#998;font-style:italic">//如果是最小的节点,则表示取得锁
+</span><span style="color:#998;font-style:italic"></span>                <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+            <span style="color:#000;font-weight:bold">}</span>
+	
+            <span style="color:#998;font-style:italic">//如果不是最小的节点，找到比自己小1的节点
+</span><span style="color:#998;font-style:italic"></span>	  <span style="color:#458;font-weight:bold">int</span> previousLockIndex <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">for</span><span style="color:#000;font-weight:bold">(</span><span style="color:#458;font-weight:bold">int</span> i <span style="color:#000;font-weight:bold">=</span> 0<span style="color:#000;font-weight:bold">;</span> i <span style="color:#000;font-weight:bold">&lt;</span> locks<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">size</span><span style="color:#000;font-weight:bold">();</span> i<span style="color:#000;font-weight:bold">++)</span> <span style="color:#000;font-weight:bold">{</span>
+			<span style="color:#000;font-weight:bold">if</span><span style="color:#000;font-weight:bold">(</span>lockNode<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">equals</span><span style="color:#000;font-weight:bold">(</span>locksRoot <span style="color:#000;font-weight:bold">+</span> <span style="color:#a61717;background-color:#e3d2d2">“</span><span style="color:#000;font-weight:bold">/</span><span style="color:#a61717;background-color:#e3d2d2">”</span> <span style="color:#000;font-weight:bold">+</span> locks<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>i<span style="color:#000;font-weight:bold">)))</span> <span style="color:#000;font-weight:bold">{</span>
+	        	previousLockIndex <span style="color:#000;font-weight:bold">=</span> i <span style="color:#000;font-weight:bold">-</span> 1<span style="color:#000;font-weight:bold">;</span>
+		    	<span style="color:#000;font-weight:bold">break</span><span style="color:#000;font-weight:bold">;</span>
+			<span style="color:#000;font-weight:bold">}</span>
+	   <span style="color:#000;font-weight:bold">}</span>
+	   
+	   <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">waitNode</span> <span style="color:#000;font-weight:bold">=</span> locks<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">get</span><span style="color:#000;font-weight:bold">(</span>previousLockIndex<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>KeeperException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">throw</span> <span style="color:#000;font-weight:bold">new</span> LockException<span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">false</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">private</span> <span style="color:#458;font-weight:bold">boolean</span> <span style="color:#900;font-weight:bold">waitForLock</span><span style="color:#000;font-weight:bold">(</span>String waitNode<span style="color:#000;font-weight:bold">,</span> <span style="color:#458;font-weight:bold">long</span> waitTime<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">throws</span> InterruptedException<span style="color:#000;font-weight:bold">,</span> KeeperException <span style="color:#000;font-weight:bold">{</span>
+        Stat stat <span style="color:#000;font-weight:bold">=</span> zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">exists</span><span style="color:#000;font-weight:bold">(</span>locksRoot <span style="color:#000;font-weight:bold">+</span> <span style="color:#d14">&#34;/&#34;</span> <span style="color:#000;font-weight:bold">+</span> waitNode<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">if</span> <span style="color:#000;font-weight:bold">(</span>stat <span style="color:#000;font-weight:bold">!=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">new</span> CountDownLatch<span style="color:#000;font-weight:bold">(</span>1<span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">await</span><span style="color:#000;font-weight:bold">(</span>waitTime<span style="color:#000;font-weight:bold">,</span> TimeUnit<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">MILLISECONDS</span><span style="color:#000;font-weight:bold">);</span>
+            <span style="color:#000;font-weight:bold">this</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">latch</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+        <span style="color:#000;font-weight:bold">}</span>
+        <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">true</span><span style="color:#000;font-weight:bold">;</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#998;font-style:italic">// 释放掉一个分布式锁
+</span><span style="color:#998;font-style:italic"></span>    <span style="color:#000;font-weight:bold">public</span> <span style="color:#458;font-weight:bold">void</span> <span style="color:#900;font-weight:bold">unlock</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">try</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#998;font-style:italic">// 删除/locks/10000000000节点
+</span><span style="color:#998;font-style:italic"></span>            <span style="color:#998;font-style:italic">// 删除/locks/10000000001节点
+</span><span style="color:#998;font-style:italic"></span>            System<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">out</span><span style="color:#000;font-weight:bold">.</span><span style="color:#008080">println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#d14">&#34;unlock &#34;</span> <span style="color:#000;font-weight:bold">+</span> lockNode<span style="color:#000;font-weight:bold">);</span>
+            zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">delete</span><span style="color:#000;font-weight:bold">(</span>lockNode<span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">-</span>1<span style="color:#000;font-weight:bold">);</span>
+            lockNode <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span><span style="color:#000;font-weight:bold">;</span>
+            zk<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">close</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>InterruptedException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span> <span style="color:#000;font-weight:bold">catch</span> <span style="color:#000;font-weight:bold">(</span>KeeperException e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            e<span style="color:#000;font-weight:bold">.</span><span style="color:#008080">printStackTrace</span><span style="color:#000;font-weight:bold">();</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+
+    <span style="color:#000;font-weight:bold">public</span> <span style="color:#000;font-weight:bold">class</span> <span style="color:#458;font-weight:bold">LockException</span> <span style="color:#000;font-weight:bold">extends</span> RuntimeException <span style="color:#000;font-weight:bold">{</span>
+        <span style="color:#000;font-weight:bold">private</span> <span style="color:#000;font-weight:bold">static</span> <span style="color:#000;font-weight:bold">final</span> <span style="color:#458;font-weight:bold">long</span> serialVersionUID <span style="color:#000;font-weight:bold">=</span> 1L<span style="color:#000;font-weight:bold">;</span>
+
+        <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LockException</span><span style="color:#000;font-weight:bold">(</span>String e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+
+        <span style="color:#000;font-weight:bold">public</span> <span style="color:#900;font-weight:bold">LockException</span><span style="color:#000;font-weight:bold">(</span>Exception e<span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+            <span style="color:#000;font-weight:bold">super</span><span style="color:#000;font-weight:bold">(</span>e<span style="color:#000;font-weight:bold">);</span>
+        <span style="color:#000;font-weight:bold">}</span>
+    <span style="color:#000;font-weight:bold">}</span>
+<span style="color:#000;font-weight:bold">}</span>
+</code></pre></div><p>代码解读：基于临时顺序节点，表达一种思想。acquireDistributedLock 方法获取锁，先尝试，进入到 tryLock 方法，比如说传进去的是 locksRoot + “/” + productId，比如说是对这个商品的操作进行加锁，这个 productId 代表了一个商品 id，比如说 1，那么这时候创建的临时节点本来是 /locks/1，然后 zookeeper 会将这个临时节点加编号，变成临时顺序节点，这个时候就是 /locks/10000000000，接了一串 0，这个时候这个临时节点还未被删除，也就是锁未被释放的时候，其他客户端来了创建节点，这个时候不会像上一种方式那样报错了，可以创建这个节点，zookeeper 会在结尾添加编号，/locks/10000000001，/locks/10000000002。这个时候就有三个节点，按照编号的，这个时候要通过 zookeeper 的 getChildren 方法，获取到 10000000000，10000000001，10000000002 的集合，然后我们排序，使这个集合中的元素从小到大排列，然后看看刚创建的节点是不是最小的节点，如果是最小的节点，返回 true，表示取得锁，如果不是最小的节点，那么找到比自己小 1 的节点，然后将比自己小 1 的节点设置为 waitNode，然后返回 false。返回 false 就会进入到 waitForLock 方法，这里就看出来，表示等待比自己小 1 的节点释放锁，zk.exists(locksRoot + &ldquo;/&rdquo; + waitNode, true);表示注册监听器，返回 Stat，如果是 null 的话，就代表比自己小 1 的节点不存在了，已经释放了锁，就可以直接返回 true 了，获取自己的锁。如果不等于 null ，那就说明比自己小 1 的节点仍然存在，没有释放锁，会进入到 if 中，this.latch.await，卡住等待，此时 this.latch 不是 null 的。等待什么呢？等待比自己小 1 的节点释放锁，等它删除节点，它如果删除节点，会进入 unlock 方法，删除节点，因为有监听器，那么一旦它删除了节点之后，这个时候 zookeeper 会反过来通知，调用 process 方法，这个时候就知道有人释放了锁，但是这个时候的 latch 不是 null（说明在卡住等待锁），然后把这个 latch.countDown() 一下，然后之前卡住的那个位置就会向下执行，将 latch 设置为 null，然后返回 true，就拿到锁了，可以执行逻辑了，执行完在释放锁，下一个再来获取锁。</p>
+<h2 id="redis-分布式锁和-zk-分布式锁的对比">redis 分布式锁和 zk 分布式锁的对比</h2>
+<ul>
+<li>redis 分布式锁，其实<strong>需要自己不断去尝试获取锁</strong>，比较消耗性能。</li>
+<li>zk 分布式锁，获取不到锁，注册个监听器即可，不需要不断主动尝试获取锁，性能开销较小。</li>
+</ul>
+<p>另外一点就是，如果是 redis 获取锁的那个客户端 出现 bug 挂了，那么只能等待超时时间之后才能释放锁；而 zk 的话，因为创建的是临时 znode，只要客户端挂了，znode 就没了，此时就自动释放锁。</p>
+<p>redis 分布式锁大家没发现好麻烦吗？遍历上锁，计算时间等等&hellip;&hellip;zk 的分布式锁语义清晰实现简单。</p>
+<p>所以先不分析太多的东西，就说这两点，我个人实践认为 zk 的分布式锁比 redis 的分布式锁牢靠、而且模型简单易用。</p>
+
+        </div>
+
+        
+<div class="post-archive">
+    <ul class="post-copyright">
+        <li><strong>原文作者：</strong><a rel="author" href="https://chanservy.github.io">迩东陈</a></li>
+        <li style="word-break:break-all"><strong>原文链接：</strong><a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html">https://chanservy.github.io/2021/07/08/fenbushi-lock.html</a></li>
+        <li><strong>版权声明：</strong>本作品采用<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议</a>进行许可，非商业转载请注明出处（作者，原文链接），商业转载请联系作者获得授权。</li>
+    </ul>
+</div>
+<br/>
+
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/2021/07/07/where-zookeeper-used.html">Zookeeper都有哪些使用场景？</a></li>
+        
+        <li><a href="/2021/07/07/fenbushijiekoushunxuxing.html">分布式服务接口请求的顺序性如何保证</a></li>
+        
+        <li><a href="/2021/07/07/fenbushijiekoumidengxing.html">分布式服务接口的幂等性如何设计</a></li>
+        
+        <li><a href="/2021/07/05/redis-bingfajingzheng-key.html">Redis的并发竞争问题</a></li>
+        
+        <li><a href="/2021/07/03/redis-db-double-write.html">如何保证缓存与数据库的双写一致性</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/Zookeeper'>Zookeeper</a></li>
+                
+                <li><a href='/tags/Redis'>Redis</a></li>
+                
+                <li><a href='/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></li>
+                
+                <li><a href='/tags/%E9%9D%A2%E8%AF%95'>面试</a></li>
+                
+                <li><a href='/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81'>分布式锁</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "ChanServy/comment"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2021 <a href="https://chanservy.github.io">迩东陈的博客 By 迩东陈</a>
+        
+        | <a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn/">辽ICP备99999999999号-1</a>
+        
+    </div>
+    <br />
+    <div>
+        <div class="github-badge">
+            <a href="https://gohugo.io/" target="_black" rel="nofollow"><span class="badge-subject">Powered by</span><span class="badge-value bg-blue">Hugo</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://www.flysnow.org/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value bg-brightgreen">飞雪无情</span></a>
+        </div>
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Theme</span><span class="badge-value bg-yellowgreen">Maupassant</span></a>
+        </div>
+    </div>
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script><script src="https://cdn.bootcdn.net/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+    <script src='/js/douban.js'></script>
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://chanservy.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://chanservy.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">最近文章</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/07/where-zookeeper-used.html" title="Zookeeper都有哪些使用场景？">Zookeeper都有哪些使用场景？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html" title="分布式服务接口请求的顺序性如何保证">分布式服务接口请求的顺序性如何保证</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html" title="分布式服务接口的幂等性如何设计">分布式服务接口的幂等性如何设计</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html" title="有关dubbo的一些总结">有关dubbo的一些总结</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html" title="如何保证缓存与数据库的双写一致性">如何保证缓存与数据库的双写一致性</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/02/redis-problems.html" title="Redis的雪崩穿透等问题">Redis的雪崩穿透等问题</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/06/29/redis-chijiuhua.html" title="Redis的持久化机制">Redis的持久化机制</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title" style="color:red">福利派送</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a href="https://www.aliyun.com/minisite/goods?userCode=jdg9oj97&amp;share_source=copy_link" title="【2019双12】ALL IN CLoud 低至1折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1_rYHo7P2gK0jSZPxXXacQpXa-690-388.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://cloud.tencent.com/act/cps/redirect?redirect=1048&amp;cps_key=14ff722692ac784fa8c3301c8c28d924&amp;from=console" title="助力产业智慧升级，云服务器首年88元起，更有千元代金券礼包免费领！" target="_blank" style="color:red">
+                
+                    <img src="https://upload-dianshi-1255598498.file.myqcloud.com/345-7c71532bd4935fbdd9a67c1a71e577b1767b805c.200%E7%89%88%E6%9C%ACB.jpg">
+                
+            </a>
+        </li>
+        
+        <li>
+            <a href="https://www.aliyun.com/acts/limit-buy?userCode=jdg9oj97" title="【渠道专享低折扣】11月特惠 限时2折" target="_blank" style="color:red">
+                
+                    <img src="https://img.alicdn.com/tfs/TB1hblJl7Y2gK0jSZFgXXc5OFXa-750-400.jpg">
+                
+            </a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>分类</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://chanservy.github.io/categories/Dubbo/">Dubbo (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Elasticsearch/">Elasticsearch (4)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/JWT/">JWT (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Java/">Java (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/OAuth2/">OAuth2 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Redis/">Redis (13)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Session/">Session (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Shiro/">Shiro (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Boot/">Spring Boot (30)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud/">Spring Cloud (14)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Cloud-Alibaba/">Spring Cloud Alibaba (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Spring-Security/">Spring Security (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Vue/">Vue (3)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/WebSocket/">WebSocket (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/Zookeeper/">Zookeeper (2)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (5)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (8)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (28)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (21)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>标签</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://chanservy.github.io/tags/Dubbo/">Dubbo</a>
+    
+    <a href="https://chanservy.github.io/tags/Elasticsearch/">Elasticsearch</a>
+    
+    <a href="https://chanservy.github.io/tags/Eureka/">Eureka</a>
+    
+    <a href="https://chanservy.github.io/tags/FastDFS/">FastDFS</a>
+    
+    <a href="https://chanservy.github.io/tags/Feign/">Feign</a>
+    
+    <a href="https://chanservy.github.io/tags/Freemarker/">Freemarker</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix/">Hystrix</a>
+    
+    <a href="https://chanservy.github.io/tags/Hystrix-Dashboard/">Hystrix Dashboard</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/JWT/">JWT</a>
+    
+    <a href="https://chanservy.github.io/tags/Java/">Java</a>
+    
+    <a href="https://chanservy.github.io/tags/Json/">Json</a>
+    
+    <a href="https://chanservy.github.io/tags/Mybatis/">Mybatis</a>
+    
+    <a href="https://chanservy.github.io/tags/Mysql/">Mysql</a>
+    
+    <a href="https://chanservy.github.io/tags/Nginx/">Nginx</a>
+    
+    <a href="https://chanservy.github.io/tags/OAuth2/">OAuth2</a>
+    
+    <a href="https://chanservy.github.io/tags/RabbitMQ/">RabbitMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/Redis/">Redis</a>
+    
+    <a href="https://chanservy.github.io/tags/Resilience4j/">Resilience4j</a>
+    
+    <a href="https://chanservy.github.io/tags/Ribbon/">Ribbon</a>
+    
+    <a href="https://chanservy.github.io/tags/RocketMQ/">RocketMQ</a>
+    
+    <a href="https://chanservy.github.io/tags/SSM/">SSM</a>
+    
+    <a href="https://chanservy.github.io/tags/Shiro/">Shiro</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Boot/">Spring Boot</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cache/">Spring Cache</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud/">Spring Cloud</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Alibaba/">Spring Cloud Alibaba</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Bus/">Spring Cloud Bus</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Config/">Spring Cloud Config</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Gateway/">Spring Cloud Gateway</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Cloud-Stream/">Spring Cloud Stream</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Data-JPA/">Spring Data JPA</a>
+    
+    <a href="https://chanservy.github.io/tags/Spring-Security/">Spring Security</a>
+    
+    <a href="https://chanservy.github.io/tags/Thymeleaf/">Thymeleaf</a>
+    
+    <a href="https://chanservy.github.io/tags/Vue/">Vue</a>
+    
+    <a href="https://chanservy.github.io/tags/WebSocket/">WebSocket</a>
+    
+    <a href="https://chanservy.github.io/tags/Zookeeper/">Zookeeper</a>
+    
+    <a href="https://chanservy.github.io/tags/Zuul/">Zuul</a>
+    
+    <a href="https://chanservy.github.io/tags/nacos/">nacos</a>
+    
+    <a href="https://chanservy.github.io/tags/session%E5%85%B1%E4%BA%AB/">session共享</a>
+    
+    <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%9C%A8%E7%BA%BF%E8%81%8A%E5%A4%A9/">在线聊天</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%A2%9E%E5%BC%BAController/">增强Controller</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1/">异步发送短信</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%9E%B6%E6%9E%84/">架构</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E/">模板引擎</a>
+    
+    <a href="https://chanservy.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%83%AD%E9%83%A8%E7%BD%B2/">热部署</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
+    
+    <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%80%9A%E7%94%A8mapper/">通用mapper</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE/">静态资源配置</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B5%E9%9D%A2%E9%9D%99%E6%80%81%E5%8C%96/">页面静态化</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">友情链接</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="https://www.flysnow.org/" title="飞雪无情的博客">飞雪无情的博客</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://blog.lovewinter.top/" title="溺水的小裴">溺水的小裴</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://www.ityouknow.com/" title="纯洁的微笑">纯洁的微笑</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.fangzhipeng.com/" title="方志朋的专栏">方志朋的专栏</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="https://www.javaboy.org/" title="江南一点雨">江南一点雨</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://blog.didispace.com/" title="程序猿DD">程序猿DD</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">其它</h3>
+        <ul class="widget-list">
+            <li><a href="https://chanservy.github.io/index.xml">文章 RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Zookeeper on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/Zookeeper/</link>
+    <description>Recent content in Zookeeper on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 08 Jul 2021 18:44:14 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/Zookeeper/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式锁的两种实现</title>
+      <link>https://chanservy.github.io/2021/07/08/fenbushi-lock.html</link>
+      <pubDate>Thu, 08 Jul 2021 18:44:14 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/08/fenbushi-lock.html</guid>
+      <description>一般实现分布式锁都有哪些方式？使用 redis 如何设计分布式锁？使用 zk 来设计分布式锁可以吗？这两种分布式锁的实现方式哪种效率比较高？ 分布式项目中，对于同一个资源进行并发写操作的时候，会用到分布式锁。 redis 分布式锁 官方叫做 RedLock 算法，是 redis 官方支持的分布式锁算法。 这个分布式锁有 3 个重要的考量点： 互斥（</description>
+    </item>
+    
+    <item>
+      <title>Zookeeper都有哪些使用场景？</title>
+      <link>https://chanservy.github.io/2021/07/07/where-zookeeper-used.html</link>
+      <pubDate>Wed, 07 Jul 2021 15:59:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/07/where-zookeeper-used.html</guid>
+      <description>zookeeper 都有哪些使用场景？ 大致来说，zookeeper 的使用场景如下： 分布式协调 分布式锁 元数据/配置信息管理 HA高可用性 分布式协调 这个其实是 zookeeper 很经典的一个用法，简单来说，就好比，你 A 系统发送个请求到 mq，然后 B 系统消息消费之后处理了。那 A 系统如何知道 B 系统的处理结果？用 zookeeper 就可以实现分布</description>
+    </item>
+    
+  </channel>
+</rss>

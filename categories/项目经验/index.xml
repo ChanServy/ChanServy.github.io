@@ -6,7 +6,43 @@
     <description>Recent content in 项目经验 on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 18 Jun 2021 18:14:18 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 08 Jul 2021 18:44:14 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式锁的两种实现</title>
+      <link>https://chanservy.github.io/2021/07/08/fenbushi-lock.html</link>
+      <pubDate>Thu, 08 Jul 2021 18:44:14 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/08/fenbushi-lock.html</guid>
+      <description>一般实现分布式锁都有哪些方式？使用 redis 如何设计分布式锁？使用 zk 来设计分布式锁可以吗？这两种分布式锁的实现方式哪种效率比较高？ 分布式项目中，对于同一个资源进行并发写操作的时候，会用到分布式锁。 redis 分布式锁 官方叫做 RedLock 算法，是 redis 官方支持的分布式锁算法。 这个分布式锁有 3 个重要的考量点： 互斥（</description>
+    </item>
+    
+    <item>
+      <title>Zookeeper都有哪些使用场景？</title>
+      <link>https://chanservy.github.io/2021/07/07/where-zookeeper-used.html</link>
+      <pubDate>Wed, 07 Jul 2021 15:59:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/07/where-zookeeper-used.html</guid>
+      <description>zookeeper 都有哪些使用场景？ 大致来说，zookeeper 的使用场景如下： 分布式协调 分布式锁 元数据/配置信息管理 HA高可用性 分布式协调 这个其实是 zookeeper 很经典的一个用法，简单来说，就好比，你 A 系统发送个请求到 mq，然后 B 系统消息消费之后处理了。那 A 系统如何知道 B 系统的处理结果？用 zookeeper 就可以实现分布</description>
+    </item>
+    
+    <item>
+      <title>分布式服务接口请求的顺序性如何保证</title>
+      <link>https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html</link>
+      <pubDate>Wed, 07 Jul 2021 15:35:16 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html</guid>
+      <description>分布式服务接口请求的顺序性如何保证？ 其实分布式系统接口的调用顺序，也是个问题，一般来说是不用保证顺序的。但是有时候可能确实是需要严格的顺序保证。给大家举个例子，你服务 A 调用服务 B，先插入再删除。好，结果俩请求过去了，落在不同机器上，可能插入请求因为某些原因执行慢了一些，导致删除请</description>
+    </item>
+    
+    <item>
+      <title>分布式服务接口的幂等性如何设计</title>
+      <link>https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html</link>
+      <pubDate>Wed, 07 Jul 2021 14:53:04 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html</guid>
+      <description>分布式服务接口的幂等性如何设计？（比如不能重复扣款） 一个分布式系统中的某个接口，该如何保证幂等性？这个事儿其实是做分布式系统的时候必须考虑的一个生产环境的技术问题。 你看，假如有个服务提供一些接口供外部调用，这个服务部署在了五台机器上，接着有个接口就是付款接口。然后人家用户在前端上</description>
+    </item>
+    
     <item>
       <title>Spring Boot整合RabbitMQ实现生产者消息确认</title>
       <link>https://chanservy.github.io/2021/04/09/mq-confirm.html</link>
