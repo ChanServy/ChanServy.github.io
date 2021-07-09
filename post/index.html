@@ -81,6 +81,116 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            为什么要分库分表（设计高并发系统的时候，数据库层面该如何设计）？用过哪些分库分表中间件？不同的分库分表中间件都有什么优点和缺点？你们具体是如何对数据库如何进行垂直拆分或水平拆分的？ 其实这块肯定是扯到高并发了，因为分库分表一定是为了支撑高并发、数据量大两个问题的。 为什么要分库分表？……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/07/09/mysql-divide.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/09/distributed-transaction.html" title="如何解决分布式事务问题？">如何解决分布式事务问题？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            分布式事务了解吗？你们是如何解决分布式事务问题的？ 分布式事务的实现主要有以下 5 种方案： XA 方案 TCC 方案 本地消息表 可靠消息最终一致性方案 最大努力通知方案 两阶段提交方案/XA方案 所谓的 XA 方案，即：两阶段提交，有一个事务管理器的概念，负责协调多个数据库（资源管理器）的事务，事务管理器先问问……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/07/09/distributed-transaction.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/09/fenbushi-session.html" title="集群部署时的分布式session如何实现？">集群部署时的分布式session如何实现？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            集群部署时的分布式 session 如何实现？ 只要聊到分布式系统，然后分布式之后接踵而来的就是一堆问题，最大的问题就是分布式事务、接口幂等性、分布式锁，还有最后一个就是分布式 session。大概就差不多这些&hellip; session 是啥？浏览器有个 cookie，在一段时间内这个 cookie 都存在，然后每次发请求过……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/07/09/fenbushi-session.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/09/design-high-system.html" title="如何设计一个高并发系统？">如何设计一个高并发系统？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E6%9E%B6%E6%9E%84'>架构</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            如何设计一个高并发系统？ 其实所谓的高并发，如果你要理解这个问题呢，其实就得从高并发的根源出发，为啥会有高并发？为啥高并发就很牛逼？ 我说的浅显一点，很简单，就是因为刚开始系统都是连接数据库的，但是要知道数据库支撑到每秒并发两三千的时候，基本就快完了。所以才有说，很多公司，刚开始干的……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/07/09/design-high-system.html">阅读全文</a></p>
+    </article>
+    
+    
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
             </h1>
         </header>
@@ -246,116 +356,6 @@
     
     
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html" title="如何保证缓存与数据库的双写一致性">如何保证缓存与数据库的双写一致性</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年7月2日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            如何保证缓存与数据库的双写一致性？ 你只要用缓存，就可能会涉及到缓存与数据库双存储双写，你只要是双写，就一定会有数据一致性的问题，那么你如何解决一致性问题？ 一般来说，如果允许缓存可以稍微的跟数据库偶尔有不一致的情况，也就是说如果你的系统不是严格要求 “缓存+数据库” 必须保持一致性的话……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html">阅读全文</a></p>
-    </article>
-    
-    
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/07/02/redis-problems.html" title="Redis的雪崩穿透等问题">Redis的雪崩穿透等问题</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年7月2日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            了解什么是 redis 的雪崩、穿透和击穿还有倾斜？redis 崩溃之后会怎么样？系统该如何应对这种情况？如何处理 redis 的穿透以及雪崩等问题？ 这些问题很重要，尤其是缓存雪崩和穿透，是缓存最大的两个问题，要么不出现，一旦出现就是致命性的问题。 1、缓存雪崩 对于系统 A，假设每天高峰期的时候每秒 5000 个请求，……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/07/02/redis-problems.html">阅读全文</a></p>
-    </article>
-    
-    
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月30日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E6%9E%B6%E6%9E%84'>架构</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            redis 集群模式的工作原理能说一下么？在集群模式下，redis 的 key 是如何寻址的？分布式寻址都有哪些算法？了解一致性 hash 算法吗？ 在前几年，redis 如果要搞几个节点，每个节点存储一部分的数据，得借助一些中间件来实现，比如说有 codis，或者 twemproxy，都有。有一些 redis 中间件，你读写 redis……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/06/30/redis-cluster.html">阅读全文</a></p>
-    </article>
-    
-    
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/29/redis-chijiuhua.html" title="Redis的持久化机制">Redis的持久化机制</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月29日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Redis'>Redis</a></span>
-            
-            <span class="meta-category"><a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：redis 的持久化有哪几种方式？不同的持久化机制都有什么优缺点？持久化机制的具体底层是如何实现的？ 我们都知道 redis 之所以快，并且支持高并发，主要是因为 redis 的 IO 多路复用机制和 redis 是基于内存的。但是 redis 如果仅仅只是将数据缓存在内存里，如果 redis 宕机了，虽然有 sentinel 哨兵在监听，但是如果哨兵还没来得……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/06/29/redis-chijiuhua.html">阅读全文</a></p>
-    </article>
-    
-    
-    
 
 
 
@@ -363,53 +363,57 @@
     
 
     
-    <li  class="current">
-        <a href="https://chanservy.github.io/post/">1</a>
-    </li>
+
     
-    <li >
-        <a href="https://chanservy.github.io/post/page/2/">2</a>
-    </li>
+        
     
-    <li >
-        <a href="https://chanservy.github.io/post/page/3/">3</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/4/">4</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/5/">5</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/6/">6</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/7/">7</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/8/">8</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/9/">9</a>
-    </li>
-    
-    <li >
-        <a href="https://chanservy.github.io/post/page/10/">10</a>
-    </li>
     
 
     
+        
+        
+        <li  class="current">
+            <a href="https://chanservy.github.io/post/">1</a>
+        </li>
+        
+    
+        
+        
+        <li >
+            <a href="https://chanservy.github.io/post/page/2/">2</a>
+        </li>
+        
+    
+        
+        
+        <li >
+            <a href="https://chanservy.github.io/post/page/3/">3</a>
+        </li>
+        
+    
+        
+        <li>
+            <span>...</span>
+        </li>
+        
+    
+        
+        
+        <li >
+            <a href="https://chanservy.github.io/post/page/11/">11</a>
+        </li>
+        
+    
+
+    
+    
+
     <li class="next">
         <a href="https://chanservy.github.io/post/page/2/">下一页</a>
     </li>
     
 </ol>
+
 
 
 
@@ -467,6 +471,22 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/09/distributed-transaction.html" title="如何解决分布式事务问题？">如何解决分布式事务问题？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/09/fenbushi-session.html" title="集群部署时的分布式session如何实现？">集群部署时的分布式session如何实现？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/09/design-high-system.html" title="如何设计一个高并发系统？">如何设计一个高并发系统？</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
     </li>
     
@@ -488,22 +508,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html" title="如何保证缓存与数据库的双写一致性">如何保证缓存与数据库的双写一致性</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/02/redis-problems.html" title="Redis的雪崩穿透等问题">Redis的雪崩穿透等问题</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/06/30/redis-cluster.html" title="Redis的集群模式">Redis的集群模式</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/06/29/redis-chijiuhua.html" title="Redis的持久化机制">Redis的持久化机制</a>
     </li>
     
 </ul>
@@ -584,15 +588,15 @@
     
     <li><a href="https://chanservy.github.io/categories/%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/">定时任务 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (5)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/">架构 (6)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (8)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (28)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (32)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (21)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (25)</a></li>
     
 </ul>
     </section>
@@ -683,9 +687,13 @@
     
     <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
     
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/">分布式session</a>
+    
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
     
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">分布式锁</a>
+    
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">分库分表</a>
     
     <a href="https://chanservy.github.io/tags/%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0/">图片上传</a>
     
@@ -726,6 +734,8 @@
     <a href="https://chanservy.github.io/tags/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验</a>
     
     <a href="https://chanservy.github.io/tags/%E9%AA%8C%E8%AF%81%E7%A0%81/">验证码</a>
+    
+    <a href="https://chanservy.github.io/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/">高并发</a>
     
 </div>
     </section>

@@ -6,7 +6,43 @@
     <description>Recent content in Posts on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 08 Jul 2021 18:44:14 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 09 Jul 2021 15:26:26 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>设计高并发系统的时候，数据库层面该如何设计？</title>
+      <link>https://chanservy.github.io/2021/07/09/mysql-divide.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:26:26 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/mysql-divide.html</guid>
+      <description>为什么要分库分表（设计高并发系统的时候，数据库层面该如何设计）？用过哪些分库分表中间件？不同的分库分表中间件都有什么优点和缺点？你们具体是如何对数据库如何进行垂直拆分或水平拆分的？ 其实这块肯定是扯到高并发了，因为分库分表一定是为了支撑高并发、数据量大两个问题的。 为什么要分库分表？</description>
+    </item>
+    
+    <item>
+      <title>如何解决分布式事务问题？</title>
+      <link>https://chanservy.github.io/2021/07/09/distributed-transaction.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:24:28 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/distributed-transaction.html</guid>
+      <description>分布式事务了解吗？你们是如何解决分布式事务问题的？ 分布式事务的实现主要有以下 5 种方案： XA 方案 TCC 方案 本地消息表 可靠消息最终一致性方案 最大努力通知方案 两阶段提交方案/XA方案 所谓的 XA 方案，即：两阶段提交，有一个事务管理器的概念，负责协调多个数据库（资源管理器）的事务，事务管理器先问问</description>
+    </item>
+    
+    <item>
+      <title>集群部署时的分布式session如何实现？</title>
+      <link>https://chanservy.github.io/2021/07/09/fenbushi-session.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:57 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/fenbushi-session.html</guid>
+      <description>集群部署时的分布式 session 如何实现？ 只要聊到分布式系统，然后分布式之后接踵而来的就是一堆问题，最大的问题就是分布式事务、接口幂等性、分布式锁，还有最后一个就是分布式 session。大概就差不多这些&amp;hellip; session 是啥？浏览器有个 cookie，在一段时间内这个 cookie 都存在，然后每次发请求过</description>
+    </item>
+    
+    <item>
+      <title>如何设计一个高并发系统？</title>
+      <link>https://chanservy.github.io/2021/07/09/design-high-system.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/design-high-system.html</guid>
+      <description>如何设计一个高并发系统？ 其实所谓的高并发，如果你要理解这个问题呢，其实就得从高并发的根源出发，为啥会有高并发？为啥高并发就很牛逼？ 我说的浅显一点，很简单，就是因为刚开始系统都是连接数据库的，但是要知道数据库支撑到每秒并发两三千的时候，基本就快完了。所以才有说，很多公司，刚开始干的</description>
+    </item>
+    
     <item>
       <title>分布式锁的两种实现</title>
       <link>https://chanservy.github.io/2021/07/08/fenbushi-lock.html</link>

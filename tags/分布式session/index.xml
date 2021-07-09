@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>分布式session on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/</link>
+    <description>Recent content in 分布式session on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Jul 2021 15:23:57 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>集群部署时的分布式session如何实现？</title>
+      <link>https://chanservy.github.io/2021/07/09/fenbushi-session.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:57 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/fenbushi-session.html</guid>
+      <description>集群部署时的分布式 session 如何实现？ 只要聊到分布式系统，然后分布式之后接踵而来的就是一堆问题，最大的问题就是分布式事务、接口幂等性、分布式锁，还有最后一个就是分布式 session。大概就差不多这些&amp;hellip; session 是啥？浏览器有个 cookie，在一段时间内这个 cookie 都存在，然后每次发请求过</description>
+    </item>
+    
+  </channel>
+</rss>

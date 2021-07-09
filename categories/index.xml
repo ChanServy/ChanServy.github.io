@@ -6,7 +6,34 @@
     <description>Recent content in Categories on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 08 Jul 2021 18:44:14 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 09 Jul 2021 15:26:26 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>面试</title>
+      <link>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</link>
+      <pubDate>Fri, 09 Jul 2021 15:26:26 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>项目经验</title>
+      <link>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</link>
+      <pubDate>Fri, 09 Jul 2021 15:26:26 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>架构</title>
+      <link>https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Redis</title>
       <link>https://chanservy.github.io/categories/Redis/</link>
@@ -26,38 +53,11 @@
     </item>
     
     <item>
-      <title>面试</title>
-      <link>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</link>
-      <pubDate>Thu, 08 Jul 2021 18:44:14 +0800</pubDate>
-      
-      <guid>https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>项目经验</title>
-      <link>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</link>
-      <pubDate>Thu, 08 Jul 2021 18:44:14 +0800</pubDate>
-      
-      <guid>https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Dubbo</title>
       <link>https://chanservy.github.io/categories/Dubbo/</link>
       <pubDate>Tue, 06 Jul 2021 20:30:39 +0800</pubDate>
       
       <guid>https://chanservy.github.io/categories/Dubbo/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>架构</title>
-      <link>https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/</link>
-      <pubDate>Wed, 30 Jun 2021 17:28:40 +0800</pubDate>
-      
-      <guid>https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/</guid>
       <description></description>
     </item>
     

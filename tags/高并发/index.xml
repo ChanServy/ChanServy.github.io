@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>高并发 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/</link>
+    <description>Recent content in 高并发 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 09 Jul 2021 15:26:26 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>设计高并发系统的时候，数据库层面该如何设计？</title>
+      <link>https://chanservy.github.io/2021/07/09/mysql-divide.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:26:26 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/mysql-divide.html</guid>
+      <description>为什么要分库分表（设计高并发系统的时候，数据库层面该如何设计）？用过哪些分库分表中间件？不同的分库分表中间件都有什么优点和缺点？你们具体是如何对数据库如何进行垂直拆分或水平拆分的？ 其实这块肯定是扯到高并发了，因为分库分表一定是为了支撑高并发、数据量大两个问题的。 为什么要分库分表？</description>
+    </item>
+    
+    <item>
+      <title>如何设计一个高并发系统？</title>
+      <link>https://chanservy.github.io/2021/07/09/design-high-system.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/design-high-system.html</guid>
+      <description>如何设计一个高并发系统？ 其实所谓的高并发，如果你要理解这个问题呢，其实就得从高并发的根源出发，为啥会有高并发？为啥高并发就很牛逼？ 我说的浅显一点，很简单，就是因为刚开始系统都是连接数据库的，但是要知道数据库支撑到每秒并发两三千的时候，基本就快完了。所以才有说，很多公司，刚开始干的</description>
+    </item>
+    
+  </channel>
+</rss>

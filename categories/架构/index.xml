@@ -6,7 +6,16 @@
     <description>Recent content in 架构 on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Wed, 30 Jun 2021 17:28:40 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 09 Jul 2021 15:23:19 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E6%9E%B6%E6%9E%84/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>如何设计一个高并发系统？</title>
+      <link>https://chanservy.github.io/2021/07/09/design-high-system.html</link>
+      <pubDate>Fri, 09 Jul 2021 15:23:19 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/09/design-high-system.html</guid>
+      <description>如何设计一个高并发系统？ 其实所谓的高并发，如果你要理解这个问题呢，其实就得从高并发的根源出发，为啥会有高并发？为啥高并发就很牛逼？ 我说的浅显一点，很简单，就是因为刚开始系统都是连接数据库的，但是要知道数据库支撑到每秒并发两三千的时候，基本就快完了。所以才有说，很多公司，刚开始干的</description>
+    </item>
+    
     <item>
       <title>Redis的集群模式</title>
       <link>https://chanservy.github.io/2021/06/30/redis-cluster.html</link>
