@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>设计模式 on 迩东陈的博客</title>
+    <link>https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+    <description>Recent content in 设计模式 on 迩东陈的博客</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 10 Jul 2021 22:42:03 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>设计模式也可以这么简单（转载）</title>
+      <link>https://chanservy.github.io/2021/07/10/design-pattern.html</link>
+      <pubDate>Sat, 10 Jul 2021 22:42:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/10/design-pattern.html</guid>
+      <description>原文链接：https://www.javadoop.com/post/design-pattern 一直想写一篇介绍设计模式的文章，让读者可以很快看完，而且一看就懂，看懂就会用，同时不会将各个模式搞混。自认为本文还是写得不错的😂😂😂，花了不少心思来写这文章和做图，力求让读者真的能看</description>
+    </item>
+    
+  </channel>
+</rss>

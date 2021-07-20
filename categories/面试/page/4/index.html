@@ -88,6 +88,106 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/06/18/messages-are-not-repeatedly-consumed.html">如何保证消息不被重复消费?</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年6月18日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97'>消息队列</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            学习石杉老师的课程笔记 面试题 如何保证消息不被重复消费？或者说，如何保证消息消费的幂等性？ 面试官心理分析 其实这是很常见的一个问题，这俩问题基本可以连起来问。既然是消费消息，那肯定要考虑会不会重复消费？能不能避免重复消费？或者重复消费了也别造成系统异常可以吗？这个是 MQ 领域的基本问题，……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/06/18/messages-are-not-repeatedly-consumed.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/06/17/high-availability-of-message-queues.html">如何保证消息队列的高可用?</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年6月17日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97'>消息队列</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            学习石杉老师的课程笔记 如何保证消息队列的高可用？ 如何保证消息队列的高可用？关于 MQ 的知识，高可用是必问的。上篇博客提到，MQ 会导致系统可用性降低。所以只要你用了 MQ，接下来的一些要点肯定就是围绕着 MQ 的那些缺点怎么来解决了。 面试题剖析 这个问题这么问是很好的，因为不能问你 Kafka 的高可用性怎……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/06/17/high-availability-of-message-queues.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/06/16/whymq.html">为何使用MQ以及它的优缺点</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年6月16日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97'>消息队列</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            学习石杉老师的课程笔记 1. 面试题 为什么使用消息队列？ 消息队列有什么优点和缺点？ Kafka、ActiveMQ、RabbitMQ、RocketMQ 都有什么区别，以及适合哪些场景？ 2. 面试官心理分析 其实面试官主要是想看看： 第一，你知不知道你们系统里为什么要用消息队列这个东西？不少候选人，说……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/06/16/whymq.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html">分布式事务之可靠消息最终一致性方案</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年5月24日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            <p>这几篇文章一直在讲有关分布式事务的问题，的确，在一些场景中，会涉及到分布式事务也就是数据不一致的问题，会发生在分布式微服务的项目中，所谓分布式事务就是数据涉及到多个微服务之间的接口调用，如果全部没错皆大欢喜，但凡有一个地方出现了报错，那就全部要回滚，保证数据的一致性和准确性，其实就是事务的特性。这篇讲的是通过消息队列来实现数据的最终一致性，可靠消息最终一致性方案，准确的说这并不是一套针对分布式事务的解决方案，而是一个通过MQ实现分布式事务效果（数据一致性）的方案。</p>……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/05/16/tcc.html">分布式事务之TCC方案</a>
             </h1>
         </header>
@@ -224,6 +324,26 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html" title="MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？">MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html" title="分库分表之后，id主键如何处理？">分库分表之后，id主键如何处理？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html" title="如何设计可以动态扩容缩容的分库分表方案？">如何设计可以动态扩容缩容的分库分表方案？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-method.html" title="如何设计才可以让系统从未分库分表动态切换到分库分表上？">如何设计才可以让系统从未分库分表动态切换到分库分表上？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/10/design-pattern.html" title="设计模式也可以这么简单（转载）">设计模式也可以这么简单（转载）</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
     </li>
     
@@ -241,26 +361,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/where-zookeeper-used.html" title="Zookeeper都有哪些使用场景？">Zookeeper都有哪些使用场景？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html" title="分布式服务接口请求的顺序性如何保证">分布式服务接口请求的顺序性如何保证</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html" title="分布式服务接口的幂等性如何设计">分布式服务接口的幂等性如何设计</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html" title="有关dubbo的一些总结">有关dubbo的一些总结</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
     </li>
     
 </ul>
@@ -313,7 +413,7 @@
     
     <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (5)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
     
@@ -347,9 +447,11 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (32)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (25)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (36)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (29)</a></li>
     
 </ul>
     </section>
@@ -440,6 +542,8 @@
     
     <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
     
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fid/">分布式id</a>
+    
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/">分布式session</a>
     
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
@@ -471,6 +575,8 @@
     <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
     
     <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
     
     <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
     

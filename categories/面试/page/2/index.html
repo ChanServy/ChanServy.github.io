@@ -88,6 +88,106 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html">分布式服务接口请求的顺序性如何保证</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月7日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            分布式服务接口请求的顺序性如何保证？ 其实分布式系统接口的调用顺序，也是个问题，一般来说是不用保证顺序的。但是有时候可能确实是需要严格的顺序保证。给大家举个例子，你服务 A 调用服务 B，先插入再删除。好，结果俩请求过去了，落在不同机器上，可能插入请求因为某些原因执行慢了一些，导致删除请……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html">分布式服务接口的幂等性如何设计</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月7日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            分布式服务接口的幂等性如何设计？（比如不能重复扣款） 一个分布式系统中的某个接口，该如何保证幂等性？这个事儿其实是做分布式系统的时候必须考虑的一个生产环境的技术问题。 你看，假如有个服务提供一些接口供外部调用，这个服务部署在了五台机器上，接着有个接口就是付款接口。然后人家用户在前端上……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html">有关dubbo的一些总结</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月6日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/Dubbo'>Dubbo</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            说一下的 dubbo 的工作原理？注册中心挂了可以继续通信吗？说说一次 rpc 请求的流程？dubbo 支持哪些通信协议？支持哪些序列化协议？说一下 Hessian 的数据结构？PB 知道吗？为什么 PB 的效率是最高的？dubbo 负载均衡策略和集群容错策略都有哪些？动态代理策略呢？dubbo 的 spi 思想是什么？如何基于 dubbo 进行服……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/06/dubbo-review.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html">Redis的并发竞争问题</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月5日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/Redis'>Redis</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+        </div>
+        
+        <div class="post-content">
+            redis 的并发竞争问题是什么？如何解决这个问题？了解 redis 事务的 CAS 方案吗？ 这个也是线上非常常见的一个问题，就是多客户端同时并发写一个 key，可能本来应该先到的数据后到了，导致数据版本错了；或者是多客户端同时获取一个 key，修改值之后再写回去，只要顺序错了，数据就错了。 而且 redis 自己就有天然解决……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/07/03/redis-db-double-write.html">如何保证缓存与数据库的双写一致性</a>
             </h1>
         </header>
@@ -241,106 +341,6 @@
         </div>
     </article>
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">Redis的过期策略？</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月25日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/Redis'>Redis</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：redis 的过期策略都有哪些？内存淘汰机制都有哪些？手写一下 LRU 代码实现？ 常见的有两个问题： 往 redis 写入的数据怎么没了？ 啥叫缓存？用内存当缓存。内存是无限的吗，内存是很宝贵而且是有限的，磁盘是廉价而且是大量的。可能一台机器就几十个 G 的内存，但是可以有几个 T 的硬盘空间。redis 主……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/06/25/redis-expiration-policies-and-lru.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/25/redis-data-types.html">Redis都有哪些数据类型？</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月25日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/Redis'>Redis</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：redis 都有哪些数据类型？分别在哪些场景下使用比较合适？ redis 主要有以下几种数据类型： string hash list set sorted set string 这是最简单的类型，就是普通的 set 和 get，做简单的 KV 缓存。 set college szu hash 这个是类似 map 的一种结构，这个一般就是可以将结构化的数据，比如一个对象（前提是这个对象没嵌套其他的对象）给缓存在 redis……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/06/25/redis-data-types.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/25/redis-single-thread-model.html">为何单线程的redis能支撑高并发？</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月25日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/Redis'>Redis</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：redis 和 memcached 有什么区别？redis 的线程模型是什么？为什么 redis 单线程却能支撑高并发？其实这些都是 redis 最基本的问题，redis 最基本的内部原理和特点就是 redis 实际上是个单线程工作模型。 redis 和 memcached 有啥区别？ redis 支持复杂的数据结构 redis 相比 memcached 来说，拥有更多的数据结构，能支持更丰富的数据操作。如果……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/06/25/redis-single-thread-model.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/06/21/why-cache.html">项目中为何需要用缓存？</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月21日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/%E7%BC%93%E5%AD%98'>缓存</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            学习石杉老师的课程笔记 项目中缓存是如何使用的？ 这个，需要结合自己项目的业务来。 为什么要用缓存？ 用缓存，主要有两个用途：高性能、高并发。 高性能 假设这么个场景，你有个操作，一个请求过来，吭哧吭哧你各种乱七八糟操作 mysql，半天查出来一个结果，耗时 600ms。但是这个结果可能接下来几……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/06/21/why-cache.html">阅读全文</a></p>
-        </div>
-    </article>
-    
 
     
 
@@ -434,6 +434,26 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html" title="MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？">MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html" title="分库分表之后，id主键如何处理？">分库分表之后，id主键如何处理？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html" title="如何设计可以动态扩容缩容的分库分表方案？">如何设计可以动态扩容缩容的分库分表方案？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-method.html" title="如何设计才可以让系统从未分库分表动态切换到分库分表上？">如何设计才可以让系统从未分库分表动态切换到分库分表上？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/10/design-pattern.html" title="设计模式也可以这么简单（转载）">设计模式也可以这么简单（转载）</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
     </li>
     
@@ -451,26 +471,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/where-zookeeper-used.html" title="Zookeeper都有哪些使用场景？">Zookeeper都有哪些使用场景？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html" title="分布式服务接口请求的顺序性如何保证">分布式服务接口请求的顺序性如何保证</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html" title="分布式服务接口的幂等性如何设计">分布式服务接口的幂等性如何设计</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html" title="有关dubbo的一些总结">有关dubbo的一些总结</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
     </li>
     
 </ul>
@@ -523,7 +523,7 @@
     
     <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (5)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
     
@@ -557,9 +557,11 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (32)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (25)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (36)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (29)</a></li>
     
 </ul>
     </section>
@@ -650,6 +652,8 @@
     
     <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
     
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fid/">分布式id</a>
+    
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/">分布式session</a>
     
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
@@ -681,6 +685,8 @@
     <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
     
     <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
     
     <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
     

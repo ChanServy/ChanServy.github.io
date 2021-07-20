@@ -79,6 +79,121 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/05/06/java-foundation.html" title="Java基础">Java基础</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年5月6日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Java'>Java</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            <p>前言：Java 语言是美国 Sun 公司，在1995年推出的高级编程语言。所谓编程语言，是计算机的语言，人们可以使用编程语言对计算机下达命令，让计算机完成人们需要的功能。Java 语言主要应用在互联网程序的开发领域。常见的互联网程序比如天猫、京东、物流系统、网银系统等，以及服务器后台处理大数据的存储、查询、数据挖掘等也有很多应用。</p>……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/05/06/java-foundation.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/16/freemarker.html" title="Freemarker研究">Freemarker研究</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月16日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            1. Freemarker介绍 Freemarker 是一个用 Java 开发的模板引擎，模板引擎即为一种基于模板和要改变的数据，并用来生成输出文本的通用工具。Freemarker 不是面向最终用户的，而是一个 Java 类库，是一款程序员可以嵌入他们所开发的产品的组件。常用的 Java 模板引擎还有：Jsp、Thymeleaf 等。 Fr……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/16/freemarker.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html" title="Spring Boot之集成通用Mapper">Spring Boot之集成通用Mapper</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：Spring Boot之集成通用Mapper。 通用Mapper的接口，不同的接口会有不同的方法，适应不同的业务需求，因此为了满足大部分的业务需求，我们应该自定义Mapper接口，继承通用Mapper提供的各个接口。在项目中，如果使用通用Mapper，那么必然不止一个微服务会用……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/boot-with-tkMapper.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html" title="Spring Boot整合Spring Data JPA">Spring Boot整合Spring Data JPA</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：Spring Boot整合Spring Data JPA。 一、Spring Data JPA介绍 Spring Data：其实 Spring Data 就是 Spring 提供的一个操作数据的框架。而 Spring Data JPA 只是 Spring Data 框架下的一个基于 JPA 标准操作数据的模块。 Spring Data JPA：基于 JPA 的标准数据进行操作。简化操作持久层的代码。只需要编写接口就可以。 二、Spri……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/boot-with-data-jpa.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/04/09/order-service.html" title="订单业务">订单业务</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年4月9日
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
+            
+        </div>
+        
+        <div class="post-content">
+            前言：记一次项目中实现订单业务的流程。 1 创建订单微服务 1.1 分析 当我们在购物车种选择好商品时，会选择右下角的结算按钮去下单： 会跳转到订单结算页，并不是直接去付款： 因此此处页面需要渲染的内容主要包含3部分： 收货人信息 支付方式 商品信息 这部分渲染已经在前端实现了 1.2 服务搭建 依赖 &lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;project xmlns=&#34;http://maven.apache.org/POM/4.0.0&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34; xsi:schemaLocation=&#34;http://maven.apache.org/POM/4.0.0……
+        </div>
+        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/order-service.html">阅读全文</a></p>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/04/09/cart-service.html" title="购物车业务">购物车业务</a>
             </h1>
         </header>
@@ -191,121 +306,6 @@
             前言：RabbitMQ及数据同步。 1.RabbitMQ 1.1.搜索与商品服务的问题 目前我们已经完成了商品详情和搜索系统的开发。我们思考一下，是否存在问题？ 商品的原始数据保存在数据库中，增删改查都在数据库中完成。 搜索服务数据来源是索引库，如果数据库商品发生变化，索引库数据不能及时更新。 商品详情做了页……
         </div>
         <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/mq-data-together.html">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/goods-details-page-static.html" title="商品详情及静态化">商品详情及静态化</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            <p>前言：接大上篇博客，当用户搜索到商品，肯定会点击查看，就会进入商品详情页，接下来我们完成商品详情页的展示。</p>……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/goods-details-page-static.html">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/thymeleaf-study.html" title="Thymeleaf语法入门">Thymeleaf语法入门</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Spring-Boot'>Spring Boot</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：模板引擎——Thymeleaf。 1.Thymeleaf简介 官方网站：https://www.thymeleaf.org/index.html Thymeleaf是用来开发Web和独立环境项目的现代服务器端Java模板引擎。 Thymeleaf的主要目标是为您的开发工作流程带来优……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/thymeleaf-study.html">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/search-service.html" title="项目中的搜索服务">项目中的搜索服务</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            <p>前言：上篇写了Elasticsearch的基本应用。今天就学以致用，搭建搜索微服务，实现搜索功能。</p>……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/search-service.html">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/study-of-elasticsearch.html" title="ElasticSearch学习记录">ElasticSearch学习记录</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/Elasticsearch'>Elasticsearch</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            前言：目标是：独立安装Elasticsearch、会使用Rest的API操作索引、会使用Rest的API查询数据、会使用Rest的API聚合数据、掌握Spring Data Elasticsearch使用。 1.Elasticsearch介绍和安装 1.1.简介 1.1.1.Elastic Elastic官网：https……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/study-of-elasticsearch.html">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html" title="电商项目中商品的分析和数据库设计">电商项目中商品的分析和数据库设计</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年4月9日
-        </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a></span>
-            
-        </div>
-        
-        <div class="post-content">
-            电商项目中商品的分析和数据库设计 前言：众所周知，电商网站品类复杂多样，比如京东、淘宝、拼多多等等，诸如这些全品类的电商网站，商品的种类繁多，每一件商品，其属性又有差别。那么设计如此大型的电商网站，我们该如何设计商品信息的展示呢？本文大部分以京东官网的截图为例说明思路。 一、SPU和……
-        </div>
-        <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/dianshangxiangmufenxi.html">阅读全文</a></p>
     </article>
     
     
@@ -456,6 +456,26 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html" title="MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？">MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html" title="分库分表之后，id主键如何处理？">分库分表之后，id主键如何处理？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html" title="如何设计可以动态扩容缩容的分库分表方案？">如何设计可以动态扩容缩容的分库分表方案？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-method.html" title="如何设计才可以让系统从未分库分表动态切换到分库分表上？">如何设计才可以让系统从未分库分表动态切换到分库分表上？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/10/design-pattern.html" title="设计模式也可以这么简单（转载）">设计模式也可以这么简单（转载）</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
     </li>
     
@@ -473,26 +493,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/where-zookeeper-used.html" title="Zookeeper都有哪些使用场景？">Zookeeper都有哪些使用场景？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html" title="分布式服务接口请求的顺序性如何保证">分布式服务接口请求的顺序性如何保证</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html" title="分布式服务接口的幂等性如何设计">分布式服务接口的幂等性如何设计</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html" title="有关dubbo的一些总结">有关dubbo的一些总结</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
     </li>
     
 </ul>
@@ -545,7 +545,7 @@
     
     <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (5)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
     
@@ -579,9 +579,11 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (32)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (25)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (36)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (29)</a></li>
     
 </ul>
     </section>
@@ -672,6 +674,8 @@
     
     <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
     
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fid/">分布式id</a>
+    
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/">分布式session</a>
     
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
@@ -703,6 +707,8 @@
     <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
     
     <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
     
     <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
     

@@ -88,6 +88,114 @@
     <article class="post">
         <header>
             <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html">MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月19日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+            <a href='/categories/Mysql'>Mysql</a>
+            
+        </div>
+        
+        <div class="post-content">
+            你们有没有做 MySQL 读写分离？如何实现 MySQL 的读写分离？MySQL 主从复制原理的是啥？如何解决 MySQL 主从同步的延时问题？ 高并发这个阶段，肯定是需要做读写分离的，啥意思？因为实际上大部分的互联网公司，一些网站，或者是 app，其实都是读多写少。所以针对这个情况，就是写一个主库，但是主库挂多个从库，……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html">分库分表之后，id主键如何处理？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月19日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+            <a href='/categories/Mysql'>Mysql</a>
+            
+        </div>
+        
+        <div class="post-content">
+            分库分表之后，id 主键如何处理？ 其实这是分库分表之后你必然要面对的一个问题，就是 id 咋生成？因为要是分成多个表之后，每个表都是从 1 开始累加，那肯定不对啊，需要一个全局唯一的 id 来支持。所以这都是你实际生产环境中必须考虑的问题。 基于数据库的实现方案 数据库自增 id 这个就是说你的系统里每次得……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html">如何设计可以动态扩容缩容的分库分表方案？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月19日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+            <a href='/categories/Mysql'>Mysql</a>
+            
+        </div>
+        
+        <div class="post-content">
+            如何设计可以动态扩容缩容的分库分表方案？ 对于分库分表来说，主要是面对以下问题： 选择一个数据库中间件，调研、学习、测试； 设计你的分库分表的一个方案，你要分成多少个库，每个库分成多少个表，比如 3 个库，每个库 4 个表； 基于选择好的数据库中间件，以及在测试环境建立好的分库分表的环境，然后测……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
+                <a href="https://chanservy.github.io/2021/07/19/database-shard-method.html">如何设计才可以让系统从未分库分表动态切换到分库分表上？</a>
+            </h1>
+        </header>
+        <date class="post-meta meta-date">
+            2021年7月19日
+        </date>
+        
+        <div class="post-meta meta-category">
+            |
+            
+            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
+            
+            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
+            
+            <a href='/categories/Mysql'>Mysql</a>
+            
+        </div>
+        
+        <div class="post-content">
+            现在有一个未分库分表的系统，未来要分库分表，如何设计才可以让系统从未分库分表动态切换到分库分表上？ 停机迁移方案 我先给你说一个最 low 的方案，就是很简单，大家伙儿凌晨 12 点开始运维，网站或者 app 挂个公告，说 0 点到早上 6 点进行运维，无法访问。 接着到 0 点停机，系统停掉，没有流量写入了，此时老的……
+            <p class="readmore"><a href="https://chanservy.github.io/2021/07/19/database-shard-method.html">阅读全文</a></p>
+        </div>
+    </article>
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">
                 <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html">设计高并发系统的时候，数据库层面该如何设计？</a>
             </h1>
         </header>
@@ -243,108 +351,6 @@
         </div>
     </article>
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html">分布式服务接口请求的顺序性如何保证</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年7月7日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            分布式服务接口请求的顺序性如何保证？ 其实分布式系统接口的调用顺序，也是个问题，一般来说是不用保证顺序的。但是有时候可能确实是需要严格的顺序保证。给大家举个例子，你服务 A 调用服务 B，先插入再删除。好，结果俩请求过去了，落在不同机器上，可能插入请求因为某些原因执行慢了一些，导致删除请……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html">分布式服务接口的幂等性如何设计</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年7月7日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            分布式服务接口的幂等性如何设计？（比如不能重复扣款） 一个分布式系统中的某个接口，该如何保证幂等性？这个事儿其实是做分布式系统的时候必须考虑的一个生产环境的技术问题。 你看，假如有个服务提供一些接口供外部调用，这个服务部署在了五台机器上，接着有个接口就是付款接口。然后人家用户在前端上……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/04/09/mq-confirm.html">Spring Boot整合RabbitMQ实现生产者消息确认</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年6月18日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
-            
-            <a href='/categories/Spring-Boot'>Spring Boot</a>
-            
-            <a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97'>消息队列</a>
-            
-        </div>
-        
-        <div class="post-content">
-            原文出处：https://blog.csdn.net/fu_huo_1993/article/details/88224985 需求： 生产者在启动的时候，自动创建好队列、绑定、交换器并设置好 死信交换器、备份交换器(alternate-exchange)。生产者发送消息后，生产者这边……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/04/09/mq-confirm.html">阅读全文</a></p>
-        </div>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html">分布式事务之可靠消息最终一致性方案</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2021年5月24日
-        </date>
-        
-        <div class="post-meta meta-category">
-            |
-            
-            <a href='/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C'>项目经验</a>
-            
-            <a href='/categories/%E9%9D%A2%E8%AF%95'>面试</a>
-            
-        </div>
-        
-        <div class="post-content">
-            <p>这几篇文章一直在讲有关分布式事务的问题，的确，在一些场景中，会涉及到分布式事务也就是数据不一致的问题，会发生在分布式微服务的项目中，所谓分布式事务就是数据涉及到多个微服务之间的接口调用，如果全部没错皆大欢喜，但凡有一个地方出现了报错，那就全部要回滚，保证数据的一致性和准确性，其实就是事务的特性。这篇讲的是通过消息队列来实现数据的最终一致性，可靠消息最终一致性方案，准确的说这并不是一套针对分布式事务的解决方案，而是一个通过MQ实现分布式事务效果（数据一致性）的方案。</p>……
-            <p class="readmore"><a href="https://chanservy.github.io/2021/05/16/reliable-message-consistency.html">阅读全文</a></p>
-        </div>
-    </article>
-    
 
     
 
@@ -430,6 +436,26 @@
 <ul class="widget-list">
     
     <li>
+        <a href="https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html" title="MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？">MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html" title="分库分表之后，id主键如何处理？">分库分表之后，id主键如何处理？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html" title="如何设计可以动态扩容缩容的分库分表方案？">如何设计可以动态扩容缩容的分库分表方案？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/19/database-shard-method.html" title="如何设计才可以让系统从未分库分表动态切换到分库分表上？">如何设计才可以让系统从未分库分表动态切换到分库分表上？</a>
+    </li>
+    
+    <li>
+        <a href="https://chanservy.github.io/2021/07/10/design-pattern.html" title="设计模式也可以这么简单（转载）">设计模式也可以这么简单（转载）</a>
+    </li>
+    
+    <li>
         <a href="https://chanservy.github.io/2021/07/09/mysql-divide.html" title="设计高并发系统的时候，数据库层面该如何设计？">设计高并发系统的时候，数据库层面该如何设计？</a>
     </li>
     
@@ -447,26 +473,6 @@
     
     <li>
         <a href="https://chanservy.github.io/2021/07/08/fenbushi-lock.html" title="分布式锁的两种实现">分布式锁的两种实现</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/where-zookeeper-used.html" title="Zookeeper都有哪些使用场景？">Zookeeper都有哪些使用场景？</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoushunxuxing.html" title="分布式服务接口请求的顺序性如何保证">分布式服务接口请求的顺序性如何保证</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/07/fenbushijiekoumidengxing.html" title="分布式服务接口的幂等性如何设计">分布式服务接口的幂等性如何设计</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/06/dubbo-review.html" title="有关dubbo的一些总结">有关dubbo的一些总结</a>
-    </li>
-    
-    <li>
-        <a href="https://chanservy.github.io/2021/07/05/redis-bingfajingzheng-key.html" title="Redis的并发竞争问题">Redis的并发竞争问题</a>
     </li>
     
 </ul>
@@ -519,7 +525,7 @@
     
     <li><a href="https://chanservy.github.io/categories/Mybatis/">Mybatis (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (1)</a></li>
+    <li><a href="https://chanservy.github.io/categories/Mysql/">Mysql (5)</a></li>
     
     <li><a href="https://chanservy.github.io/categories/Nginx/">Nginx (1)</a></li>
     
@@ -553,9 +559,11 @@
     
     <li><a href="https://chanservy.github.io/categories/%E7%BC%93%E5%AD%98/">缓存 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (32)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式 (1)</a></li>
     
-    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (25)</a></li>
+    <li><a href="https://chanservy.github.io/categories/%E9%9D%A2%E8%AF%95/">面试 (36)</a></li>
+    
+    <li><a href="https://chanservy.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%BB%8F%E9%AA%8C/">项目经验 (29)</a></li>
     
 </ul>
     </section>
@@ -646,6 +654,8 @@
     
     <a href="https://chanservy.github.io/tags/%E4%B9%90%E8%A7%82%E9%94%81/">乐观锁</a>
     
+    <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fid/">分布式id</a>
+    
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8Fsession/">分布式session</a>
     
     <a href="https://chanservy.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/">分布式事务</a>
@@ -677,6 +687,8 @@
     <a href="https://chanservy.github.io/tags/%E7%9F%AD%E4%BF%A1%E9%99%90%E6%B5%81/">短信限流</a>
     
     <a href="https://chanservy.github.io/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+    
+    <a href="https://chanservy.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
     
     <a href="https://chanservy.github.io/tags/%E8%B7%A8%E5%9F%9F/">跨域</a>
     

@@ -6,7 +6,52 @@
     <description>Recent content in Posts on 迩东陈的博客</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 09 Jul 2021 15:26:26 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 19 Jul 2021 22:24:29 +0800</lastBuildDate><atom:link href="https://chanservy.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MySQL主从复制原理的是啥？如何解决MySQL主从同步的延时问题？</title>
+      <link>https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html</link>
+      <pubDate>Mon, 19 Jul 2021 22:24:29 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/19/mysql-read-write-separation.html</guid>
+      <description>你们有没有做 MySQL 读写分离？如何实现 MySQL 的读写分离？MySQL 主从复制原理的是啥？如何解决 MySQL 主从同步的延时问题？ 高并发这个阶段，肯定是需要做读写分离的，啥意思？因为实际上大部分的互联网公司，一些网站，或者是 app，其实都是读多写少。所以针对这个情况，就是写一个主库，但是主库挂多个从库，</description>
+    </item>
+    
+    <item>
+      <title>分库分表之后，id主键如何处理？</title>
+      <link>https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html</link>
+      <pubDate>Mon, 19 Jul 2021 22:23:23 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/19/database-shard-global-id-generate.html</guid>
+      <description>分库分表之后，id 主键如何处理？ 其实这是分库分表之后你必然要面对的一个问题，就是 id 咋生成？因为要是分成多个表之后，每个表都是从 1 开始累加，那肯定不对啊，需要一个全局唯一的 id 来支持。所以这都是你实际生产环境中必须考虑的问题。 基于数据库的实现方案 数据库自增 id 这个就是说你的系统里每次得</description>
+    </item>
+    
+    <item>
+      <title>如何设计可以动态扩容缩容的分库分表方案？</title>
+      <link>https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html</link>
+      <pubDate>Mon, 19 Jul 2021 22:22:44 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/19/database-shard-dynamic-expand.html</guid>
+      <description>如何设计可以动态扩容缩容的分库分表方案？ 对于分库分表来说，主要是面对以下问题： 选择一个数据库中间件，调研、学习、测试； 设计你的分库分表的一个方案，你要分成多少个库，每个库分成多少个表，比如 3 个库，每个库 4 个表； 基于选择好的数据库中间件，以及在测试环境建立好的分库分表的环境，然后测</description>
+    </item>
+    
+    <item>
+      <title>如何设计才可以让系统从未分库分表动态切换到分库分表上？</title>
+      <link>https://chanservy.github.io/2021/07/19/database-shard-method.html</link>
+      <pubDate>Mon, 19 Jul 2021 22:18:49 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/19/database-shard-method.html</guid>
+      <description>现在有一个未分库分表的系统，未来要分库分表，如何设计才可以让系统从未分库分表动态切换到分库分表上？ 停机迁移方案 我先给你说一个最 low 的方案，就是很简单，大家伙儿凌晨 12 点开始运维，网站或者 app 挂个公告，说 0 点到早上 6 点进行运维，无法访问。 接着到 0 点停机，系统停掉，没有流量写入了，此时老的</description>
+    </item>
+    
+    <item>
+      <title>设计模式也可以这么简单（转载）</title>
+      <link>https://chanservy.github.io/2021/07/10/design-pattern.html</link>
+      <pubDate>Sat, 10 Jul 2021 22:42:03 +0800</pubDate>
+      
+      <guid>https://chanservy.github.io/2021/07/10/design-pattern.html</guid>
+      <description>原文链接：https://www.javadoop.com/post/design-pattern 一直想写一篇介绍设计模式的文章，让读者可以很快看完，而且一看就懂，看懂就会用，同时不会将各个模式搞混。自认为本文还是写得不错的😂😂😂，花了不少心思来写这文章和做图，力求让读者真的能看</description>
+    </item>
+    
     <item>
       <title>设计高并发系统的时候，数据库层面该如何设计？</title>
       <link>https://chanservy.github.io/2021/07/09/mysql-divide.html</link>
