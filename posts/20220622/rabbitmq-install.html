@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>RabbitMQ部署指南 - 迩东陈</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="迩东陈"><meta name="msapplication-TileImage" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/head/star.ico"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="迩东陈"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="单机部署我们在Centos7虚拟机中使用Docker来安装。 下载镜像在线拉取 1docker pull rabbitmq:3.8-management  安装MQ执行下面的命令来运行MQ容器："><meta property="og:type" content="blog"><meta property="og:title" content="RabbitMQ部署指南"><meta property="og:url" content="https://chanservy.github.io/posts/20220622/rabbitmq-install.html"><meta property="og:site_name" content="迩东陈"><meta property="og:description" content="单机部署我们在Centos7虚拟机中使用Docker来安装。 下载镜像在线拉取 1docker pull rabbitmq:3.8-management  安装MQ执行下面的命令来运行MQ容器："><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713104511055.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105135701.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105339785.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105829435.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717212345165.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717222833196.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223057902.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223421750.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223320238.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223603628.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223800203.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231751411.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231829505.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231958996.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232108584.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232257420.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232322646.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234329640.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234426209.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718001909492.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002118357.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002253226.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002342603.png"><meta property="og:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002422365.png"><meta property="article:published_time" content="2022-06-22T14:08:12.000Z"><meta property="article:modified_time" content="2022-08-31T08:06:20.591Z"><meta property="article:author" content="迩东陈"><meta property="article:tag" content="RabbitMQ"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713104511055.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://chanservy.github.io/posts/20220622/rabbitmq-install.html"},"headline":"RabbitMQ部署指南","image":["https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713104511055.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105135701.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105339785.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105829435.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717212345165.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717222833196.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223057902.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223421750.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223320238.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223603628.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223800203.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231751411.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231829505.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231958996.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232108584.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232257420.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232322646.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234329640.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234426209.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718001909492.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002118357.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002253226.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002342603.png","https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002422365.png"],"datePublished":"2022-06-22T14:08:12.000Z","dateModified":"2022-08-31T08:06:20.591Z","author":{"@type":"Person","name":"迩东陈"},"publisher":{"@type":"Organization","name":"迩东陈","logo":{"@type":"ImageObject","url":"https://chanservy.github.io/img/icarus-favicon.svg"}},"description":"单机部署我们在Centos7虚拟机中使用Docker来安装。 下载镜像在线拉取 1docker pull rabbitmq:3.8-management  安装MQ执行下面的命令来运行MQ容器："}</script><link rel="canonical" href="https://chanservy.github.io/posts/20220622/rabbitmq-install.html"><link rel="icon" href="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/head/star.ico"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/5.15.2/css/all.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.12.0/styles/github-gist.min.css"><link rel="stylesheet" href="https://fonts.loli.net/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/css/justifiedGallery.min.css"><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/pace/1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.1"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/icarus-favicon.svg" alt="迩东陈" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives/">Archives</a><a class="navbar-item" href="/categories/">Categories</a><a class="navbar-item" href="/tags/">Tags</a><a class="navbar-item" href="/about/">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="ChanServy GitHub" href="https://github.com/ChanServy"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-9-widescreen"><div class="card"><article class="card-content article" role="article"><h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal"><i class="fas fa-angle-double-right"></i>RabbitMQ部署指南</h1><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><i class="far fa-calendar-alt"> </i><time dateTime="2022-06-22T14:08:12.000Z" title="2022-06-22T14:08:12.000Z">2022-06-22</time></span><span class="level-item is-hidden-mobile"><i class="far fa-calendar-check"> </i><time dateTime="2022-08-31T08:06:20.591Z" title="2022-08-31T08:06:20.591Z">2022-08-31</time></span><span class="level-item"><i class="far fa-folder-open has-text-grey"></i> <a class="link-muted" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a></span><span class="level-item"><i class="far fa-clock"></i> 25 分钟读完 (大约3675个字)</span><span class="level-item" id="busuanzi_container_page_pv"><i class="far fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><div class="content"><h2 id="单机部署"><a href="#单机部署" class="headerlink" title="单机部署"></a>单机部署</h2><p>我们在Centos7虚拟机中使用Docker来安装。</p>
+<h3 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h3><p>在线拉取</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装MQ"><a href="#安装MQ" class="headerlink" title="安装MQ"></a>安装MQ</h3><p>执行下面的命令来运行MQ容器：</p>
+<span id="more"></span>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run \</span><br><span class="line"> -e RABBITMQ_DEFAULT_USER=itcast \</span><br><span class="line"> -e RABBITMQ_DEFAULT_PASS=123321 \</span><br><span class="line"> -v mq-plugins:/plugins \</span><br><span class="line"> --name mq \</span><br><span class="line"> --hostname mq1 \</span><br><span class="line"> -p 15672:15672 \</span><br><span class="line"> -p 5672:5672 \</span><br><span class="line"> -d \</span><br><span class="line"> rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装DelayExchange插件"><a href="#安装DelayExchange插件" class="headerlink" title="安装DelayExchange插件"></a>安装DelayExchange插件</h2><p>官方的安装指南地址为：<a target="_blank" rel="noopener" href="https://blog.rabbitmq.com/posts/2015/04/scheduling-messages-with-rabbitmq">https://blog.rabbitmq.com/posts/2015/04/scheduling-messages-with-rabbitmq</a></p>
+<p>上述文档是基于linux原生安装RabbitMQ，然后安装插件。</p>
+<p>因为我们之前是基于Docker安装RabbitMQ，所以下面我们会讲解基于Docker来安装RabbitMQ插件。</p>
+<h3 id="下载插件"><a href="#下载插件" class="headerlink" title="下载插件"></a>下载插件</h3><p>RabbitMQ有一个官方的插件社区，地址为：<a target="_blank" rel="noopener" href="https://www.rabbitmq.com/community-plugins.html">https://www.rabbitmq.com/community-plugins.html</a></p>
+<p>其中包含各种各样的插件，包括我们要使用的DelayExchange插件：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713104511055.png" alt="image-20210713104511055"></p>
+<p>大家可以去对应的GitHub页面下载3.8.9版本的插件，地址为<a target="_blank" rel="noopener" href="https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/tag/3.8.9%E8%BF%99%E4%B8%AA%E5%AF%B9%E5%BA%94RabbitMQ%E7%9A%843.8.5%E4%BB%A5%E4%B8%8A%E7%89%88%E6%9C%AC%E3%80%82">https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/tag/3.8.9这个对应RabbitMQ的3.8.5以上版本。</a></p>
+<h3 id="上传插件"><a href="#上传插件" class="headerlink" title="上传插件"></a>上传插件</h3><p>因为我们是基于Docker安装，所以需要先查看RabbitMQ的插件目录对应的数据卷。</p>
+<p>我们之前设定的RabbitMQ的数据卷名称为<code>mq-plugins</code>，所以我们使用下面命令查看数据卷：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect mq-plugins</span><br></pre></td></tr></table></figure>
+
+<p>可以得到下面结果：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105135701.png" alt="image-20210713105135701"></p>
+<p>接下来，将插件上传到这个目录即可：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105339785.png" alt="image-20210713105339785"></p>
+<h3 id="安装插件"><a href="#安装插件" class="headerlink" title="安装插件"></a>安装插件</h3><p>最后就是安装了，需要进入MQ容器内部来执行安装。我的容器名为<code>mq</code>，所以执行下面命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mq bash</span><br></pre></td></tr></table></figure>
+
+<p>执行时，请将其中的 <code>-it</code> 后面的<code>mq</code>替换为你自己的容器名。</p>
+<p>进入容器内部后，执行下面命令开启插件：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins <span class="built_in">enable</span> rabbitmq_delayed_message_exchange</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210713105829435.png" alt="image-20210713105829435"></p>
+<h2 id="集群部署"><a href="#集群部署" class="headerlink" title="集群部署"></a>集群部署</h2><p>接下来，我们看看如何安装RabbitMQ的集群。</p>
+<h3 id="集群分类"><a href="#集群分类" class="headerlink" title="集群分类"></a>集群分类</h3><p>在RabbitMQ的官方文档中，讲述了两种集群的配置方式：</p>
+<ul>
+<li>普通模式：普通模式集群不进行数据同步，每个MQ都有自己的队列、数据信息（其它元数据信息如交换机等会同步）。例如我们有2个MQ：mq1，和mq2，如果你的消息在mq1，而你连接到了mq2，那么mq2会去mq1拉取消息，然后返回给你。如果mq1宕机，消息就会丢失。</li>
+<li>镜像模式：与普通模式不同，队列会在各个mq的镜像节点之间同步，因此你连接到任何一个镜像节点，均可获取到消息。而且如果一个节点宕机，并不会导致数据丢失。不过，这种方式增加了数据同步的带宽消耗。</li>
+</ul>
+<p>我们先来看普通模式集群，我们的计划部署3节点的mq集群：</p>
+<table>
+<thead>
+<tr>
+<th>主机名</th>
+<th>控制台端口</th>
+<th>amqp通信端口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mq1</td>
+<td>8081 —&gt; 15672</td>
+<td>8071 —&gt; 5672</td>
+</tr>
+<tr>
+<td>mq2</td>
+<td>8082 —&gt; 15672</td>
+<td>8072 —&gt; 5672</td>
+</tr>
+<tr>
+<td>mq3</td>
+<td>8083 —&gt; 15672</td>
+<td>8073  —&gt; 5672</td>
+</tr>
+</tbody></table>
+<p>集群中的节点标示默认都是：<code>rabbit@[hostname]</code>，因此以上三个节点的名称分别为：</p>
+<ul>
+<li>rabbit@mq1</li>
+<li>rabbit@mq2</li>
+<li>rabbit@mq3</li>
+</ul>
+<h3 id="获取cookie"><a href="#获取cookie" class="headerlink" title="获取cookie"></a>获取cookie</h3><p>RabbitMQ底层依赖于Erlang，而Erlang虚拟机就是一个面向分布式的语言，默认就支持集群模式。集群模式中的每个RabbitMQ 节点使用 cookie 来确定它们是否被允许相互通信。</p>
+<p>要使两个节点能够通信，它们必须具有相同的共享秘密，称为<strong>Erlang cookie</strong>。cookie 只是一串最多 255 个字符的字母数字字符。</p>
+<p>每个集群节点必须具有<strong>相同的 cookie</strong>。实例之间也需要它来相互通信。</p>
+<p>我们先在之前启动的mq容器中获取一个cookie值，作为集群的cookie。执行下面的命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mq <span class="built_in">cat</span> /var/lib/rabbitmq/.erlang.cookie</span><br></pre></td></tr></table></figure>
+
+<p>可以看到cookie值如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FXZMCVGLBIXZCDEMMVZQ</span><br></pre></td></tr></table></figure>
+
+
+
+<p>接下来，停止并删除当前的mq容器，我们重新搭建集群。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> -f mq</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717212345165.png" alt="image-20210717212345165"></p>
+<h3 id="准备集群配置"><a href="#准备集群配置" class="headerlink" title="准备集群配置"></a>准备集群配置</h3><p>在&#x2F;tmp目录新建一个配置文件 rabbitmq.conf：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"><span class="comment"># 创建文件</span></span><br><span class="line"><span class="built_in">touch</span> rabbitmq.conf</span><br></pre></td></tr></table></figure>
+
+<p>文件内容如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">loopback_users.<span class="attribute">guest</span> = <span class="literal">false</span></span><br><span class="line">listeners.tcp.default = <span class="number">5672</span></span><br><span class="line">cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config</span><br><span class="line">cluster_formation.classic_config.nodes.<span class="number">1</span> = rabbit<span class="variable">@mq1</span></span><br><span class="line">cluster_formation.classic_config.nodes.<span class="number">2</span> = rabbit<span class="variable">@mq2</span></span><br><span class="line">cluster_formation.classic_config.nodes.<span class="number">3</span> = rabbit<span class="variable">@mq3</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>再创建一个文件，记录cookie</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"><span class="comment"># 创建cookie文件</span></span><br><span class="line"><span class="built_in">touch</span> .erlang.cookie</span><br><span class="line"><span class="comment"># 写入cookie</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;FXZMCVGLBIXZCDEMMVZQ&quot;</span> &gt; .erlang.cookie</span><br><span class="line"><span class="comment"># 修改cookie文件的权限</span></span><br><span class="line"><span class="built_in">chmod</span> 600 .erlang.cookie</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>准备三个目录,mq1、mq2、mq3：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"><span class="comment"># 创建目录</span></span><br><span class="line"><span class="built_in">mkdir</span> mq1 mq2 mq3</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后拷贝rabbitmq.conf、cookie文件到mq1、mq2、mq3：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入/tmp</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"><span class="comment"># 拷贝</span></span><br><span class="line"><span class="built_in">cp</span> rabbitmq.conf mq1</span><br><span class="line"><span class="built_in">cp</span> rabbitmq.conf mq2</span><br><span class="line"><span class="built_in">cp</span> rabbitmq.conf mq3</span><br><span class="line"><span class="built_in">cp</span> .erlang.cookie mq1</span><br><span class="line"><span class="built_in">cp</span> .erlang.cookie mq2</span><br><span class="line"><span class="built_in">cp</span> .erlang.cookie mq3</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="启动集群"><a href="#启动集群" class="headerlink" title="启动集群"></a>启动集群</h3><p>创建一个网络：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create mq-net</span><br></pre></td></tr></table></figure>
+
+
+
+<p>docker volume create </p>
+<p>运行命令</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --net mq-net \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/mq1/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie \</span><br><span class="line">-e RABBITMQ_DEFAULT_USER=itcast \</span><br><span class="line">-e RABBITMQ_DEFAULT_PASS=123321 \</span><br><span class="line">--name mq1 \</span><br><span class="line">--hostname mq1 \</span><br><span class="line">-p 8071:5672 \</span><br><span class="line">-p 8081:15672 \</span><br><span class="line">rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --net mq-net \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/mq2/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie \</span><br><span class="line">-e RABBITMQ_DEFAULT_USER=itcast \</span><br><span class="line">-e RABBITMQ_DEFAULT_PASS=123321 \</span><br><span class="line">--name mq2 \</span><br><span class="line">--hostname mq2 \</span><br><span class="line">-p 8072:5672 \</span><br><span class="line">-p 8082:15672 \</span><br><span class="line">rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --net mq-net \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/mq3/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie \</span><br><span class="line">-e RABBITMQ_DEFAULT_USER=itcast \</span><br><span class="line">-e RABBITMQ_DEFAULT_PASS=123321 \</span><br><span class="line">--name mq3 \</span><br><span class="line">--hostname mq3 \</span><br><span class="line">-p 8073:5672 \</span><br><span class="line">-p 8083:15672 \</span><br><span class="line">rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>在mq1这个节点上添加一个队列：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717222833196.png" alt="image-20210717222833196"></p>
+<p>如图，在mq2和mq3两个控制台也都能看到：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223057902.png" alt="image-20210717223057902"></p>
+<h4 id="数据共享测试"><a href="#数据共享测试" class="headerlink" title="数据共享测试"></a>数据共享测试</h4><p>点击这个队列，进入管理页面：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223421750.png" alt="image-20210717223421750"></p>
+<p>然后利用控制台发送一条消息到这个队列：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223320238.png" alt="image-20210717223320238"></p>
+<p>结果在mq2、mq3上都能看到这条消息：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223603628.png" alt="image-20210717223603628"></p>
+<h4 id="可用性测试"><a href="#可用性测试" class="headerlink" title="可用性测试"></a>可用性测试</h4><p>我们让其中一台节点mq1宕机：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop mq1</span><br></pre></td></tr></table></figure>
+
+<p>然后登录mq2或mq3的控制台，发现simple.queue也不可用了：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717223800203.png" alt="image-20210717223800203"></p>
+<p>说明数据并没有拷贝到mq2和mq3。</p>
+<h2 id="镜像模式"><a href="#镜像模式" class="headerlink" title="镜像模式"></a>镜像模式</h2><p>在刚刚的案例中，一旦创建队列的主机宕机，队列就会不可用。不具备高可用能力。如果要解决这个问题，必须使用官方提供的镜像集群方案。</p>
+<p>官方文档地址：<a target="_blank" rel="noopener" href="https://www.rabbitmq.com/ha.html">https://www.rabbitmq.com/ha.html</a></p>
+<h3 id="镜像模式的特征"><a href="#镜像模式的特征" class="headerlink" title="镜像模式的特征"></a>镜像模式的特征</h3><p>默认情况下，队列只保存在创建该队列的节点上。而镜像模式下，创建队列的节点被称为该队列的<strong>主节点</strong>，队列还会拷贝到集群中的其它节点，也叫做该队列的<strong>镜像</strong>节点。</p>
+<p>但是，不同队列可以在集群中的任意节点上创建，因此不同队列的主节点可以不同。甚至，<strong>一个队列的主节点可能是另一个队列的镜像节点</strong>。</p>
+<p>用户发送给队列的一切请求，例如发送消息、消息回执默认都会在主节点完成，如果是从节点接收到请求，也会路由到主节点去完成。<strong>镜像节点仅仅起到备份数据作用</strong>。</p>
+<p>当主节点接收到消费者的ACK时，所有镜像都会删除节点中的数据。</p>
+<p>总结如下：</p>
+<ul>
+<li>镜像队列结构是一主多从（从就是镜像）</li>
+<li>所有操作都是主节点完成，然后同步给镜像节点</li>
+<li>主宕机后，镜像节点会替代成新的主（如果在主从同步完成前，主就已经宕机，可能出现数据丢失）</li>
+<li>不具备负载均衡功能，因为所有操作都会有主节点完成（但是不同队列，其主节点可以不同，可以利用这个提高吞吐量）</li>
+</ul>
+<h3 id="镜像模式的配置"><a href="#镜像模式的配置" class="headerlink" title="镜像模式的配置"></a>镜像模式的配置</h3><p>镜像模式的配置有3种模式：</p>
+<table>
+<thead>
+<tr>
+<th align="left">ha-mode</th>
+<th align="left">ha-params</th>
+<th align="left">效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">准确模式exactly</td>
+<td align="left">队列的副本量count</td>
+<td align="left">集群中队列副本（主服务器和镜像服务器之和）的数量。count如果为1意味着单个副本：即队列主节点。count值为2表示2个副本：1个队列主和1个队列镜像。换句话说：count &#x3D; 镜像数量 + 1。如果群集中的节点数少于count，则该队列将镜像到所有节点。如果有集群总数大于count+1，并且包含镜像的节点出现故障，则将在另一个节点上创建一个新的镜像。</td>
+</tr>
+<tr>
+<td align="left">all</td>
+<td align="left">(none)</td>
+<td align="left">队列在群集中的所有节点之间进行镜像。队列将镜像到任何新加入的节点。镜像到所有节点将对所有群集节点施加额外的压力，包括网络I &#x2F; O，磁盘I &#x2F; O和磁盘空间使用情况。推荐使用exactly，设置副本数为（N &#x2F; 2 +1）。</td>
+</tr>
+<tr>
+<td align="left">nodes</td>
+<td align="left"><em>node names</em></td>
+<td align="left">指定队列创建到哪些节点，如果指定的节点全部不存在，则会出现异常。如果指定的节点在集群中存在，但是暂时不可用，会创建节点到当前客户端连接到的节点。</td>
+</tr>
+</tbody></table>
+<p>这里我们以rabbitmqctl命令作为案例来讲解配置语法。</p>
+<p>语法示例：</p>
+<h4 id="exactly模式"><a href="#exactly模式" class="headerlink" title="exactly模式"></a>exactly模式</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl set_policy ha-two &quot;^two\.&quot; &#x27;&#123;&quot;ha-mode&quot;:&quot;exactly&quot;,&quot;ha-params&quot;:2,&quot;ha-sync-mode&quot;:&quot;automatic&quot;&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>rabbitmqctl set_policy</code>：固定写法</li>
+<li><code>ha-two</code>：策略名称，自定义</li>
+<li><code>&quot;^two\.&quot;</code>：匹配队列的正则表达式，符合命名规则的队列才生效，这里是任何以<code>two.</code>开头的队列名称</li>
+<li><code>&#39;&#123;&quot;ha-mode&quot;:&quot;exactly&quot;,&quot;ha-params&quot;:2,&quot;ha-sync-mode&quot;:&quot;automatic&quot;&#125;&#39;</code>: 策略内容<ul>
+<li><code>&quot;ha-mode&quot;:&quot;exactly&quot;</code>：策略模式，此处是exactly模式，指定副本数量</li>
+<li><code>&quot;ha-params&quot;:2</code>：策略参数，这里是2，就是副本数量为2，1主1镜像</li>
+<li><code>&quot;ha-sync-mode&quot;:&quot;automatic&quot;</code>：同步策略，默认是manual，即新加入的镜像节点不会同步旧的消息。如果设置为automatic，则新加入的镜像节点会把主节点中所有消息都同步，会带来额外的网络开销</li>
+</ul>
+</li>
+</ul>
+<h4 id="all模式"><a href="#all模式" class="headerlink" title="all模式"></a>all模式</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl set_policy ha-all &quot;^all\.&quot; &#x27;&#123;&quot;ha-mode&quot;:&quot;all&quot;&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ha-all</code>：策略名称，自定义</li>
+<li><code>&quot;^all\.&quot;</code>：匹配所有以<code>all.</code>开头的队列名</li>
+<li><code>&#39;&#123;&quot;ha-mode&quot;:&quot;all&quot;&#125;&#39;</code>：策略内容<ul>
+<li><code>&quot;ha-mode&quot;:&quot;all&quot;</code>：策略模式，此处是all模式，即所有节点都会称为镜像节点</li>
+</ul>
+</li>
+</ul>
+<h4 id="nodes模式"><a href="#nodes模式" class="headerlink" title="nodes模式"></a>nodes模式</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl set_policy ha-nodes &quot;^nodes\.&quot; &#x27;&#123;&quot;ha-mode&quot;:&quot;nodes&quot;,&quot;ha-params&quot;:[&quot;rabbit@nodeA&quot;, &quot;rabbit@nodeB&quot;]&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>rabbitmqctl set_policy</code>：固定写法</li>
+<li><code>ha-nodes</code>：策略名称，自定义</li>
+<li><code>&quot;^nodes\.&quot;</code>：匹配队列的正则表达式，符合命名规则的队列才生效，这里是任何以<code>nodes.</code>开头的队列名称</li>
+<li><code>&#39;&#123;&quot;ha-mode&quot;:&quot;nodes&quot;,&quot;ha-params&quot;:[&quot;rabbit@nodeA&quot;, &quot;rabbit@nodeB&quot;]&#125;&#39;</code>: 策略内容<ul>
+<li><code>&quot;ha-mode&quot;:&quot;nodes&quot;</code>：策略模式，此处是nodes模式</li>
+<li><code>&quot;ha-params&quot;:[&quot;rabbit@mq1&quot;, &quot;rabbit@mq2&quot;]</code>：策略参数，这里指定副本所在节点名称</li>
+</ul>
+</li>
+</ul>
+<h3 id="测试-1"><a href="#测试-1" class="headerlink" title="测试"></a>测试</h3><p>我们使用exactly模式的镜像，因为集群节点数量为3，因此镜像数量就设置为2.</p>
+<p>运行下面的命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mq1 rabbitmqctl set_policy ha-two <span class="string">&quot;^two\.&quot;</span> <span class="string">&#x27;&#123;&quot;ha-mode&quot;:&quot;exactly&quot;,&quot;ha-params&quot;:2,&quot;ha-sync-mode&quot;:&quot;automatic&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面，我们创建一个新的队列：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231751411.png" alt="image-20210717231751411"></p>
+<p>在任意一个mq控制台查看队列：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231829505.png" alt="image-20210717231829505"></p>
+<h4 id="测试数据共享"><a href="#测试数据共享" class="headerlink" title="测试数据共享"></a>测试数据共享</h4><p>给two.queue发送一条消息：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717231958996.png" alt="image-20210717231958996"></p>
+<p>然后在mq1、mq2、mq3的任意控制台查看消息：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232108584.png" alt="image-20210717232108584"></p>
+<h4 id="测试高可用"><a href="#测试高可用" class="headerlink" title="测试高可用"></a>测试高可用</h4><p>现在，我们让two.queue的主节点mq1宕机：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop mq1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>查看集群状态：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232257420.png" alt="image-20210717232257420"></p>
+<p>查看队列状态：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717232322646.png" alt="image-20210717232322646"></p>
+<p>发现依然是健康的！并且其主节点切换到了rabbit@mq2上</p>
+<h2 id="仲裁队列"><a href="#仲裁队列" class="headerlink" title="仲裁队列"></a>仲裁队列</h2><p>从RabbitMQ 3.8版本开始，引入了新的仲裁队列，他具备与镜像队里类似的功能，但使用更加方便。</p>
+<h3 id="添加仲裁队列"><a href="#添加仲裁队列" class="headerlink" title="添加仲裁队列"></a>添加仲裁队列</h3><p>在任意控制台添加一个队列，一定要选择队列类型为Quorum类型。</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234329640.png" alt="image-20210717234329640"></p>
+<p>在任意控制台查看队列：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210717234426209.png" alt="image-20210717234426209"></p>
+<p>可以看到，仲裁队列的 + 2字样。代表这个队列有2个镜像节点。</p>
+<p>因为仲裁队列默认的镜像数为5。如果你的集群有7个节点，那么镜像数肯定是5；而我们集群只有3个节点，因此镜像数量就是3.</p>
+<h3 id="测试-2"><a href="#测试-2" class="headerlink" title="测试"></a>测试</h3><p>可以参考对镜像集群的测试，效果是一样的。</p>
+<h3 id="集群扩容"><a href="#集群扩容" class="headerlink" title="集群扩容"></a>集群扩容</h3><h4 id="加入集群"><a href="#加入集群" class="headerlink" title="加入集群"></a>加入集群</h4><p>1）启动一个新的MQ容器：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --net mq-net \</span><br><span class="line">-v <span class="variable">$&#123;PWD&#125;</span>/.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie \</span><br><span class="line">-e RABBITMQ_DEFAULT_USER=itcast \</span><br><span class="line">-e RABBITMQ_DEFAULT_PASS=123321 \</span><br><span class="line">--name mq4 \</span><br><span class="line">--hostname mq5 \</span><br><span class="line">-p 8074:15672 \</span><br><span class="line">-p 8084:15672 \</span><br><span class="line">rabbitmq:3.8-management</span><br></pre></td></tr></table></figure>
+
+<p>2）进入容器控制台：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mq4 bash</span><br></pre></td></tr></table></figure>
+
+<p>3）停止mq进程</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl stop_app</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4）重置RabbitMQ中的数据：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl reset</span><br></pre></td></tr></table></figure>
+
+
+
+<p>5）加入mq1：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl join_cluster rabbit@mq1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>6）再次启动mq进程</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl start_app</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718001909492.png" alt="image-20210718001909492"></p>
+<h4 id="增加仲裁队列副本"><a href="#增加仲裁队列副本" class="headerlink" title="增加仲裁队列副本"></a>增加仲裁队列副本</h4><p>我们先查看下quorum.queue这个队列目前的副本情况，进入mq1容器：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mq1 bash</span><br></pre></td></tr></table></figure>
+
+<p>执行命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-queues quorum_status <span class="string">&quot;quorum.queue&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002118357.png" alt="image-20210718002118357"></p>
+<p>现在，我们让mq4也加入进来：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-queues add_member <span class="string">&quot;quorum.queue&quot;</span> <span class="string">&quot;rabbit@mq4&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002253226.png" alt="image-20210718002253226"></p>
+<p>再次查看：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-queues quorum_status <span class="string">&quot;quorum.queue&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002342603.png" alt="image-20210718002342603"></p>
+<p>查看控制台，发现quorum.queue的镜像数量也从原来的 +2 变成了 +3：</p>
+<p><img src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/img/image-20210718002422365.png" alt="image-20210718002422365"></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>RabbitMQ部署指南</p><p><a href="https://chanservy.github.io/posts/20220622/rabbitmq-install.html">https://chanservy.github.io/posts/20220622/rabbitmq-install.html</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>迩东陈</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2022-06-22</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2022-08-31</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="" rel="noopener" target="_blank" title="CC BY-NC-SA 4.0" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="fab fa-creative-commons"></i> <i class="fab fa-creative-commons-by"></i> <i class="fab fa-creative-commons-nc"></i> <i class="fab fa-creative-commons-sa"></i> CC BY-NC-SA 4.0</a></p></div></div></div></div></div><hr style="height:1px;margin:1rem 0"><div class="level is-mobile is-flex"><div class="article-tags is-size-7 is-uppercase"><i class="fas fa-tags has-text-grey"></i> <a class="link-muted" rel="tag" href="/tags/RabbitMQ/">RabbitMQ </a></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/posts/20220622/rabbitmq-study.html"><span class="level-item">RabbitMQ学习记录</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="valine-thread"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/valine/1.4.14/Valine.min.js"></script><script>new Valine({
+            el: '#valine-thread',
+            appId: "f7IR3RHtvyy3zbMnkj08F4Uv-gzGzoHsz",
+            appKey: "ztlhTLYlXtUClUWYAQBB5h1U",
+            
+            avatar: "mm",
+            avatarForce: false,
+            meta: ["nick","mail","link"],
+            pageSize: 10,
+            lang: "zh-CN",
+            visitor: false,
+            highlight: true,
+            recordIP: false,
+            
+            
+            
+            enableQQ: false,
+            requiredFields: [],
+        });</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level" style="margin-bottom:1rem"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="https://blog-images-erdochan.oss-cn-beijing.aliyuncs.com/head/head.jpg" alt="ChanServy"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">ChanServy</p><p class="is-size-6 is-block">1579700161@qq.com</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>LiaoNing, China</span></p></div></div></nav><nav class="level menu-list is-mobile" style="margin-bottom:1rem"><a class="level-item has-text-centered is-marginless" href="/archives/"><div><p class="heading">文章</p><div><p class="title">16</p></div></div></a><a class="level-item has-text-centered is-marginless" href="/categories/"><div><p class="heading">分类</p><div><p class="title">6</p></div></div></a><a class="level-item has-text-centered is-marginless" href="/tags/"><div><p class="heading">标签</p><div><p class="title">10</p></div></div></a></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://gitee.com/erdochan" target="_blank" rel="noopener"><i class="fab fa-github"></i>  关注我</a></div></div></div><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#单机部署"><span class="level-left"><span class="level-item">1</span><span class="level-item">单机部署</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#下载镜像"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">下载镜像</span></span></a></li><li><a class="level is-mobile" href="#安装MQ"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">安装MQ</span></span></a></li></ul></li><li><a class="level is-mobile" href="#安装DelayExchange插件"><span class="level-left"><span class="level-item">2</span><span class="level-item">安装DelayExchange插件</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#下载插件"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">下载插件</span></span></a></li><li><a class="level is-mobile" href="#上传插件"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">上传插件</span></span></a></li><li><a class="level is-mobile" href="#安装插件"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">安装插件</span></span></a></li></ul></li><li><a class="level is-mobile" href="#集群部署"><span class="level-left"><span class="level-item">3</span><span class="level-item">集群部署</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#集群分类"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">集群分类</span></span></a></li><li><a class="level is-mobile" href="#获取cookie"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">获取cookie</span></span></a></li><li><a class="level is-mobile" href="#准备集群配置"><span class="level-left"><span class="level-item">3.3</span><span class="level-item">准备集群配置</span></span></a></li><li><a class="level is-mobile" href="#启动集群"><span class="level-left"><span class="level-item">3.4</span><span class="level-item">启动集群</span></span></a></li><li><a class="level is-mobile" href="#测试"><span class="level-left"><span class="level-item">3.5</span><span class="level-item">测试</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#数据共享测试"><span class="level-left"><span class="level-item">3.5.1</span><span class="level-item">数据共享测试</span></span></a></li><li><a class="level is-mobile" href="#可用性测试"><span class="level-left"><span class="level-item">3.5.2</span><span class="level-item">可用性测试</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#镜像模式"><span class="level-left"><span class="level-item">4</span><span class="level-item">镜像模式</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#镜像模式的特征"><span class="level-left"><span class="level-item">4.1</span><span class="level-item">镜像模式的特征</span></span></a></li><li><a class="level is-mobile" href="#镜像模式的配置"><span class="level-left"><span class="level-item">4.2</span><span class="level-item">镜像模式的配置</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#exactly模式"><span class="level-left"><span class="level-item">4.2.1</span><span class="level-item">exactly模式</span></span></a></li><li><a class="level is-mobile" href="#all模式"><span class="level-left"><span class="level-item">4.2.2</span><span class="level-item">all模式</span></span></a></li><li><a class="level is-mobile" href="#nodes模式"><span class="level-left"><span class="level-item">4.2.3</span><span class="level-item">nodes模式</span></span></a></li></ul></li><li><a class="level is-mobile" href="#测试-1"><span class="level-left"><span class="level-item">4.3</span><span class="level-item">测试</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#测试数据共享"><span class="level-left"><span class="level-item">4.3.1</span><span class="level-item">测试数据共享</span></span></a></li><li><a class="level is-mobile" href="#测试高可用"><span class="level-left"><span class="level-item">4.3.2</span><span class="level-item">测试高可用</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#仲裁队列"><span class="level-left"><span class="level-item">5</span><span class="level-item">仲裁队列</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#添加仲裁队列"><span class="level-left"><span class="level-item">5.1</span><span class="level-item">添加仲裁队列</span></span></a></li><li><a class="level is-mobile" href="#测试-2"><span class="level-left"><span class="level-item">5.2</span><span class="level-item">测试</span></span></a></li><li><a class="level is-mobile" href="#集群扩容"><span class="level-left"><span class="level-item">5.3</span><span class="level-item">集群扩容</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#加入集群"><span class="level-left"><span class="level-item">5.3.1</span><span class="level-item">加入集群</span></span></a></li><li><a class="level is-mobile" href="#增加仲裁队列副本"><span class="level-left"><span class="level-item">5.3.2</span><span class="level-item">增加仲裁队列副本</span></span></a></li></ul></li></ul></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/icarus-favicon.svg" alt="迩东陈" height="28"></a><p class="is-size-7"><span>&copy; 2022 迩东陈</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="fab fa-creative-commons"></i> <i class="fab fa-creative-commons-by"></i> <i class="fab fa-creative-commons-nc"></i> <i class="fab fa-creative-commons-sa"></i> </a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="ChanServy GitHub" href="https://github.com/ChanServy"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js"></script><script src="https://cdnjs.loli.net/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><!--!--><script src="https://cdnjs.loli.net/ajax/libs/cookieconsent/3.1.1/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdnjs.loli.net/ajax/libs/lightgallery/1.6.8/js/lightgallery.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/justifiedGallery/3.7.0/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/KaTeX/0.11.1/katex.min.css"><script src="https://cdnjs.loli.net/ajax/libs/KaTeX/0.11.1/katex.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/KaTeX/0.11.1/contrib/auto-render.min.js" defer></script><script src="https://cdnjs.loli.net/ajax/libs/KaTeX/0.11.1/contrib/mhchem.js" defer></script><script>window.addEventListener("load", function() {
+            document.querySelectorAll('[role="article"] > .content').forEach(function(element) {
+                renderMathInElement(element);
+            });
+        });</script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
